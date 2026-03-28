@@ -94,7 +94,7 @@ jobs:
   release:
     name: Create GitHub Release
     if: always() # ✅ ALWAYS run, even if builds fail
-    needs: [desktop, mobile-android]
+    needs: [desktop, mobile]
     runs-on: ubuntu-latest
 
     steps:
