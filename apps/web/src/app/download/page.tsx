@@ -8,9 +8,11 @@ import { useEffect, useState } from 'react';
 
 import { redirect } from 'next/navigation';
 import { usePlatform } from '@/providers/PlatformProvider';
+import { useSidebar } from '@/providers/SidebarProvider';
 
 export default function Page() {
 	const { platform, type } = usePlatform();
+	const { hide } = useSidebar();
 
 	const [apps, setApps] = useState<Record<'windows' | 'macos' | 'linux', Record<string, string> | null>>({
 		windows: null,
@@ -22,6 +24,10 @@ export default function Page() {
 	const [show, setShow] = useState(false);
 
 	if (type === 'application') return redirect('/');
+
+	useEffect(() => {
+		hide();
+	});
 
 	useEffect(() => {
 		(async () => {

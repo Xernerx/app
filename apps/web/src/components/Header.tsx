@@ -8,6 +8,7 @@ import { useEffect, useState } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
 
 import Banner from '@/../public/banner.svg';
+import Link from 'next/link';
 import { SHORTCUTS } from '@/lib/shortcuts';
 import { usePlatform } from '@/providers/PlatformProvider';
 import { useSidebar } from '@/providers/SidebarProvider';
@@ -154,9 +155,11 @@ export default function Header() {
 						</button>
 					)}
 
-					<div className='h-8 flex items-center'>
-						<Banner className='h-full w-auto' style={{ color: 'var(--accent)' }} />
-					</div>
+					<Link href='/'>
+						<div className='h-8 flex items-center'>
+							<Banner className='h-full w-auto' style={{ color: 'var(--accent)' }} />
+						</div>
+					</Link>
 				</div>
 
 				<div style={{ flex: 1, WebkitAppRegion: 'drag' } as React.CSSProperties} className='w-full h-full' />
