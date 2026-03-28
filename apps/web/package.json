@@ -9,9 +9,9 @@
 		"build": "next build",
 		"start": "next start",
 		"lint": "eslint",
-		"patch": "git add . && git commit -m \"Patch Web App\" && npm version patch",
-		"minor": "git add . && git commit -m \"Minor Web App\" && npm version minor",
-		"major": "git add . && git commit -m \"Major Web App\" && npm version major"
+		"patch": "npm version patch",
+		"minor": "npm version minor",
+		"major": "npm version major"
 	},
 	"dependencies": {
 		"@svgr/webpack": "^8.1.0",

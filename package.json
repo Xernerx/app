@@ -1,10 +1,13 @@
 {
 	"name": "xernerx",
 	"private": true,
-	"version": "0.1.0",
+	"version": "1.1.0",
 	"scripts": {
 		"dev": "pnpm i && pnpm --parallel --filter ./apps/* dev",
 		"build": "pnpm --filter ./apps/* build",
-		"lint": "pnpm --recursive run lint"
+		"lint": "pnpm --recursive run lint",
+		"patch": "git add . && git commit -m \"Patch version app\" && npm version patch && pnpm --filter ./apps/* run patch",
+		"minor": "git add . && git commit -m \"Minor version app\" && npm version minor && pnpm --filter ./apps/* run minor",
+		"major": "git add . && git commit -m \"Major version app\" && npm version major && pnpm --filter ./apps/* run major"
 	}
 }

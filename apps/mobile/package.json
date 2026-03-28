@@ -10,9 +10,9 @@
 		"web": "expo start --web",
 		"lint": "expo lint",
 		"dev": "expo start --port 8081",
-		"patch": "git add . && git commit -m \"Patch Mobile App\" && npm version patch",
-		"minor": "git add . && git commit -m \"Minor Mobile App\" && npm version minor",
-		"major": "git add . && git commit -m \"Major Mobile App\" && npm version major"
+		"patch": "npm version patch",
+		"minor": "npm version minor",
+		"major": "npm version major"
 	},
 	"dependencies": {
 		"@expo/vector-icons": "^15.0.3",
