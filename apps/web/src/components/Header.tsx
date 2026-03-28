@@ -14,7 +14,7 @@ import { useSidebar } from '@/providers/SidebarProvider';
 
 export default function Header() {
 	const { toggle, state } = useSidebar();
-	const { platform } = usePlatform();
+	const { type } = usePlatform();
 	const router = useRouter();
 	const pathname = usePathname();
 
@@ -47,7 +47,7 @@ export default function Header() {
 
 	useEffect(() => {
 		setPath(pathname);
-	}, []);
+	}, [pathname]);
 
 	/* --------------------------------------------- */
 	/* Keyboard shortcuts                            */
@@ -100,7 +100,7 @@ export default function Header() {
 	/* --------------------------------------------- */
 
 	useEffect(() => {
-		if (!platform) return;
+		if (!type) return;
 
 		async function check() {
 			const state = await window.electron?.isMaximized?.();
@@ -108,7 +108,7 @@ export default function Header() {
 		}
 
 		check();
-	}, [platform]);
+	}, [type]);
 
 	/* --------------------------------------------- */
 	/* Render                                        */
@@ -162,7 +162,7 @@ export default function Header() {
 				<div style={{ flex: 1, WebkitAppRegion: 'drag' } as React.CSSProperties} className='w-full h-full' />
 
 				{/* WINDOW CONTROLS */}
-				{platform === 'application' && (
+				{type === 'application' && (
 					<div className='flex items-center'>
 						<button className='w-11 h-9 flex items-center justify-center hover:bg-white/5' onClick={() => window.electron?.minimize()}>
 							<Minus size={16} />

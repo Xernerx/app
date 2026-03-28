@@ -11,7 +11,7 @@ import { useSession } from 'next-auth/react';
 import { useSidebar } from '@/providers/SidebarProvider';
 
 export default function Home() {
-	const { platform } = usePlatform();
+	const { type } = usePlatform();
 	const { setNavItems, clearNavItems, show } = useSidebar();
 	const { data: session } = useSession();
 
@@ -186,7 +186,7 @@ export default function Home() {
 			)}
 
 			{/* INSTALL NOTICE */}
-			{platform === 'browser' && (
+			{type === 'browser' && (
 				<motion.a
 					href='/download' // or wherever you handle install
 					initial={{ opacity: 0, y: 10 }}

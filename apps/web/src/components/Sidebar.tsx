@@ -17,7 +17,7 @@ export default function Sidebar() {
 	const profileRef = useRef<HTMLDivElement | null>(null);
 	const profileButtonRef = useRef<HTMLButtonElement | null>(null);
 	const { state, navItems, view, setView } = useSidebar();
-	const { platform } = usePlatform();
+	const { type } = usePlatform();
 	const { data: session } = useSession();
 	const router = useRouter();
 
@@ -132,7 +132,7 @@ export default function Sidebar() {
 
 											{avatarDecoration && <img src={avatarDecoration} className='absolute inset-0 scale-[1.15] pointer-events-none' />}
 
-											<div className='absolute -bottom-1 -right-1 bg-(--bg-main) p-1 rounded-full'>{platform === 'browser' ? <Globe size={12} /> : <Monitor size={12} />}</div>
+											<div className='absolute -bottom-1 -right-1 bg-(--bg-main) p-1 rounded-full'>{type === 'browser' ? <Globe size={12} /> : <Monitor size={12} />}</div>
 										</div>
 
 										<div className='flex flex-col overflow-hidden'>

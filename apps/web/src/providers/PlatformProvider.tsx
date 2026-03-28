@@ -4,14 +4,21 @@
 
 import { createContext, useContext } from 'react';
 
-type PlatformContextType = { platform: string };
+type PlatformContextType = { type: string; platform: string };
 
 const PlatformContext = createContext<PlatformContextType | null>(null);
 
 export function PlatformProvider({ children }: { children: React.ReactNode }) {
-	const platform = navigator.userAgent.toLowerCase().includes('electron') ? 'application' : 'browser';
+	const type = navigator.userAgent.toLowerCase().includes('electron') ? 'application' : 'browser';
+	const platform = navigator.userAgent.toLowerCase().includes('win')
+		? 'windows'
+		: navigator.userAgent.toLowerCase().includes('mac')
+			? 'macos'
+			: navigator.userAgent.toLowerCase().includes('linux')
+				? 'linux'
+				: 'other';
 
-	return <PlatformContext.Provider value={{ platform }}>{children}</PlatformContext.Provider>;
+	return <PlatformContext.Provider value={{ type, platform }}>{children}</PlatformContext.Provider>;
 }
 
 export function usePlatform() {
