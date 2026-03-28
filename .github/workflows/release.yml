@@ -1,0 +1,111 @@
+# @format
+
+name: Desktop + Mobile Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  desktop:
+    name: Electron Build
+    runs-on: ${{ matrix.os }}
+
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+
+    permissions:
+      contents: write
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9
+
+      - name: Install deps
+        run: pnpm install --frozen-lockfile
+
+      - name: Build desktop
+        run: pnpm --filter ./apps/desktop build
+
+      - name: Package desktop
+        run: pnpm --filter ./apps/desktop dist
+
+      - name: Upload desktop artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: desktop-${{ matrix.os }}
+          path: |
+            apps/desktop/dist/**
+            apps/desktop/release/**
+            apps/desktop/*.exe
+            apps/desktop/*.dmg
+            apps/desktop/*.AppImage
+
+  mobile-android:
+    name: Android Build
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9
+
+      - name: Install deps
+        run: pnpm install --frozen-lockfile
+
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+
+      - name: Build Android APK
+        run: |
+          cd apps/mobile/android
+          ./gradlew assembleRelease
+
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: android
+          path: apps/mobile/android/app/build/outputs/apk/release/*.apk
+
+  release:
+    name: Create GitHub Release
+    needs: [desktop, mobile-android]
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/download-artifact@v4
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            **/*.exe
+            **/*.dmg
+            **/*.AppImage
+            **/*.apk
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

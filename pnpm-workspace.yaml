@@ -1,0 +1,11 @@
+# @format
+
+packages:
+  - 'apps/*'
+  - 'shared/*'
+allowBuilds:
+  electron: true
+  electron-winstaller: true
+  sharp: true
+  unrs-resolver: true
+nodeLinker: hoisted

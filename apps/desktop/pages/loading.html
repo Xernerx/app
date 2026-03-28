@@ -1,0 +1,75 @@
+<!-- @format -->
+
+<!doctype html>
+<html>
+	<head>
+		<meta charset="UTF-8" />
+
+		<style>
+			body {
+				margin: 0;
+				background: transparent;
+				font-family: system-ui;
+				display: flex;
+				align-items: center;
+				justify-content: center;
+				height: 100vh;
+				width: 100vw;
+			}
+
+			.container {
+				display: flex;
+				flex-direction: column;
+				align-items: center;
+			}
+
+			.banner {
+				width: 420px;
+				height: auto;
+				user-select: none;
+				pointer-events: none;
+				image-rendering: -webkit-optimize-contrast;
+			}
+
+			.bar {
+				width: 420px;
+				height: 6px;
+				background: rgba(255, 255, 255, 0.15);
+				border-radius: 4px;
+				margin-top: 14px;
+				overflow: hidden;
+				position: relative;
+			}
+
+			.progress {
+				position: absolute;
+				height: 100%;
+				width: 120px;
+				background: #8979f0;
+				border-radius: 4px;
+				left: 0;
+				animation: bounce 1.6s infinite ease-in-out alternate;
+				box-shadow: 0 0 8px rgba(137, 121, 240, 0.6);
+			}
+
+			@keyframes bounce {
+				from {
+					transform: translateX(0);
+				}
+				to {
+					transform: translateX(300px);
+				}
+			}
+		</style>
+	</head>
+
+	<body>
+		<div class="container">
+			<img src="../public/banner.png" class="banner" />
+
+			<div class="bar">
+				<div class="progress"></div>
+			</div>
+		</div>
+	</body>
+</html>
