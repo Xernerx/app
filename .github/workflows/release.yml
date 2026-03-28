@@ -49,8 +49,8 @@ jobs:
           name: desktop-${{ matrix.os }}
           path: apps/desktop/release/**
 
-  mobile-android:
-    name: Android Build (Expo)
+  mobile:
+    name: Mobile Build (Expo)
     runs-on: ubuntu-latest
     continue-on-error: true # ✅ don’t block everything if this fails
 
