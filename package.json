@@ -1,0 +1,10 @@
+{
+	"name": "xernerx",
+	"private": true,
+	"version": "0.1.0",
+	"scripts": {
+		"dev": "pnpm i && pnpm --parallel --filter ./apps/* dev",
+		"build": "pnpm --filter ./apps/* build",
+		"lint": "pnpm --recursive run lint"
+	}
+}

@@ -1,0 +1,61 @@
+{
+	"name": "xernerx-app",
+	"version": "1.0.0",
+	"description": "Xernerx App",
+	"main": "dist/main.js",
+	"type": "module",
+	"scripts": {
+		"build": "npm i && tsc",
+		"dist": "pnpm build && electron-builder",
+		"dev": "tsc && electron ."
+	},
+	"author": "Dummi",
+	"license": "MIT",
+	"packageManager": "pnpm@10.32.0",
+	"dependencies": {
+		"electron-store": "^11.0.2",
+		"electron-updater": "^6.8.3"
+	},
+	"devDependencies": {
+		"electron": "40.8.0",
+		"electron-builder": "^26.8.1"
+	},
+	"build": {
+		"nodeGypRebuild": false,
+		"buildDependenciesFromSource": false,
+		"asar": true,
+		"npmRebuild": true,
+		"appId": "com.xernerx.app",
+		"productName": "Xernerx App",
+		"icon": "public/icon.ico",
+		"compression": "maximum",
+		"electronLanguages": [
+			"en"
+		],
+		"publish": [
+			{
+				"provider": "github",
+				"owner": "Xernerx",
+				"repo": "ProjectApp"
+			}
+		],
+		"directories": {
+			"output": "release"
+		},
+		"win": {
+			"target": "nsis",
+			"artifactName": "${productName}-${version}-setup.${ext}"
+		},
+		"mac": {
+			"target": "dmg",
+			"artifactName": "${productName}-${version}-setup.${ext}"
+		},
+		"linux": {
+			"target": "AppImage",
+			"artifactName": "${productName}-${version}-setup.${ext}"
+		},
+		"nsis": {
+			"differentialPackage": true
+		}
+	}
+}
