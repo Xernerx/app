@@ -17,6 +17,18 @@
 				width: 100vw;
 			}
 
+			.status {
+				color: #8979f0;
+			}
+
+			.error {
+				color: #ff0000;
+			}
+
+			.hidden {
+				display: none;
+			}
+
 			.container {
 				display: flex;
 				flex-direction: column;
@@ -67,9 +79,34 @@
 		<div class="container">
 			<img src="../public/banner.png" class="banner" />
 
+			<div id="status" class="status hidden"></div>
+			<div id="error" class="error hidden"></div>
+
 			<div class="bar">
 				<div class="progress"></div>
 			</div>
 		</div>
 	</body>
+
+	<script>
+		const status = document.getElementById('status');
+		const error = document.getElementById('error');
+
+		const collector = setTimeout(() => {
+			status.classList.toggle('hidden');
+		}, 30000);
+
+		window.electron.onStatus((message) => {
+			status.textContent = message;
+		});
+
+		window.electron.onError((message) => {
+			error.textContent = message;
+
+			status.classList.add('hidden');
+			error.classList.toggle('hidden');
+
+			clearTimeout(collector);
+		});
+	</script>
 </html>

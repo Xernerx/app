@@ -16,6 +16,12 @@ const WEB_URL = app.isPackaged ? 'https://canary.xernerx.com' : 'https://dev.dum
 
 let win: BrowserWindow;
 
+function sendError(message: string) {
+	if (win && !win.isDestroyed()) {
+		win.webContents.send('startup:error', message);
+	}
+}
+
 /* --------------------------------------------- */
 /* Status messages                               */
 /* --------------------------------------------- */
@@ -31,9 +37,13 @@ function sendStatus(message: string) {
 /* --------------------------------------------- */
 
 async function waitForServer() {
-	sendStatus('Starting services…');
+	sendStatus('Connecting to the Xernerx Server...');
+
+	let attempt = 0;
 
 	while (true) {
+		attempt++;
+
 		try {
 			const res = await fetch(`${WEB_URL}/api/v1/status`);
 
@@ -41,9 +51,18 @@ async function waitForServer() {
 				sendStatus('Server ready');
 				return;
 			}
-		} catch {}
 
-		await new Promise((r) => setTimeout(r, 1000));
+			// Retry countdown
+			const delay = attempt * attempt;
+
+			for (let s = delay; s > 0; s--) {
+				sendStatus(`${res.status} ${res.statusText} — retrying in ${s}s`);
+				await new Promise((r) => setTimeout(r, 1000));
+			}
+		} catch (error) {
+			sendError(`${(error as Error).message}`);
+			return;
+		}
 	}
 }
 
@@ -52,41 +71,30 @@ async function waitForServer() {
 /* --------------------------------------------- */
 
 async function runUpdater() {
-	if (!app.isPackaged) {
-		sendStatus('Development mode');
-		return;
-	}
-
 	sendStatus('Checking for updates…');
 
-	const { autoUpdater } = await import('electron-updater');
-
-	autoUpdater.autoDownload = true;
-
-	autoUpdater.on('checking-for-update', () => {
-		sendStatus('Checking for updates…');
-	});
-
-	autoUpdater.on('update-available', () => {
-		sendStatus('Downloading update…');
-	});
-
-	autoUpdater.on('update-not-available', () => {
-		sendStatus('No updates found');
-	});
-
-	autoUpdater.on('update-downloaded', () => {
-		sendStatus('Installing update…');
-
-		setTimeout(() => {
-			autoUpdater.quitAndInstall();
-		}, 1000);
-	});
+	const { autoUpdater } = (await import('electron-updater')).default;
 
 	try {
+		autoUpdater.autoDownload = true;
+		autoUpdater.on('checking-for-update', () => {
+			sendStatus('Checking for updates…');
+		});
+		autoUpdater.on('update-available', () => {
+			sendStatus('Downloading update…');
+		});
+		autoUpdater.on('update-not-available', () => {
+			sendStatus('No updates found');
+		});
+		autoUpdater.on('update-downloaded', () => {
+			sendStatus('Installing update…');
+			setTimeout(() => {
+				autoUpdater.quitAndInstall();
+			}, 1000);
+		});
 		await autoUpdater.checkForUpdates();
-	} catch {
-		sendStatus('Update check failed');
+	} catch (error) {
+		sendError((error as Error).message);
 	}
 }
 
@@ -129,9 +137,7 @@ async function createWindow() {
 		resizable: false,
 		hasShadow: false,
 		backgroundColor: '#00000000',
-
 		icon: iconPath,
-
 		webPreferences: {
 			preload: path.join(__dirname, 'preload.cjs'),
 			contextIsolation: true,

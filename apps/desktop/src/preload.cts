@@ -7,4 +7,14 @@ contextBridge.exposeInMainWorld('electron', {
 	maximize: () => ipcRenderer.send('window:maximize'),
 	close: () => ipcRenderer.send('window:close'),
 	isMaximized: () => ipcRenderer.invoke('window:isMaximized'),
+	onStatus: (callback: any) => {
+		ipcRenderer.on('startup:status', (_: any, message: any) => {
+			callback(message);
+		});
+	},
+	onError: (callback: any) => {
+		ipcRenderer.on('startup:error', (_: any, message: any) => {
+			callback(message);
+		});
+	},
 });
