@@ -27,7 +27,7 @@
 		"npmRebuild": true,
 		"appId": "com.xernerx.app",
 		"productName": "Xernerx App",
-		"icon": "public/icon.ico",
+		"icon": "public/icon.png",
 		"compression": "maximum",
 		"electronLanguages": [
 			"en"
