@@ -6,8 +6,8 @@
 		"dev": "pnpm i && pnpm --parallel --filter ./apps/* dev",
 		"build": "pnpm --filter ./apps/* build",
 		"lint": "pnpm --recursive run lint",
-		"patch": "git add . && git commit -m \"Patch submit source code of app\" && npm version patch && pnpm --filter ./apps/* run patch && git add . && git commit -m \"Patch version of app\"",
-		"minor": "git add . && git commit -m \"Minor submit source code of app\" && npm version minor && pnpm --filter ./apps/* run minor && git add . && git commit -m \"Minor version of app\"",
-		"major": "git add . && git commit -m \"Major submit source code of app\" && npm version major && pnpm --filter ./apps/* run major && git add . && git commit -m \"Major version of app\""
+		"patch": "git add . && git commit -m \"Patch submit source code of app\" && npm version patch && pnpm --filter ./apps/* run patch && git add . && git commit -m \"Patch version of app\" && git push && git push --tags",
+		"minor": "git add . && git commit -m \"Minor submit source code of app\" && npm version minor && pnpm --filter ./apps/* run minor && git add . && git commit -m \"Minor version of app\" && git push && git push --tags",
+		"major": "git add . && git commit -m \"Major submit source code of app\" && npm version major && pnpm --filter ./apps/* run major && git add . && git commit -m \"Major version of app\" && git push && git push --tags"
 	}
 }
