@@ -1,6 +1,6 @@
 {
 	"name": "xernerx-web",
-	"version": "0.1.0",
+	"version": "1.1.0",
 	"private": true,
 	"scripts": {
 		"dev": "run-p app cloudflared",
@@ -8,7 +8,10 @@
 		"cloudflared": "cloudflared tunnel run dev-local",
 		"build": "next build",
 		"start": "next start",
-		"lint": "eslint"
+		"lint": "eslint",
+		"patch": "git add . && git commit -m \"Patch Web App\" && npm version patch",
+		"minor": "git add . && git commit -m \"Minor Web App\" && npm version minor",
+		"major": "git add . && git commit -m \"Major Web App\" && npm version major"
 	},
 	"dependencies": {
 		"@svgr/webpack": "^8.1.0",

@@ -8,7 +8,9 @@
 		"build": "npm i && tsc",
 		"dist": "pnpm build && electron-builder",
 		"dev": "tsc && electron .",
-		"patch": "git add . && git commit -m \"Patch version ${version}\" && npm version patch"
+		"patch": "git add . && git commit -m \"Patch Desktop App\" && npm version patch",
+		"minor": "git add . && git commit -m \"Minor Desktop App\" && npm version minor",
+		"major": "git add . && git commit -m \"Major Desktop App\" && npm version major"
 	},
 	"author": "Dummi",
 	"license": "MIT",
