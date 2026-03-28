@@ -1,6 +1,6 @@
 {
 	"name": "xernerx-app",
-	"version": "1.0.4",
+	"version": "1.0.5",
 	"description": "Xernerx App",
 	"main": "dist/main.js",
 	"type": "module",
@@ -31,13 +31,6 @@
 		"compression": "maximum",
 		"electronLanguages": [
 			"en"
-		],
-		"publish": [
-			{
-				"provider": "github",
-				"owner": "Xernerx",
-				"repo": "ProjectApp"
-			}
 		],
 		"directories": {
 			"output": "release"
