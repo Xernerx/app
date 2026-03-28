@@ -7,6 +7,9 @@ on:
     tags:
       - 'v*'
 
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
 jobs:
   desktop:
     name: Electron Build
@@ -26,12 +29,10 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 20
-          cache: pnpm
 
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v4
-        with:
-          version: 9
+      # ✅ actually installs pnpm
+      - name: Install pnpm
+        run: npm install -g pnpm
 
       - name: Install deps
         run: pnpm install --frozen-lockfile
@@ -47,11 +48,7 @@ jobs:
         with:
           name: desktop-${{ matrix.os }}
           path: |
-            apps/desktop/dist/**
             apps/desktop/release/**
-            apps/desktop/*.exe
-            apps/desktop/*.dmg
-            apps/desktop/*.AppImage
 
   mobile-android:
     name: Android Build
@@ -64,12 +61,10 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 20
-          cache: pnpm
 
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v4
-        with:
-          version: 9
+      # ✅ same fix here
+      - name: Install pnpm
+        run: npm install -g pnpm
 
       - name: Install deps
         run: pnpm install --frozen-lockfile
