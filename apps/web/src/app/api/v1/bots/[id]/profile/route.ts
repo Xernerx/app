@@ -43,7 +43,7 @@ const botSchema = z.object({
 
 const botUpdateSchema = botSchema.partial().omit({ id: true });
 
-export async function GET(_: NextRequest, { params }: { params: { id: string } }) {
+export async function GET(_: NextRequest, { params }: { params: Promise<{ id: string }> }) {
 	try {
 		const id = (await params).id;
 
@@ -65,7 +65,7 @@ export async function GET(_: NextRequest, { params }: { params: { id: string } }
 	}
 }
 
-export async function POST(request: NextRequest, { params }: { params: { id: string } }) {
+export async function POST(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
 	try {
 		const id = (await params).id;
 
@@ -98,7 +98,7 @@ export async function POST(request: NextRequest, { params }: { params: { id: str
 	}
 }
 
-export async function PATCH(request: NextRequest, { params }: { params: { id: string } }) {
+export async function PATCH(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
 	try {
 		const id = (await params).id;
 
@@ -138,7 +138,7 @@ export async function PATCH(request: NextRequest, { params }: { params: { id: st
 	}
 }
 
-export async function DELETE(_: NextRequest, { params }: { params: { id: string } }) {
+export async function DELETE(_: NextRequest, { params }: { params: Promise<{ id: string }> }) {
 	try {
 		const id = (await params).id;
 

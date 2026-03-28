@@ -1,13 +1,14 @@
 {
 	"name": "xernerx-app",
-	"version": "1.0.5",
+	"version": "1.1.0",
 	"description": "Xernerx App",
 	"main": "dist/main.js",
 	"type": "module",
 	"scripts": {
 		"build": "npm i && tsc",
 		"dist": "pnpm build && electron-builder",
-		"dev": "tsc && electron ."
+		"dev": "tsc && electron .",
+		"patch": "git add . && git commit -m \"Patch version ${version}\" && npm version patch"
 	},
 	"author": "Dummi",
 	"license": "MIT",

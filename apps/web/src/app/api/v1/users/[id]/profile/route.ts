@@ -6,7 +6,7 @@ import { NextRequest, NextResponse } from 'next/server';
 
 import database from '@/lib/database';
 
-export async function GET(_: NextRequest, { params }: { params: { id: string } }) {
+export async function GET(_: NextRequest, { params }: { params: Promise<{ id: string }> }) {
 	const { id } = await params;
 
 	const { user } = await database('xernerx', 'profiles');

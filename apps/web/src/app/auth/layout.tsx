@@ -6,7 +6,7 @@ import { signOut, useSession } from 'next-auth/react';
 import { useEffect } from 'react';
 import { useSidebar } from '@/providers/SidebarProvider';
 
-export default function Layout({ children }: { children: React.Component }) {
+export default function Layout({ children }: { children: React.ReactNode }) {
 	const { hide } = useSidebar();
 	const { data: session } = useSession();
 

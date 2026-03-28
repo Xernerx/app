@@ -21,7 +21,7 @@ if (!globalThis.discordUserByIdCache) {
 	globalThis.discordUserByIdCache = userCache;
 }
 
-export async function GET(_: NextRequest, { params }: { params: { id: string } }) {
+export async function GET(_: NextRequest, { params }: { params: Promise<{ id: string }> }) {
 	const id = (await params).id;
 
 	if (!id) {

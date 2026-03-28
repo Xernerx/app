@@ -25,7 +25,7 @@ const updateSchema = levelsSchema.partial();
 
 /* -------------------------- GET -------------------------- */
 
-export async function GET(_: NextRequest, { params }: { params: { id: string } }) {
+export async function GET(_: NextRequest, { params }: { params: Promise<{ id: string }> }) {
 	try {
 		const id = getId(await params);
 
@@ -50,7 +50,7 @@ export async function GET(_: NextRequest, { params }: { params: { id: string } }
 
 /* -------------------------- POST -------------------------- */
 
-export async function POST(request: NextRequest, { params }: { params: { id: string } }) {
+export async function POST(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
 	try {
 		const id = getId(await params);
 
@@ -87,7 +87,7 @@ export async function POST(request: NextRequest, { params }: { params: { id: str
 
 /* -------------------------- PATCH -------------------------- */
 
-export async function PATCH(request: NextRequest, { params }: { params: { id: string } }) {
+export async function PATCH(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
 	try {
 		const id = getId(await params);
 
@@ -123,7 +123,7 @@ export async function PATCH(request: NextRequest, { params }: { params: { id: st
 
 /* -------------------------- DELETE -------------------------- */
 
-export async function DELETE(_: NextRequest, { params }: { params: { id: string } }) {
+export async function DELETE(_: NextRequest, { params }: { params: Promise<{ id: string }> }) {
 	try {
 		const id = getId(await params);
 

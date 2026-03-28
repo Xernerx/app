@@ -11,7 +11,7 @@ function getId(params: { id: string }) {
 	return params.id?.trim() || null;
 }
 
-export async function GET(_: NextRequest, { params }: { params: { id: string } }) {
+export async function GET(_: NextRequest, { params }: { params: Promise<{ id: string }> }) {
 	try {
 		const id = getId(await params);
 
@@ -75,7 +75,7 @@ export async function POST(request: NextRequest) {
 
 const updateSchema = orgSchema.partial();
 
-export async function PATCH(request: NextRequest, { params }: { params: { id: string } }) {
+export async function PATCH(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
 	try {
 		const id = getId(await params);
 
@@ -110,7 +110,7 @@ export async function PATCH(request: NextRequest, { params }: { params: { id: st
 	}
 }
 
-export async function DELETE(_: NextRequest, { params }: { params: { id: string } }) {
+export async function DELETE(_: NextRequest, { params }: { params: Promise<{ id: string }> }) {
 	try {
 		const id = getId(await params);
 
