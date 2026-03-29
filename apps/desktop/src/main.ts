@@ -77,21 +77,26 @@ async function runUpdater() {
 
 	try {
 		autoUpdater.autoDownload = true;
+
 		autoUpdater.on('checking-for-update', () => {
 			sendStatus('Checking for updates…');
 		});
+
 		autoUpdater.on('update-available', () => {
 			sendStatus('Downloading update…');
 		});
+
 		autoUpdater.on('update-not-available', () => {
 			sendStatus('No updates found');
 		});
+
 		autoUpdater.on('update-downloaded', () => {
 			sendStatus('Installing update…');
 			setTimeout(() => {
 				autoUpdater.quitAndInstall();
 			}, 1000);
 		});
+
 		await autoUpdater.checkForUpdates();
 	} catch (error) {
 		sendError((error as Error).message);

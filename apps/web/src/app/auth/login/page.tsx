@@ -2,25 +2,21 @@
 
 'use client';
 
-import { redirect, useSearchParams } from 'next/navigation';
 import { signIn, useSession } from 'next-auth/react';
 
 import Image from 'next/image';
 import { motion } from 'framer-motion';
-import { useSidebar } from '@/providers/SidebarProvider';
+import { redirect } from 'next/navigation';
 import { useState } from 'react';
 
 export default function SignInPage() {
 	const { data: session } = useSession();
-	const { show } = useSidebar();
-	const params = useSearchParams();
-	const callbackUrl = params.get('callbackUrl') || '/';
 
 	const [loading, setLoading] = useState(false);
 
 	async function handleLogin() {
 		setLoading(true);
-		await signIn('discord', { callbackUrl });
+		await signIn();
 	}
 
 	if (session) return redirect('/');
