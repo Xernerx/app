@@ -14,6 +14,8 @@ jobs:
   desktop:
     name: Electron Build
     runs-on: ${{ matrix.os }}
+    env:
+      GH_TOKEN: ${{ secrets.GH_TOKEN }}
 
     strategy:
       fail-fast: false
