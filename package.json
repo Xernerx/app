@@ -1,7 +1,7 @@
 {
 	"name": "xernerx",
 	"private": true,
-	"version": "1.1.6",
+	"version": "1.1.7",
 	"scripts": {
 		"dev": "pnpm i && pnpm --parallel --filter ./apps/* dev",
 		"build": "pnpm --filter ./apps/* build",
