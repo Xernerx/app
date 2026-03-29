@@ -51,7 +51,18 @@
 			"artifactName": "${productName}-${version}-setup.${ext}"
 		},
 		"nsis": {
-			"differentialPackage": true
+			"oneClick": false,
+			"differentialPackage": true,
+			"perMachine": false,
+			"allowToChangeInstallationDirectory": true,
+			"runAfterFinish": true,
+			"createDesktopShortcut": true,
+			"createStartMenuShortcut": true,
+			"shortcutName": "Xernerx App",
+			"installerIcon": "public/icon.ico",
+			"uninstallerIcon": "public/icon.ico",
+			"installerSidebar": "public/banner.bmp",
+			"uninstallerSidebar": "public/banner.bmp"
 		}
 	}
 }
