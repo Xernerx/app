@@ -32,6 +32,14 @@
 		"productName": "Xernerx App",
 		"icon": "public/icon.png",
 		"compression": "maximum",
+		"publish": [
+			{
+				"provider": "github",
+				"owner": "Xernerx",
+				"repo": "app",
+				"releaseType": "release"
+			}
+		],
 		"electronLanguages": [
 			"en"
 		],
