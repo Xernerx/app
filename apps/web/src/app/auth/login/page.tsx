@@ -16,7 +16,7 @@ export default function SignInPage() {
 
 	async function handleLogin() {
 		setLoading(true);
-		await signIn();
+		await signIn('discord');
 	}
 
 	if (session) return redirect('/');
