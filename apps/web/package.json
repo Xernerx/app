@@ -1,6 +1,6 @@
 {
 	"name": "xernerx-web",
-	"version": "1.1.11",
+	"version": "1.1.12",
 	"private": true,
 	"scripts": {
 		"dev": "run-p app cloudflared",
