@@ -1,6 +1,7 @@
 {
 	"name": "xernerx",
-	"private": true,
+	"private": false,
+	"description": "App",
 	"version": "1.1.13",
 	"author": "Dummi",
 	"scripts": {
