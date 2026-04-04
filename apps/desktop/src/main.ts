@@ -185,6 +185,15 @@ async function createWindow() {
 	win.on('resize', saveBounds);
 	win.on('move', saveBounds);
 
+	win.webContents.on('render-process-gone', (_, details) => {
+		log(`CRASH: ${JSON.stringify(details)}`);
+
+		// Recover instead of dying forever
+		setTimeout(() => {
+			win.reload();
+		}, 1000);
+	});
+
 	/* Debug-only diagnostics */
 
 	if (DEBUG) {
