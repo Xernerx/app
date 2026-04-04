@@ -18,9 +18,9 @@ export default function SignInPage() {
 		await signIn('discord');
 	}
 
-	// useEffect(() => {
-	// 	if (session) window.location.replace('/');
-	// }, [session]);
+	useEffect(() => {
+		if (session) window.location.replace('/');
+	}, [session]);
 
 	return (
 		<div className='h-full flex items-center justify-center px-6'>

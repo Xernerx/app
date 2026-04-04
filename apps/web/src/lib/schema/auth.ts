@@ -39,10 +39,11 @@ export const authOptions: NextAuthOptions = {
 		},
 
 		async session({ session, token }) {
-			const discord = await fetch('https://discord.com/api/users/@me', { headers: { Authorization: `Bearer ${token.accessToken}` } }).then((res) => res.json());
-			const profile = await fetch(`${process.env.NEXTAUTH_URL}/api/v1/users/${token.sub}/profile`).then((res) => res.json());
+			const discord = {}; // await fetch('https://discord.com/api/users/@me', { headers: { Authorization: `Bearer ${token.accessToken}` } }).then((res) => res.json());
+			const profile = {}; // await fetch(`${process.env.NEXTAUTH_URL}/api/v1/users/${token.sub}/profile`).then((res) => res.json());
 
 			const user = {
+				...session,
 				...discord,
 				...profile,
 				accessToken: token.accessToken,

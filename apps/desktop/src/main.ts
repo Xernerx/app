@@ -161,7 +161,7 @@ async function createWindow() {
 		frame: false,
 		transparent: true,
 		resizable: true,
-		backgroundColor: '#0000000',
+		backgroundColor: '#00000000',
 		icon: iconPath,
 		webPreferences: {
 			preload: path.join(__dirname, 'preload.cjs'),
@@ -189,8 +189,8 @@ async function createWindow() {
 		log(`CRASH: ${JSON.stringify(details)}`);
 
 		// Recover instead of dying forever
-		setTimeout(() => {
-			win.reload();
+		setTimeout(async () => {
+			await win.loadURL(WEB_URL);
 		}, 1000);
 	});
 
