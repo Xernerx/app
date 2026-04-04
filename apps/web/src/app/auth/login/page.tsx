@@ -11,11 +11,9 @@ import { redirect } from 'next/navigation';
 import { useRouter } from 'next/router';
 
 export default function SignInPage() {
-	const { data: session, status } = useSession();
-	const router = useRouter();
+	const { data: session } = useSession();
 
 	const [loading, setLoading] = useState(false);
-	const [mounted, setMounted] = useState(false);
 
 	async function handleLogin() {
 		setLoading(true);
@@ -23,17 +21,8 @@ export default function SignInPage() {
 	}
 
 	useEffect(() => {
-		setMounted(true);
+		if (session) return redirect('/');
 	}, []);
-
-	useEffect(() => {
-		if (!mounted) return;
-		if (status === 'loading') return;
-
-		if (session) {
-			router.replace('/');
-		}
-	}, [session, status, mounted, router]);
 
 	return (
 		<div className='h-full flex items-center justify-center px-6'>
