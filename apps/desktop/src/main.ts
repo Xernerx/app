@@ -4,6 +4,7 @@ import { BrowserWindow, app, ipcMain, screen } from 'electron';
 
 import Store from 'electron-store';
 import { fileURLToPath } from 'url';
+import fs from 'fs';
 import path from 'path';
 
 const store = new Store();
@@ -15,6 +16,27 @@ const iconPath = path.join(__dirname, '../public/icon.ico');
 const WEB_URL = app.isPackaged ? 'https://canary.xernerx.com' : 'https://dev.dummi.me';
 
 let win: BrowserWindow;
+
+function isDebugEnabled(): boolean {
+	try {
+		const devPath = path.join(__dirname, 'metadata.json');
+		const prodPath = path.join(process.resourcesPath, 'metadata.json');
+
+		const configPath = app.isPackaged ? prodPath : devPath;
+
+		if (fs.existsSync(configPath)) {
+			const raw = fs.readFileSync(configPath, 'utf-8');
+			const parsed = JSON.parse(raw);
+			return parsed.debug === true;
+		}
+	} catch (e) {
+		console.error('Failed to read metadata.json:', e);
+	}
+
+	return false;
+}
+
+const DEBUG = isDebugEnabled();
 
 function sendError(message: string) {
 	if (win && !win.isDestroyed()) {
@@ -150,7 +172,11 @@ async function createWindow() {
 		},
 	});
 
-	if (app.isPackaged) {
+	if (DEBUG) {
+		win.webContents.openDevTools({ mode: 'detach' });
+	}
+
+	if (app.isPackaged && !DEBUG) {
 		win.webContents.on('before-input-event', (event, input) => {
 			if (input.key === 'F12') {
 				event.preventDefault();

@@ -32,6 +32,12 @@
 		"productName": "Xernerx App",
 		"icon": "public/icon.png",
 		"compression": "maximum",
+		"extraResources": [
+			{
+				"from": "metadata.json",
+				"to": "metadata.json"
+			}
+		],
 		"publish": [
 			{
 				"provider": "github",

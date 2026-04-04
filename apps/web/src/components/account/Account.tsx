@@ -10,7 +10,7 @@ export default function Account() {
 	const { data: session } = useSession();
 
 	return (
-		<div className='flex flex-col max-w-xl' style={{ gap: 'var(--ui-gap)' }}>
+		<div className='flex flex-col mx-auto w-full max-w-4xl' style={{ gap: 'var(--ui-gap)' }}>
 			{/* USER INFO */}
 			<motion.div
 				initial={{ opacity: 0, y: 8 }}

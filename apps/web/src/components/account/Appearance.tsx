@@ -67,7 +67,7 @@ export default function Appearance() {
 	}
 
 	return (
-		<div className='flex flex-col max-w-xl' style={{ gap: 'var(--ui-gap)' }}>
+		<div className='flex flex-col mx-auto w-full max-w-4xl' style={{ gap: 'var(--ui-gap)' }}>
 			{/* Theme */}
 			<SettingsCard>
 				<div className='flex items-center gap-3'>
@@ -95,31 +95,35 @@ export default function Appearance() {
 					</div>
 				</div>
 
-				<div className='flex flex-wrap gap-3'>
-					{colorButton('#ef4444')}
-					{colorButton('#f97316')}
-					{colorButton('#f59e0b')}
-					{colorButton('#eab308')}
-					{colorButton('#84cc16')}
-					{colorButton('#22c55e')}
-					{colorButton('#14b8a6')}
-					{colorButton('#06b6d4')}
-					{colorButton('#3b82f6')}
-					{colorButton('#6366f1')}
-					{colorButton('#8b5cf6')}
-					{session?.accent_color && colorButton('#' + session?.accent_color.toString(16).padStart(6, '0'))}
-					{colorButton('#dc2626')}
-					{colorButton('#c2410c')}
-					{colorButton('#b45309')}
-					{colorButton('#a16207')}
-					{colorButton('#4d7c0f')}
-					{colorButton('#15803d')}
-					{colorButton('#0f766e')}
-					{colorButton('#0e7490')}
-					{colorButton('#1d4ed8')}
-					{colorButton('#4338ca')}
-					{colorButton('#6d28d9')}
-					{session?.banner_color && colorButton(session?.banner_color)}
+				<div className='flex flex-wrap gap-3 flex-col'>
+					<div className='flex flex-wrap gap-3'>
+						{colorButton('#ef4444')}
+						{colorButton('#f97316')}
+						{colorButton('#f59e0b')}
+						{colorButton('#eab308')}
+						{colorButton('#84cc16')}
+						{colorButton('#22c55e')}
+						{colorButton('#14b8a6')}
+						{colorButton('#06b6d4')}
+						{colorButton('#3b82f6')}
+						{colorButton('#6366f1')}
+						{colorButton('#8b5cf6')}
+						{session?.accent_color && colorButton('#' + session?.accent_color.toString(16).padStart(6, '0'))}
+					</div>
+					<div className='flex flex-wrap gap-3'>
+						{colorButton('#dc2626')}
+						{colorButton('#c2410c')}
+						{colorButton('#b45309')}
+						{colorButton('#a16207')}
+						{colorButton('#4d7c0f')}
+						{colorButton('#15803d')}
+						{colorButton('#0f766e')}
+						{colorButton('#0e7490')}
+						{colorButton('#1d4ed8')}
+						{colorButton('#4338ca')}
+						{colorButton('#6d28d9')}
+						{session?.banner_color && colorButton(session?.banner_color)}
+					</div>
 				</div>
 			</SettingsCard>
 
@@ -160,7 +164,7 @@ export default function Appearance() {
 					</div>
 				</div>
 
-				<div className='flex gap-3'>
+				<div className='flex gap-3 flex-wrap'>
 					<button
 						onClick={() => setUISpacing('compact')}
 						className={`px-4 py-2 rounded-md text-sm border transition
