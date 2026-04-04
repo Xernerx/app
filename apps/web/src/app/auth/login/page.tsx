@@ -7,8 +7,6 @@ import { useEffect, useState } from 'react';
 
 import Image from 'next/image';
 import { motion } from 'framer-motion';
-import { redirect } from 'next/navigation';
-import { useRouter } from 'next/router';
 
 export default function SignInPage() {
 	const { data: session } = useSession();
@@ -21,8 +19,8 @@ export default function SignInPage() {
 	}
 
 	useEffect(() => {
-		if (session) return redirect('/');
-	}, []);
+		if (session) window.location.href = '/';
+	}, [session]);
 
 	return (
 		<div className='h-full flex items-center justify-center px-6'>
