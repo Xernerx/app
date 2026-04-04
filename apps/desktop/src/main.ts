@@ -34,10 +34,14 @@ function getMetadata(): Metadata {
 	try {
 		const file = app.isPackaged ? path.join(process.resourcesPath, 'metadata.json') : path.join(process.cwd(), 'metadata.json');
 
+		log(`LOADING: ${file}`);
+
 		if (fs.existsSync(file)) {
 			return JSON.parse(fs.readFileSync(file, 'utf-8'));
 		}
-	} catch {}
+	} catch {
+		log(`WARNING: Failed to load metadata.json`);
+	}
 
 	return {};
 }
