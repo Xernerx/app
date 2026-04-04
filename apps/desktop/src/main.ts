@@ -17,246 +17,213 @@ const WEB_URL = app.isPackaged ? 'https://canary.xernerx.com' : 'https://dev.dum
 
 let win: BrowserWindow;
 
-function getMetadataPath() {
-	if (app.isPackaged) {
-		return path.join(process.resourcesPath, 'metadata.json');
-	}
+/* --------------------------------------------- */
+/* Metadata                                      */
+/* --------------------------------------------- */
 
-	// dev = project root
-	return path.join(process.cwd(), 'metadata.json');
-}
+type Metadata = {
+	debug?: boolean;
+	hardwareAcceleration?: boolean;
+	startMinimized?: boolean;
+	startMaximized?: boolean;
+	startOnBoot?: boolean;
+};
 
-function isDebugEnabled(): boolean {
+function getMetadata(): Metadata {
 	try {
-		const configPath = getMetadataPath();
+		const file = app.isPackaged ? path.join(process.resourcesPath, 'metadata.json') : path.join(process.cwd(), 'metadata.json');
 
-		if (fs.existsSync(configPath)) {
-			const raw = fs.readFileSync(configPath, 'utf-8');
-			const parsed = JSON.parse(raw);
-			return parsed.debug === true;
+		if (fs.existsSync(file)) {
+			return JSON.parse(fs.readFileSync(file, 'utf-8'));
 		}
-	} catch (e) {
-		sendError(`Error loading config: ${(e as Error).message}`);
-	}
+	} catch {}
 
-	return false;
+	return {};
 }
 
-const DEBUG = isDebugEnabled();
+const meta = getMetadata();
+
+const DEBUG = meta.debug === true;
+
+/* --------------------------------------------- */
+/* System config                                 */
+/* --------------------------------------------- */
+
+if (meta.hardwareAcceleration === false) {
+	app.disableHardwareAcceleration();
+}
+
+if (meta.startOnBoot) {
+	app.setLoginItemSettings({
+		openAtLogin: true,
+	});
+}
+
+/* --------------------------------------------- */
+/* Logging (only in debug)                       */
+/* --------------------------------------------- */
+
+function log(message: string) {
+	if (!DEBUG) return;
+
+	try {
+		const file = path.join(app.getPath('desktop'), 'xernerx-debug.log');
+		fs.appendFileSync(file, `[${new Date().toISOString()}] ${message}\n`);
+	} catch {}
+}
+
+/* --------------------------------------------- */
+/* Messaging                                     */
+/* --------------------------------------------- */
 
 function sendError(message: string) {
-	if (win && !win.isDestroyed()) {
-		win.webContents.send('startup:error', message);
+	log(`ERROR: ${message}`);
+
+	if (DEBUG && win && !win.isDestroyed()) {
+		win.webContents.executeJavaScript(`
+			document.body.innerHTML = "<pre style='color:red;padding:20px;'>${message}</pre>";
+		`);
 	}
 }
 
-/* --------------------------------------------- */
-/* Status messages                               */
-/* --------------------------------------------- */
-
 function sendStatus(message: string) {
+	log(`STATUS: ${message}`);
+
 	if (win && !win.isDestroyed()) {
 		win.webContents.send('startup:status', message);
 	}
 }
 
 /* --------------------------------------------- */
-/* Wait for backend                              */
+/* Bounds                                        */
+/* --------------------------------------------- */
+
+function getSafeBounds(bounds?: Electron.Rectangle): Electron.Rectangle {
+	const { workArea } = screen.getPrimaryDisplay();
+
+	if (!bounds) {
+		return {
+			x: workArea.x + 100,
+			y: workArea.y + 100,
+			width: 1200,
+			height: 800,
+		};
+	}
+
+	const off = bounds.x + bounds.width < workArea.x || bounds.y + bounds.height < workArea.y || bounds.x > workArea.x + workArea.width || bounds.y > workArea.y + workArea.height;
+
+	if (off) {
+		return {
+			x: workArea.x + 100,
+			y: workArea.y + 100,
+			width: 1200,
+			height: 800,
+		};
+	}
+
+	return bounds;
+}
+
+/* --------------------------------------------- */
+/* Backend wait                                  */
 /* --------------------------------------------- */
 
 async function waitForServer() {
-	sendStatus('Connecting to the Xernerx Server...');
-
-	let attempt = 0;
+	sendStatus('Connecting...');
 
 	while (true) {
-		attempt++;
-
 		try {
 			const res = await fetch(`${WEB_URL}/api/v1/status`);
-
-			if (res.ok) {
-				sendStatus('Server ready');
-				return;
-			}
-
-			// Retry countdown
-			const delay = attempt * attempt;
-
-			for (let s = delay; s > 0; s--) {
-				sendStatus(`${res.status} ${res.statusText} — retrying in ${s}s`);
-				await new Promise((r) => setTimeout(r, 1000));
-			}
-		} catch (error) {
-			sendError(`${(error as Error).message}`);
+			if (res.ok) return sendStatus('Ready');
+		} catch (e) {
+			sendError((e as Error).message);
 			return;
 		}
+
+		await new Promise((r) => setTimeout(r, 1000));
 	}
 }
 
 /* --------------------------------------------- */
-/* Fake updater placeholder                      */
-/* --------------------------------------------- */
-
-async function runUpdater() {
-	sendStatus('Checking for updates…');
-
-	const { autoUpdater } = (await import('electron-updater')).default;
-
-	try {
-		autoUpdater.autoDownload = true;
-
-		autoUpdater.on('checking-for-update', () => {
-			sendStatus('Checking for updates…');
-		});
-
-		autoUpdater.on('update-available', () => {
-			sendStatus('Downloading update…');
-		});
-
-		autoUpdater.on('update-not-available', () => {
-			sendStatus('No updates found');
-		});
-
-		autoUpdater.on('update-downloaded', () => {
-			sendStatus('Installing update…');
-			setTimeout(() => {
-				autoUpdater.quitAndInstall();
-			}, 1000);
-		});
-
-		await autoUpdater.checkForUpdates();
-	} catch (error) {
-		sendError((error as Error).message);
-	}
-}
-
-function isBoundsVisible(bounds: Electron.Rectangle) {
-	const displays = screen.getAllDisplays();
-
-	return displays.some((display) => {
-		const area = display.workArea;
-
-		const horizontallyVisible = bounds.x < area.x + area.width && bounds.x + bounds.width > area.x;
-
-		const verticallyVisible = bounds.y < area.y + area.height && bounds.y + bounds.height > area.y;
-
-		return horizontallyVisible && verticallyVisible;
-	});
-}
-
-/* --------------------------------------------- */
-/* Window creation                               */
+/* Window                                        */
 /* --------------------------------------------- */
 
 async function createWindow() {
-	/* Load saved window position */
-
 	let bounds = store.get('windowBounds') as Electron.Rectangle | undefined;
-
-	if (bounds && !isBoundsVisible(bounds)) {
-		bounds = undefined;
-	}
+	bounds = getSafeBounds(bounds);
 
 	win = new BrowserWindow({
-		width: bounds?.width ?? 520,
-		height: bounds?.height ?? 320,
-		x: bounds?.x,
-		y: bounds?.y,
-		center: !bounds,
+		width: bounds.width,
+		height: bounds.height,
+		x: bounds.x,
+		y: bounds.y,
 
 		frame: false,
-		transparent: true,
-		resizable: false,
-		hasShadow: false,
-		backgroundColor: '#00000000',
+		transparent: false,
+		resizable: true,
+		backgroundColor: '#222222',
 		icon: iconPath,
 		webPreferences: {
 			preload: path.join(__dirname, 'preload.cjs'),
 			contextIsolation: true,
 			nodeIntegration: false,
+			sandbox: false,
 		},
 	});
 
-	if (DEBUG) {
-		win.webContents.openDevTools({ mode: 'detach' });
-	}
+	if (meta.startMaximized) win.maximize();
+	if (!meta.startMinimized) win.show();
 
-	if (app.isPackaged && !DEBUG) {
-		win.webContents.on('before-input-event', (event, input) => {
-			if (input.key === 'F12') {
-				event.preventDefault();
-			}
-
-			if (input.control && input.shift && input.key.toLowerCase() === 'i') {
-				event.preventDefault();
-			}
-		});
-
-		win.webContents.on('context-menu', (e) => {
-			e.preventDefault();
-		});
-
-		win.webContents.on('devtools-opened', () => {
-			win.webContents.closeDevTools();
-		});
-	}
-
-	/* Save window bounds when moved or resized */
+	/* Save bounds */
 
 	const saveBounds = () => {
 		if (!win || win.isDestroyed()) return;
 		if (win.isMinimized()) return;
-
 		store.set('windowBounds', win.getBounds());
 	};
 
 	win.on('resize', saveBounds);
 	win.on('move', saveBounds);
 
-	/* Window controls */
+	/* Debug-only diagnostics */
 
-	ipcMain.on('window:minimize', () => {
-		BrowserWindow.getFocusedWindow()?.minimize();
-	});
+	if (DEBUG) {
+		win.webContents.on('did-finish-load', () => {
+			log(`LOADED: ${win.webContents.getURL()}`);
+		});
 
-	ipcMain.on('window:maximize', () => {
-		const w = BrowserWindow.getFocusedWindow();
-		if (!w) return;
+		win.webContents.on('did-fail-load', (_, c, d) => {
+			log(`FAIL: ${c} ${d}`);
+		});
 
-		if (w.isMaximized()) w.unmaximize();
-		else w.maximize();
-	});
+		win.webContents.on('render-process-gone', (_, d) => {
+			log(`CRASH: ${JSON.stringify(d)}`);
+		});
 
-	ipcMain.on('window:close', () => {
-		BrowserWindow.getFocusedWindow()?.close();
-	});
+		win.webContents.on('will-redirect', (_, url) => {
+			log(`REDIRECT: ${url}`);
+		});
+	}
 
-	ipcMain.handle('window:isMaximized', () => {
-		return BrowserWindow.getFocusedWindow()?.isMaximized();
-	});
-
-	/* Splash screen */
+	/* Splash */
 
 	await win.loadFile(path.join(__dirname, '../pages/loading.html'));
 
-	await runUpdater();
+	await win.webContents.session.clearStorageData();
+
 	await waitForServer();
 
-	sendStatus('Launching Xernerx…');
-
-	await new Promise((r) => setTimeout(r, 300));
-
-	/* Switch from splash → main window */
-
-	win.setResizable(true);
-
-	if (!bounds) {
-		win.setSize(1200, 800);
-		win.center();
-	}
+	sendStatus('Launching...');
 
 	await win.loadURL(WEB_URL);
+
+	/* Devtools only in debug */
+
+	if (DEBUG) {
+		setTimeout(() => {
+			win.webContents.openDevTools({ mode: 'detach' });
+		}, 1000);
+	}
 }
 
 /* --------------------------------------------- */

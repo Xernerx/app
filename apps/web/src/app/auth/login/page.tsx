@@ -3,15 +3,16 @@
 'use client';
 
 import { signIn, useSession } from 'next-auth/react';
+import { useEffect, useState } from 'react';
 
 import Image from 'next/image';
 import { motion } from 'framer-motion';
 import { redirect } from 'next/navigation';
-import { useState } from 'react';
+import { useRouter } from 'next/router';
 
 export default function SignInPage() {
 	const { data: session } = useSession();
-
+	const router = useRouter();
 	const [loading, setLoading] = useState(false);
 
 	async function handleLogin() {
@@ -19,7 +20,9 @@ export default function SignInPage() {
 		await signIn('discord');
 	}
 
-	if (session) return redirect('/');
+	useEffect(() => {
+		if (session) router.replace('/');
+	}, [session, router]);
 
 	return (
 		<div className='h-full flex items-center justify-center px-6'>
