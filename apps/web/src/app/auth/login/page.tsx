@@ -19,7 +19,7 @@ export default function SignInPage() {
 	}
 
 	useEffect(() => {
-		if (session) window.location.href = '/';
+		if (session) window.location.replace('/');
 	}, [session]);
 
 	return (
