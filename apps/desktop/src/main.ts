@@ -43,7 +43,13 @@ function getMetadata(): Metadata {
 		log(`WARNING: Failed to load metadata.json`);
 	}
 
-	return {};
+	return {
+		debug: true,
+		hardwareAcceleration: true,
+		startMinimized: false,
+		startMaximized: false,
+		startOnBoot: false,
+	};
 }
 
 const meta = getMetadata();
