@@ -161,7 +161,7 @@ async function createWindow() {
 		frame: false,
 		transparent: true,
 		resizable: true,
-		backgroundColor: '#222222',
+		backgroundColor: '#0000000',
 		icon: iconPath,
 		webPreferences: {
 			preload: path.join(__dirname, 'preload.cjs'),
