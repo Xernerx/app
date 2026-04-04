@@ -313,7 +313,10 @@ async function createWindow() {
 
 		if (++crashCount > 3) return;
 
-		setTimeout(() => win.loadURL(WEB_URL), 1000);
+		setTimeout(async () => {
+			win.loadURL(WEB_URL);
+			await win.webContents.session.clearStorageData();
+		}, 1000);
 	});
 
 	/* Debug */
