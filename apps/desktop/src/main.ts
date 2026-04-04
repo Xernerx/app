@@ -159,7 +159,7 @@ async function createWindow() {
 		y: bounds.y,
 
 		frame: false,
-		transparent: false,
+		transparent: true,
 		resizable: true,
 		backgroundColor: '#222222',
 		icon: iconPath,
