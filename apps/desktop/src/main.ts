@@ -72,8 +72,6 @@ if (meta.startOnBoot) {
 /* --------------------------------------------- */
 
 function log(message: string) {
-	if (!DEBUG) return;
-
 	try {
 		const file = path.join(app.getPath('desktop'), 'xernerx-debug.log');
 		fs.appendFileSync(file, `[${new Date().toISOString()}] ${message}\n`);
