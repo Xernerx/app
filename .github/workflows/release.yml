@@ -67,31 +67,31 @@ jobs:
       - name: Install pnpm
         run: npm install -g pnpm
 
-      - name: Install deps
-        run: pnpm install --frozen-lockfile
+      # - name: Install deps
+      #   run: pnpm install --frozen-lockfile
 
-      - name: Install EAS CLI
-        run: npm install -g eas-cli
+      # - name: Install EAS CLI
+      #   run: npm install -g eas-cli
 
-      - name: Build Android with EAS
-        run: |
-          cd apps/mobile
-          npx eas build --platform android --non-interactive --profile preview
-        env:
-          EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
+      # - name: Build Android with EAS
+      #   run: |
+      #     cd apps/mobile
+      #     npx eas build --platform android --non-interactive --profile preview
+      #   env:
+      #     EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
 
-      - name: Download APK
-        run: |
-          cd apps/mobile
-          npx eas build:download --platform android --latest --output app.apk
-        env:
-          EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
+      # - name: Download APK
+      #   run: |
+      #     cd apps/mobile
+      #     npx eas build:download --platform android --latest --output app.apk
+      #   env:
+      #     EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
 
-      - name: Upload APK
-        uses: actions/upload-artifact@v4
-        with:
-          name: android
-          path: apps/mobile/app.apk
+      # - name: Upload APK
+      #   uses: actions/upload-artifact@v4
+      #   with:
+      #     name: android
+      #     path: apps/mobile/app.apk
 
   release:
     name: Create GitHub Release
