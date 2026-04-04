@@ -43,7 +43,6 @@ function isDebugEnabled(): boolean {
 }
 
 const DEBUG = isDebugEnabled();
-console.log(`DEBUG: ${DEBUG}`);
 
 function sendError(message: string) {
 	if (win && !win.isDestroyed()) {
