@@ -17,12 +17,18 @@ const WEB_URL = app.isPackaged ? 'https://canary.xernerx.com' : 'https://dev.dum
 
 let win: BrowserWindow;
 
+function getMetadataPath() {
+	if (app.isPackaged) {
+		return path.join(process.resourcesPath, 'metadata.json');
+	}
+
+	// dev = project root
+	return path.join(process.cwd(), 'metadata.json');
+}
+
 function isDebugEnabled(): boolean {
 	try {
-		const devPath = path.join(__dirname, 'metadata.json');
-		const prodPath = path.join(process.resourcesPath, 'metadata.json');
-
-		const configPath = app.isPackaged ? prodPath : devPath;
+		const configPath = getMetadataPath();
 
 		if (fs.existsSync(configPath)) {
 			const raw = fs.readFileSync(configPath, 'utf-8');
@@ -30,13 +36,14 @@ function isDebugEnabled(): boolean {
 			return parsed.debug === true;
 		}
 	} catch (e) {
-		console.error('Failed to read metadata.json:', e);
+		sendError(`Error loading config: ${(e as Error).message}`);
 	}
 
 	return false;
 }
 
 const DEBUG = isDebugEnabled();
+console.log(`DEBUG: ${DEBUG}`);
 
 function sendError(message: string) {
 	if (win && !win.isDestroyed()) {
@@ -67,7 +74,7 @@ async function waitForServer() {
 		attempt++;
 
 		try {
-			const res = await fetch(`${WEB_URL}/api/v1/status`);
+			const res = await fetch(`${WEB_URL}/api/v1/statu`);
 
 			if (res.ok) {
 				sendStatus('Server ready');
