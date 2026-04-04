@@ -2,12 +2,13 @@
 'use client';
 
 import { LogOut, Trash2, User } from 'lucide-react';
-import { signOut, useSession } from 'next-auth/react';
 
 import { motion } from 'framer-motion';
+import { signOut } from 'next-auth/react';
+import { useUser } from '@/providers/UserProvider';
 
 export default function Account() {
-	const { data: session } = useSession();
+	const user = useUser();
 
 	return (
 		<div className='flex flex-col mx-auto w-full max-w-4xl' style={{ gap: 'var(--ui-gap)' }}>
@@ -30,10 +31,10 @@ export default function Account() {
 
 				<div className='flex flex-col text-sm gap-1'>
 					<p>
-						Signed in as <span className='font-medium'>@{session?.username}</span>
+						Signed in as <span className='font-medium'>@{user?.username}</span>
 					</p>
 					<p>
-						Using <span className='font-medium'>{session?.email}</span> as email
+						Using <span className='font-medium'>{user?.email}</span> as email
 					</p>
 				</div>
 			</motion.div>

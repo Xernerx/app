@@ -10,15 +10,15 @@ import QRCode from 'react-qr-code';
 import { usePlatform } from '@/providers/PlatformProvider';
 import { useRef } from 'react';
 import { useRouter } from 'next/navigation';
-import { useSession } from 'next-auth/react';
 import { useSidebar } from '@/providers/SidebarProvider';
+import { useUser } from '@/providers/UserProvider';
 
 export default function Sidebar() {
 	const profileRef = useRef<HTMLDivElement | null>(null);
 	const profileButtonRef = useRef<HTMLButtonElement | null>(null);
 	const { state, navItems, view, setView } = useSidebar();
 	const { type } = usePlatform();
-	const { data: session } = useSession();
+	const user = useUser();
 	const router = useRouter();
 
 	const [openProfile, setOpenProfile] = useState(false);
@@ -62,9 +62,9 @@ export default function Sidebar() {
 
 	if (state === 'hidden') return null;
 
-	const avatarDecoration = session?.avatar_decoration_data?.asset && `https://cdn.discordapp.com/avatar-decoration-presets/${session.avatar_decoration_data.asset}.webp`;
+	const avatarDecoration = user?.avatar_decoration_data?.asset && `https://cdn.discordapp.com/avatar-decoration-presets/${user.avatar_decoration_data.asset}.webp`;
 
-	const nameplate = session?.collectibles?.nameplate && `https://cdn.discordapp.com/assets/collectibles/${session.collectibles.nameplate.asset}asset.webm`;
+	const nameplate = user?.collectibles?.nameplate && `https://cdn.discordapp.com/assets/collectibles/${user.collectibles.nameplate.asset}asset.webm`;
 
 	return (
 		<motion.aside
@@ -114,7 +114,7 @@ export default function Sidebar() {
 			</div>
 
 			<div className='mt-auto relative'>
-				{session ? (
+				{user ? (
 					<>
 						{/* OPEN SIDEBAR PROFILE */}
 						{state === 'open' && (
@@ -128,7 +128,7 @@ export default function Sidebar() {
 								<div className='relative flex items-center justify-between gap-2'>
 									<button ref={profileButtonRef} onClick={() => setOpenProfile(!openProfile)} className='flex items-center gap-3 group w-full text-left'>
 										<div className='relative'>
-											<img src={`https://cdn.discordapp.com/avatars/${session.id}/${session.avatar}.png`} className='w-10 h-10 rounded-full' />
+											<img src={`https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.png`} className='w-10 h-10 rounded-full' />
 
 											{avatarDecoration && <img src={avatarDecoration} className='absolute inset-0 scale-[1.15] pointer-events-none' />}
 
@@ -136,8 +136,8 @@ export default function Sidebar() {
 										</div>
 
 										<div className='flex flex-col overflow-hidden'>
-											<span className='text-sm font-medium truncate'>{session.global_name ?? session.username}</span>
-											<span className='text-xs opacity-60 truncate'>@{session.username}</span>
+											<span className='text-sm font-medium truncate'>{user.global_name ?? user.username}</span>
+											<span className='text-xs opacity-60 truncate'>@{user.username}</span>
 										</div>
 									</button>
 
@@ -152,7 +152,7 @@ export default function Sidebar() {
 						{state !== 'open' && (
 							<div className='flex justify-center'>
 								<button onClick={() => setProfileMenu(!profileMenu)} className='relative'>
-									<img src={`https://cdn.discordapp.com/avatars/${session.id}/${session.avatar}.png`} className='w-10 h-10 rounded-full' />
+									<img src={`https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.png`} className='w-10 h-10 rounded-full' />
 
 									{avatarDecoration && <img src={avatarDecoration} className='absolute inset-0 scale-[1.15] pointer-events-none' />}
 								</button>
@@ -191,7 +191,7 @@ export default function Sidebar() {
 			</div>
 
 			<AnimatePresence>
-				{openProfile && session && (
+				{openProfile && user && (
 					<motion.div
 						initial={{ opacity: 0, y: 10, scale: 0.95 }}
 						animate={{ opacity: 1, y: 0, scale: 1 }}
@@ -205,26 +205,26 @@ export default function Sidebar() {
 						{profileView === 'card' && (
 							<div>
 								<div className='relative'>
-									{session.banner && <img src={`https://cdn.discordapp.com/banners/${session.id}/${session.banner}?size=4096`} className='w-full h-24 object-cover' />}
+									{user.banner && <img src={`https://cdn.discordapp.com/banners/${user.id}/${user.banner}?size=4096`} className='w-full h-24 object-cover' />}
 
-									<img src={`https://cdn.discordapp.com/avatars/${session.id}/${session.avatar}?size=4096`} className='absolute left-3 -bottom-8 w-16 h-16 rounded-full border-4 border-[#020617]' />
+									<img src={`https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}?size=4096`} className='absolute left-3 -bottom-8 w-16 h-16 rounded-full border-4 border-[#020617]' />
 								</div>
 
 								<div className='pt-10 px-4 pb-4 space-y-2'>
-									<div className='font-semibold'>{session.global_name ?? session.username}</div>
+									<div className='font-semibold'>{user.global_name ?? user.username}</div>
 
-									<div className='text-xs opacity-60'>@{session.username}</div>
+									<div className='text-xs opacity-60'>@{user.username}</div>
 
-									{session.clan?.identity_enabled && (
+									{user.clan?.identity_enabled && (
 										<div className='flex items-center gap-2 text-xs opacity-80'>
-											<img src={`https://cdn.discordapp.com/clan-badges/${session.clan.identity_guild_id}/${session.clan.badge}.png`} className='h-4 w-4' />
+											<img src={`https://cdn.discordapp.com/clan-badges/${user.clan.identity_guild_id}/${user.clan.badge}.png`} className='h-4 w-4' />
 
-											<span className='font-semibold'>{session.clan.tag}</span>
+											<span className='font-semibold'>{user.clan.tag}</span>
 										</div>
 									)}
 
 									<button
-										onClick={() => navigator.clipboard.writeText(session.id)}
+										onClick={() => navigator.clipboard.writeText(user.id)}
 										className='flex items-center justify-center gap-2 w-full text-xs bg-black/30 px-3 py-2 rounded-md hover:bg-black/40 transition'>
 										<IdCard size={14} />
 										Copy ID

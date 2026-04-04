@@ -43,8 +43,8 @@ const orgSchema = z.object({
 
 export async function POST(request: NextRequest) {
 	try {
-		const session = await getServerSession(authOptions);
-		const userId = session?.id;
+		const session: any = await getServerSession(authOptions);
+		const userId = session?.user?.id;
 
 		if (!userId) {
 			return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });

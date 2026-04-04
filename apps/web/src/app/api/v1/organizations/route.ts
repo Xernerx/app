@@ -13,8 +13,8 @@ export async function GET(request: NextRequest) {
 	const params = new URLSearchParams(url.search);
 	const all = params.get('all') === 'true';
 
-	const session = await getServerSession(authOptions);
-	const userId = session?.id;
+	const session: any = await getServerSession(authOptions);
+	const userId = session?.user?.id;
 
 	if (!userId && !all) {
 		return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });

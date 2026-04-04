@@ -11,9 +11,9 @@ import Sidebar from '@/components/Sidebar';
 import { SidebarProvider } from '@/providers/SidebarProvider';
 import { ThemeProvider } from '@/providers/ThemeProvider';
 import { ToastProvider } from '@/providers/ToastProvider';
+import { UserProvider } from '@/providers/UserProvider';
 import { authOptions } from '@/lib/schema/auth';
 import { getServerSession } from 'next-auth';
-import { redirect } from 'next/navigation';
 
 export const metadata: Metadata = {
 	title: 'Xernerx',
@@ -64,27 +64,29 @@ try {
 			</head>
 			<body className='h-full'>
 				<SessionProvider session={session}>
-					<ThemeProvider>
-						<ToastProvider>
-							<PlatformProvider>
-								<div id='app-root' className='h-full w-full overflow-hidden bg-(--bg-main)'>
-									<SidebarProvider>
-										<div className='flex flex-col h-full'>
-											{/* Header */}
-											<Header />
+					<UserProvider>
+						<ThemeProvider>
+							<ToastProvider>
+								<PlatformProvider>
+									<div id='app-root' className='h-full w-full overflow-hidden bg-(--bg-main)'>
+										<SidebarProvider>
+											<div className='flex flex-col h-full'>
+												{/* Header */}
+												<Header />
 
-											{/* Sidebar + Main */}
-											<div className='flex flex-1 overflow-hidden'>
-												<Sidebar />
+												{/* Sidebar + Main */}
+												<div className='flex flex-1 overflow-hidden'>
+													<Sidebar />
 
-												<Main>{children}</Main>
+													<Main>{children}</Main>
+												</div>
 											</div>
-										</div>
-									</SidebarProvider>
-								</div>
-							</PlatformProvider>
-						</ToastProvider>
-					</ThemeProvider>
+										</SidebarProvider>
+									</div>
+								</PlatformProvider>
+							</ToastProvider>
+						</ThemeProvider>
+					</UserProvider>
 				</SessionProvider>
 			</body>
 		</html>

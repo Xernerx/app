@@ -9,10 +9,10 @@ import database from '@/lib/database';
 import { getServerSession } from 'next-auth';
 
 export async function GET(_: NextRequest) {
-	const session = await getServerSession(authOptions);
+	const session: any = await getServerSession(authOptions);
 	const db = await database('xernerx', 'tokens');
 
-	const tokens = await db.api.find({ owners: session?.id }).select('id name status');
+	const tokens = await db.api.find({ owners: session?.user?.id }).select('id name status');
 
 	return NextResponse.json(tokens, { status: 200, statusText: 'OK' });
 }

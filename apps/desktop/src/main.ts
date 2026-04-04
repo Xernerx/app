@@ -16,6 +16,7 @@ const iconPath = path.join(__dirname, '../public/icon.ico');
 const WEB_URL = app.isPackaged ? 'https://canary.xernerx.com' : 'https://dev.dummi.me';
 
 let win: BrowserWindow;
+let splash: BrowserWindow | null = null;
 
 /* --------------------------------------------- */
 /* Metadata                                      */
@@ -42,7 +43,6 @@ function getMetadata(): Metadata {
 }
 
 const meta = getMetadata();
-
 const DEBUG = meta.debug === true;
 
 /* --------------------------------------------- */
@@ -54,13 +54,11 @@ if (meta.hardwareAcceleration === false) {
 }
 
 if (meta.startOnBoot) {
-	app.setLoginItemSettings({
-		openAtLogin: true,
-	});
+	app.setLoginItemSettings({ openAtLogin: true });
 }
 
 /* --------------------------------------------- */
-/* Logging (only in debug)                       */
+/* Logging                                       */
 /* --------------------------------------------- */
 
 function log(message: string) {
@@ -112,16 +110,55 @@ function getSafeBounds(bounds?: Electron.Rectangle): Electron.Rectangle {
 
 	const off = bounds.x + bounds.width < workArea.x || bounds.y + bounds.height < workArea.y || bounds.x > workArea.x + workArea.width || bounds.y > workArea.y + workArea.height;
 
-	if (off) {
-		return {
-			x: workArea.x + 100,
-			y: workArea.y + 100,
-			width: 1200,
-			height: 800,
-		};
+	return off
+		? {
+				x: workArea.x + 100,
+				y: workArea.y + 100,
+				width: 1200,
+				height: 800,
+			}
+		: bounds;
+}
+
+function getDisplayFromBounds(bounds: Electron.Rectangle) {
+	const displays = screen.getAllDisplays();
+
+	for (const display of displays) {
+		const area = display.workArea;
+
+		const inside = bounds.x >= area.x && bounds.y >= area.y && bounds.x < area.x + area.width && bounds.y < area.y + area.height;
+
+		if (inside) return display;
 	}
 
-	return bounds;
+	return screen.getPrimaryDisplay();
+}
+
+/* --------------------------------------------- */
+/* Splash                                        */
+/* --------------------------------------------- */
+
+function createSplash(bounds: Electron.Rectangle) {
+	const display = getDisplayFromBounds(bounds);
+	const { workArea } = display;
+
+	const width = 500;
+	const height = 350;
+
+	splash = new BrowserWindow({
+		width,
+		height,
+		center: true,
+		roundedCorners: true,
+		frame: false,
+		transparent: true,
+		resizable: false,
+		alwaysOnTop: true,
+		skipTaskbar: true,
+		backgroundColor: '#00000000',
+	});
+
+	splash.loadFile(path.join(__dirname, '../pages/loading.html'));
 }
 
 /* --------------------------------------------- */
@@ -131,16 +168,62 @@ function getSafeBounds(bounds?: Electron.Rectangle): Electron.Rectangle {
 async function waitForServer() {
 	sendStatus('Connecting...');
 
+	let attempt = 0;
+
 	while (true) {
+		attempt++;
+
 		try {
 			const res = await fetch(`${WEB_URL}/api/v1/status`);
-			if (res.ok) return sendStatus('Ready');
+
+			if (res.ok) {
+				sendStatus('Ready');
+				return;
+			}
+
+			const delay = Math.min(attempt * attempt, 10);
+
+			for (let s = delay; s > 0; s--) {
+				sendStatus(`Retrying in ${s}s`);
+				await new Promise((r) => setTimeout(r, 1000));
+			}
 		} catch (e) {
 			sendError((e as Error).message);
 			return;
 		}
+	}
+}
 
-		await new Promise((r) => setTimeout(r, 1000));
+/* --------------------------------------------- */
+/* Updater                                       */
+/* --------------------------------------------- */
+
+async function runUpdater() {
+	if (DEBUG) return;
+
+	sendStatus('Checking for updates…');
+
+	const { autoUpdater } = (await import('electron-updater')).default;
+
+	try {
+		autoUpdater.autoDownload = true;
+
+		autoUpdater.on('update-available', () => {
+			sendStatus('Downloading update…');
+		});
+
+		autoUpdater.on('update-not-available', () => {
+			sendStatus('No updates found');
+		});
+
+		autoUpdater.on('update-downloaded', () => {
+			sendStatus('Installing update…');
+			setTimeout(() => autoUpdater.quitAndInstall(), 1000);
+		});
+
+		await autoUpdater.checkForUpdates();
+	} catch (error) {
+		sendError((error as Error).message);
 	}
 }
 
@@ -152,17 +235,20 @@ async function createWindow() {
 	let bounds = store.get('windowBounds') as Electron.Rectangle | undefined;
 	bounds = getSafeBounds(bounds);
 
+	createSplash(bounds);
+
 	win = new BrowserWindow({
 		width: bounds.width,
 		height: bounds.height,
 		x: bounds.x,
 		y: bounds.y,
-
+		roundedCorners: true,
 		frame: false,
-		transparent: true,
+		transparent: false,
 		resizable: true,
 		backgroundColor: '#00000000',
 		icon: iconPath,
+		show: false,
 		webPreferences: {
 			preload: path.join(__dirname, 'preload.cjs'),
 			contextIsolation: true,
@@ -171,42 +257,62 @@ async function createWindow() {
 		},
 	});
 
-	if (meta.startMaximized) win.maximize();
-	if (!meta.startMinimized) win.show();
+	const wasMaximized = store.get('windowMaximized');
+
+	if (meta.startMaximized || wasMaximized) {
+		win.maximize();
+	}
 
 	/* Save bounds */
 
-	const saveBounds = () => {
+	function saveBounds() {
 		if (!win || win.isDestroyed()) return;
+
 		if (win.isMinimized()) return;
+
+		if (win.isMaximized()) {
+			store.set('windowMaximized', true);
+			return;
+		}
+
+		store.set('windowMaximized', false);
 		store.set('windowBounds', win.getBounds());
-	};
+	}
 
 	win.on('resize', saveBounds);
 	win.on('move', saveBounds);
+	win.on('close', saveBounds);
+
+	/* Window controls */
+
+	ipcMain.on('window:minimize', () => win.minimize());
+
+	ipcMain.on('window:maximize', () => {
+		if (win.isMaximized()) win.unmaximize();
+		else win.maximize();
+	});
+
+	ipcMain.on('window:close', () => win.close());
+
+	ipcMain.handle('window:isMaximized', () => win.isMaximized());
+
+	/* Crash recovery */
+
+	let crashCount = 0;
 
 	win.webContents.on('render-process-gone', (_, details) => {
 		log(`CRASH: ${JSON.stringify(details)}`);
 
-		// Recover instead of dying forever
-		setTimeout(async () => {
-			await win.loadURL(WEB_URL);
-		}, 1000);
+		if (++crashCount > 3) return;
+
+		setTimeout(() => win.loadURL(WEB_URL), 1000);
 	});
 
-	/* Debug-only diagnostics */
+	/* Debug */
 
 	if (DEBUG) {
 		win.webContents.on('did-finish-load', () => {
 			log(`LOADED: ${win.webContents.getURL()}`);
-		});
-
-		win.webContents.on('did-fail-load', (_, c, d) => {
-			log(`FAIL: ${c} ${d}`);
-		});
-
-		win.webContents.on('render-process-gone', (_, d) => {
-			log(`CRASH: ${JSON.stringify(d)}`);
 		});
 
 		win.webContents.on('will-redirect', (_, url) => {
@@ -214,19 +320,37 @@ async function createWindow() {
 		});
 	}
 
-	/* Splash */
+	/* Devtools lock */
 
-	await win.loadFile(path.join(__dirname, '../pages/loading.html'));
+	if (app.isPackaged && !DEBUG) {
+		win.webContents.on('before-input-event', (event, input) => {
+			if (input.key === 'F12') event.preventDefault();
+			if (input.control && input.shift && input.key.toLowerCase() === 'i') {
+				event.preventDefault();
+			}
+		});
 
-	await win.webContents.session.clearStorageData();
+		win.webContents.on('context-menu', (e) => e.preventDefault());
+	}
 
+	/* Boot flow */
+
+	await runUpdater();
 	await waitForServer();
 
 	sendStatus('Launching...');
 
 	await win.loadURL(WEB_URL);
 
-	/* Devtools only in debug */
+	if (!meta.startMinimized) {
+		win.show();
+		win.focus();
+	}
+
+	if (splash && !splash.isDestroyed()) {
+		splash.destroy();
+		splash = null;
+	}
 
 	if (DEBUG) {
 		setTimeout(() => {

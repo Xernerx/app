@@ -13,9 +13,9 @@ export async function GET(request: NextRequest) {
 	const params = new URLSearchParams(url.search);
 	const all = !!params.get('all');
 
-	const session = await getServerSession(authOptions);
+	const session: any = await getServerSession(authOptions);
 
-	const id = session?.id;
+	const id = session?.user?.id;
 
 	const db = await database('xernerx', 'profiles');
 

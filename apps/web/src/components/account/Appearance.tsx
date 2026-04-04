@@ -3,9 +3,9 @@
 import { LayoutGrid, Monitor, Palette, RefreshCw, Sparkles, ZoomIn } from 'lucide-react';
 
 import { motion } from 'framer-motion';
-import { useSession } from 'next-auth/react';
 import { useState } from 'react';
 import { useTheme } from '@/providers/ThemeProvider';
+import { useUser } from '@/providers/UserProvider';
 
 export default function Appearance() {
 	const {
@@ -21,7 +21,7 @@ export default function Appearance() {
 		setZoom,
 		ui: { uiSpacing, zoom },
 	} = useTheme();
-	const { data: session } = useSession();
+	const user = useUser();
 
 	const [zoomPreview, setZoomPreview] = useState(zoom);
 
@@ -108,7 +108,7 @@ export default function Appearance() {
 						{colorButton('#3b82f6')}
 						{colorButton('#6366f1')}
 						{colorButton('#8b5cf6')}
-						{session?.accent_color && colorButton('#' + session?.accent_color.toString(16).padStart(6, '0'))}
+						{user?.accent_color && colorButton('#' + user?.accent_color.toString(16).padStart(6, '0'))}
 					</div>
 					<div className='flex flex-wrap gap-3'>
 						{colorButton('#dc2626')}
@@ -122,7 +122,7 @@ export default function Appearance() {
 						{colorButton('#1d4ed8')}
 						{colorButton('#4338ca')}
 						{colorButton('#6d28d9')}
-						{session?.banner_color && colorButton(session?.banner_color)}
+						{user?.banner_color && colorButton(user?.banner_color)}
 					</div>
 				</div>
 			</SettingsCard>

@@ -13,13 +13,13 @@ import { getServerSession } from 'next-auth';
  * GET - fetch single token
  */
 export async function GET(_: NextRequest, { params }: { params: Promise<{ id: string }> }) {
-	const session = await getServerSession(authOptions);
-	if (!session?.id) return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
+	const session: any = await getServerSession(authOptions);
+	if (!session?.user?.id) return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
 
 	const db = await database('xernerx', 'tokens');
 	const id = (await params).id;
 
-	const token = await db.api.findOne({ id, owners: session.id });
+	const token = await db.api.findOne({ id, owners: session?.user?.id });
 
 	if (!token) {
 		return NextResponse.json({ message: 'Token does not exist' }, { status: 404 });
@@ -33,8 +33,8 @@ export async function GET(_: NextRequest, { params }: { params: Promise<{ id: st
  */
 
 export async function POST(req: NextRequest) {
-	const session = await getServerSession(authOptions);
-	if (!session?.id) {
+	const session: any = await getServerSession(authOptions);
+	if (!session?.user?.id) {
 		return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
 	}
 
@@ -50,7 +50,7 @@ export async function POST(req: NextRequest) {
 	const token = {
 		id,
 		name: body.name,
-		owners: [session.id],
+		owners: [session?.user?.id],
 		status: 'pending',
 		botId: null,
 		createdAt: new Date(),
@@ -65,8 +65,8 @@ export async function POST(req: NextRequest) {
  * PATCH - update token
  */
 export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
-	const session = await getServerSession(authOptions);
-	if (!session?.id) {
+	const session: any = await getServerSession(authOptions);
+	if (!session?.user?.id) {
 		return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
 	}
 
@@ -74,7 +74,7 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
 	const id = (await params).id;
 	const body = await req.json();
 
-	const existing = await db.api.findOne({ id, owners: session.id });
+	const existing = await db.api.findOne({ id, owners: session?.user?.id });
 	if (!existing) {
 		return NextResponse.json({ message: 'Token not found' }, { status: 404 });
 	}
@@ -96,7 +96,7 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
 		const uniqueOwners = [...new Set(body.owners.filter(Boolean))];
 
 		// optional: prevent user from removing themselves
-		if (!uniqueOwners.includes(session.id)) {
+		if (!uniqueOwners.includes(session?.user?.id)) {
 			return NextResponse.json({ message: 'You cannot remove yourself as an owner' }, { status: 403 });
 		}
 
@@ -118,13 +118,13 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
  * DELETE - remove token
  */
 export async function DELETE(_: NextRequest, { params }: { params: Promise<{ id: string }> }) {
-	const session = await getServerSession(authOptions);
-	if (!session?.id) return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
+	const session: any = await getServerSession(authOptions);
+	if (!session?.user?.id) return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
 
 	const db = await database('xernerx', 'tokens');
 	const id = (await params).id;
 
-	const existing = await db.api.findOne({ id, owners: session.id });
+	const existing = await db.api.findOne({ id, owners: session?.user?.id });
 	if (!existing) {
 		return NextResponse.json({ message: 'Token not found' }, { status: 404 });
 	}

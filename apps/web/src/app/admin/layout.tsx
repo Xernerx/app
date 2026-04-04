@@ -10,7 +10,7 @@ import { redirect } from 'next/navigation';
 export default async function Layout({ children }: { children: React.ReactNode }) {
 	const session = await getServerSession(authOptions);
 
-	if (session?.role !== Roles.Owner && session?.role !== Roles.Admin) return redirect('/');
+	if (session?.role !== Roles.Owner && session?.role !== Roles.Admin) return redirect('/'); // FIX THIS AT SOME POINT
 
 	return <>{children}</>;
 }

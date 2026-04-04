@@ -9,11 +9,13 @@ import { useEffect } from 'react';
 import { usePlatform } from '@/providers/PlatformProvider';
 import { useSession } from 'next-auth/react';
 import { useSidebar } from '@/providers/SidebarProvider';
+import { useUser } from '@/providers/UserProvider';
 
 export default function Home() {
 	const { type } = usePlatform();
 	const { setNavItems, clearNavItems, show } = useSidebar();
 	const { data: session } = useSession();
+	const user = useUser();
 
 	useEffect(() => {
 		show();
@@ -24,7 +26,7 @@ export default function Home() {
 			{ label: 'Portal', icon: <Layers />, href: '/portal' },
 		];
 
-		if (session?.role === Roles.Owner || session?.role === Roles.Admin) items.push({ label: 'Admin', icon: <ShieldCheck />, href: '/admin' });
+		if (user?.role === Roles.Owner || user?.role === Roles.Admin) items.push({ label: 'Admin', icon: <ShieldCheck />, href: '/admin' });
 
 		setNavItems(items);
 

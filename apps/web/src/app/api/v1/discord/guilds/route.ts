@@ -42,15 +42,15 @@ function canManageGuild(permissions: string) {
 }
 
 export async function GET() {
-	const session = await getServerSession(authOptions);
+	const session: any = await getServerSession(authOptions);
 	const accessToken = session?.accessToken;
 
-	if (!accessToken || !session?.id) {
+	if (!accessToken || !session?.user?.id) {
 		return NextResponse.json({ message: 'Unauthorized.' }, { status: 401 });
 	}
 
 	const now = Date.now();
-	const cached = guildCache.get(session.id);
+	const cached = guildCache.get(session?.user?.id);
 
 	// ✅ USE CACHE FIRST
 	if (cached && cached.expiresAt > now) {
@@ -115,7 +115,7 @@ export async function GET() {
 
 		const filteredGuilds = data.filter((guild) => canManageGuild(guild.permissions));
 
-		guildCache.set(session.id, {
+		guildCache.set(session?.user?.id, {
 			data: filteredGuilds,
 			cachedAt: now,
 			expiresAt: now + CACHE_TTL,

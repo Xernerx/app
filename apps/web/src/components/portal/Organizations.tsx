@@ -7,9 +7,12 @@ import { useEffect, useState } from 'react';
 import { Plus } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { useSession } from 'next-auth/react';
+import { useUser } from '@/providers/UserProvider';
 
 export default function Organizations() {
 	const { data: session } = useSession();
+	const user = useUser();
+
 	const [orgs, setOrgs] = useState<any[]>([]);
 	const [loading, setLoading] = useState(true);
 	const [selectedOrgId, setSelectedOrgId] = useState<string | null>(null);
@@ -49,7 +52,7 @@ export default function Organizations() {
 					await fetch(`/api/v1/organizations/${selectedOrgId}/profile`, {
 						method: 'POST',
 						headers: { 'Content-Type': 'application/json' },
-						body: JSON.stringify({ name: `${session?.global_name || session?.username}'s Organization` }),
+						body: JSON.stringify({ name: `${user?.global_name || user?.username}'s Organization` }),
 					});
 
 					const retry = await fetch(`/api/v1/organizations/${selectedOrgId}/profile`);
@@ -71,7 +74,7 @@ export default function Organizations() {
 		const res = await fetch(`/api/v1/organizations/create/profile`, {
 			method: 'POST',
 			headers: { 'Content-Type': 'application/json' },
-			body: JSON.stringify({ name: `${session?.global_name || session?.username}'s Organization` }),
+			body: JSON.stringify({ name: `${user?.global_name || user?.username}'s Organization` }),
 		});
 
 		const created = await res.json();
@@ -92,7 +95,7 @@ export default function Organizations() {
 		<div className='flex flex-col gap-4'>
 			{/* selector */}
 			<div className='flex gap-2 overflow-x-auto overflow-y-hidden'>
-				{orgs.map((org) => {
+				{orgs?.map((org) => {
 					const isSelected = selectedOrgId === org._id;
 
 					return (
