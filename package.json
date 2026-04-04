@@ -2,7 +2,7 @@
 	"name": "xernerx",
 	"private": false,
 	"description": "App",
-	"version": "1.1.17",
+	"version": "1.1.18",
 	"author": "Dummi",
 	"scripts": {
 		"dev": "pnpm i && pnpm --parallel --filter ./apps/* dev",
