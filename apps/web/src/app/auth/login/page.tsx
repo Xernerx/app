@@ -15,7 +15,7 @@ export default function SignInPage() {
 
 	async function handleLogin() {
 		setLoading(true);
-		await signIn('discord');
+		await signIn('discord', { callbackUrl: '/' });
 	}
 
 	useEffect(() => {
