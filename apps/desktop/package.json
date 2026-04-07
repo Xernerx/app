@@ -1,6 +1,6 @@
 {
 	"name": "xernerx-app",
-	"version": "1.1.35",
+	"version": "1.1.36",
 	"description": "Xernerx App",
 	"main": "dist/main.js",
 	"type": "module",
