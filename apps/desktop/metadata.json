@@ -1,5 +1,5 @@
 {
-	"debug": false,
+	"debug": true,
 	"hardwareAcceleration": true,
 	"startMinimized": false,
 	"startMaximized": false,

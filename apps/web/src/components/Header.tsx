@@ -23,6 +23,7 @@ export default function Header() {
 	const [url, setUrl] = useState(false);
 	const [shortcut, setShortcut] = useState(false);
 	const [path, setPath] = useState('');
+	const [version, setVersion] = useState('');
 
 	async function toggleMaximize() {
 		await window.electron?.maximize();
@@ -55,6 +56,10 @@ export default function Header() {
 	/* --------------------------------------------- */
 
 	useEffect(() => {
+		fetch('/api/v1/status')
+			.then((res) => res.json())
+			.then((data) => setVersion(data.server.version));
+
 		function handler(e: KeyboardEvent) {
 			if (e.ctrlKey && e.key === '`') {
 				e.preventDefault();
@@ -294,7 +299,6 @@ export default function Header() {
 								boxShadow: '0 20px 60px rgba(0,0,0,0.5)',
 							}}>
 							<h2 style={{ marginBottom: 20, fontSize: 18 }}>Keyboard Shortcuts</h2>
-
 							<div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
 								{Object.entries(grouped).map(([category, items]) => (
 									<div key={category}>
@@ -345,6 +349,19 @@ export default function Header() {
 										</div>
 									</div>
 								))}
+							</div>
+							<div
+								className='--text-(--muted) flex gap-2'
+								style={{
+									marginTop: 10,
+									marginBottom: 10,
+									fontSize: 10,
+									color: 'var(--text-muted)',
+									textTransform: 'uppercase',
+									letterSpacing: 1,
+								}}>
+								{window?.electron?.version && <p>App {window.electron?.version} - </p>}
+								<p>Next {version}</p>
 							</div>
 						</motion.div>
 					</motion.div>

@@ -2,6 +2,7 @@
 
 import './globals.css';
 
+import { DebugProvider } from '@/providers/DebugProvider';
 import Header from '@/components/Header';
 import Main from '@/components/Main';
 import type { Metadata } from 'next';
@@ -66,25 +67,27 @@ try {
 				<SessionProvider session={session}>
 					<UserProvider>
 						<ThemeProvider>
-							<ToastProvider>
-								<PlatformProvider>
-									<div id='app-root' className='h-full w-full overflow-hidden bg-(--bg-main)'>
-										<SidebarProvider>
-											<div className='flex flex-col h-full'>
-												{/* Header */}
-												<Header />
+							<DebugProvider>
+								<ToastProvider>
+									<PlatformProvider>
+										<div id='app-root' className='h-full w-full overflow-hidden bg-(--bg-main)'>
+											<SidebarProvider>
+												<div className='flex flex-col h-full'>
+													{/* Header */}
+													<Header />
 
-												{/* Sidebar + Main */}
-												<div className='flex flex-1 overflow-hidden'>
-													<Sidebar />
+													{/* Sidebar + Main */}
+													<div className='flex flex-1 overflow-hidden'>
+														<Sidebar />
 
-													<Main>{children}</Main>
+														<Main>{children}</Main>
+													</div>
 												</div>
-											</div>
-										</SidebarProvider>
-									</div>
-								</PlatformProvider>
-							</ToastProvider>
+											</SidebarProvider>
+										</div>
+									</PlatformProvider>
+								</ToastProvider>
+							</DebugProvider>
 						</ThemeProvider>
 					</UserProvider>
 				</SessionProvider>

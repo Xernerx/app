@@ -145,7 +145,6 @@ export default function Home() {
 			</motion.div>
 
 			{/* SESSION NOTICE */}
-			{/* SESSION NOTICE */}
 			{!session && (
 				<motion.a
 					href='/api/auth/signin'

@@ -1,6 +1,19 @@
 /** @format */
 
 const { contextBridge, ipcRenderer } = require('electron');
+const { version } = require('../package.json');
+
+const fs = require('fs');
+const path = require('path');
+
+let buffer;
+try {
+	buffer = fs.readFileSync(path.join(process.resourcesPath, 'metadata.json'));
+} catch {
+	buffer = fs.readFileSync(path.join(process.cwd(), 'metadata.json'));
+}
+
+const metadata = JSON.parse(buffer.toString());
 
 contextBridge.exposeInMainWorld('electron', {
 	minimize: () => ipcRenderer.send('window:minimize'),
@@ -17,4 +30,6 @@ contextBridge.exposeInMainWorld('electron', {
 			callback(message);
 		});
 	},
+	version,
+	metadata,
 });

@@ -9,6 +9,8 @@ declare global {
 			maximize: () => void;
 			close: () => void;
 			isMaximized: () => Promise<boolean>;
+			version: string;
+			metadata: any;
 		};
 	}
 }

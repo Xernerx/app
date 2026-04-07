@@ -30,7 +30,7 @@ type Metadata = {
 	startOnBoot?: boolean;
 };
 
-function getMetadata(): Metadata {
+export function getMetadata(): Metadata {
 	try {
 		const file = app.isPackaged ? path.join(process.resourcesPath, 'metadata.json') : path.join(process.cwd(), 'metadata.json');
 
