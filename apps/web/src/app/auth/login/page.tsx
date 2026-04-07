@@ -9,7 +9,7 @@ import Image from 'next/image';
 import { motion } from 'framer-motion';
 
 export default function SignInPage() {
-	const { data: session } = useSession();
+	const { data: session, status } = useSession();
 
 	const [loading, setLoading] = useState(false);
 
@@ -18,9 +18,9 @@ export default function SignInPage() {
 		await signIn('discord');
 	}
 
-	// useEffect(() => {
-	// 	if (session) window.location.replace('/');
-	// }, [session]);
+	useEffect(() => {
+		if (status == 'authenticated' && session) window.location.replace('/');
+	}, [session]);
 
 	return (
 		<div className='h-full flex items-center justify-center px-6'>
