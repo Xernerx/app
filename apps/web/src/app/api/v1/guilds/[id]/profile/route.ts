@@ -34,6 +34,8 @@ const guildSchema = z.object({
 
 const guildUpdateSchema = guildSchema.partial().omit({ id: true });
 
+export const dynamic = 'force-dynamic';
+
 /* ========================= GET ========================= */
 
 export async function GET(_: NextRequest, { params }: { params: Promise<{ id: string }> }) {

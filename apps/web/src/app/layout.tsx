@@ -10,6 +10,7 @@ import { PlatformProvider } from '@/providers/PlatformProvider';
 import { SessionProvider } from '@/providers/SessionProvider';
 import Sidebar from '@/components/Sidebar';
 import { SidebarProvider } from '@/providers/SidebarProvider';
+import { SupportProvider } from '@/providers/SupportProvider';
 import { ThemeProvider } from '@/providers/ThemeProvider';
 import { ToastProvider } from '@/providers/ToastProvider';
 import { UserProvider } from '@/providers/UserProvider';
@@ -64,33 +65,35 @@ try {
 				/>
 			</head>
 			<body className='h-full'>
-				<SessionProvider session={session}>
-					<UserProvider>
-						<ThemeProvider>
-							<DebugProvider>
-								<ToastProvider>
-									<PlatformProvider>
-										<div id='app-root' className='h-full w-full overflow-hidden bg-(--bg-main)'>
-											<SidebarProvider>
-												<div className='flex flex-col h-full'>
-													{/* Header */}
-													<Header />
+				<ToastProvider>
+					<SessionProvider session={session}>
+						<UserProvider>
+							<ThemeProvider>
+								<DebugProvider>
+									<SupportProvider>
+										<PlatformProvider>
+											<div id='app-root' className='h-full w-full overflow-hidden bg-(--bg-main)'>
+												<SidebarProvider>
+													<div className='flex flex-col h-full'>
+														{/* Header */}
+														<Header />
 
-													{/* Sidebar + Main */}
-													<div className='flex flex-1 overflow-hidden'>
-														<Sidebar />
+														{/* Sidebar + Main */}
+														<div className='flex flex-1 overflow-hidden'>
+															<Sidebar />
 
-														<Main>{children}</Main>
+															<Main>{children}</Main>
+														</div>
 													</div>
-												</div>
-											</SidebarProvider>
-										</div>
-									</PlatformProvider>
-								</ToastProvider>
-							</DebugProvider>
-						</ThemeProvider>
-					</UserProvider>
-				</SessionProvider>
+												</SidebarProvider>
+											</div>
+										</PlatformProvider>
+									</SupportProvider>
+								</DebugProvider>
+							</ThemeProvider>
+						</UserProvider>
+					</SessionProvider>
+				</ToastProvider>
 			</body>
 		</html>
 	);

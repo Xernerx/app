@@ -2,20 +2,24 @@
 'use client';
 
 import { Compass, Layers, LayoutDashboard, Search, Shield, ShieldCheck } from 'lucide-react';
+import { useEffect, useState } from 'react';
 
 import { Roles } from '@/lib/roles';
 import { motion } from 'framer-motion';
-import { useEffect } from 'react';
 import { usePlatform } from '@/providers/PlatformProvider';
 import { useSession } from 'next-auth/react';
 import { useSidebar } from '@/providers/SidebarProvider';
+import { useToast } from '@/providers/ToastProvider';
 import { useUser } from '@/providers/UserProvider';
 
 export default function Home() {
 	const { type } = usePlatform();
 	const { setNavItems, clearNavItems, show } = useSidebar();
 	const { data: session } = useSession();
+	const { toast } = useToast();
 	const user = useUser();
+
+	const [support, setSupport] = useState(false);
 
 	useEffect(() => {
 		show();
@@ -32,6 +36,23 @@ export default function Home() {
 
 		return () => clearNavItems();
 	}, []);
+
+	useEffect(() => {
+		(async () => {
+			const response = await fetch('/api/v1/discord/guilds').then((res) => res.json());
+
+			const guild = response.guilds?.find((g) => g.id === '687429190165069838');
+
+			if (session) setSupport(!guild);
+		})();
+	}, [session]);
+
+	const handleJoin = async () => {
+		const response = await fetch('/api/v1/guilds/687429190165069838/join', { method: 'PUT' });
+
+		if (response.ok) toast((await response.json()).message, 'success');
+		if (!response.ok) toast((await response.json()).message, 'error');
+	};
 
 	return (
 		<div className='flex flex-col gap-6'>
@@ -226,6 +247,47 @@ export default function Home() {
 						</span>
 					</div>
 				</motion.a>
+			)}
+
+			{support && (
+				<motion.button
+					onClick={handleJoin}
+					initial={{ opacity: 0, y: 10 }}
+					animate={{ opacity: 1, y: 0 }}
+					whileHover={{ scale: 1.01 }}
+					className='group relative overflow-hidden rounded-2xl border px-4 py-4 text-sm transition'
+					style={{
+						borderColor: 'color-mix(in srgb, var(--accent) 22%, var(--border))',
+						background: 'color-mix(in srgb, var(--accent) 10%, var(--bg-panel))',
+					}}>
+					{/* glow */}
+					<div
+						className='absolute inset-0 opacity-0 transition group-hover:opacity-100'
+						style={{
+							background: 'radial-gradient(circle at top right, color-mix(in srgb, var(--accent) 18%, transparent), transparent 45%)',
+						}}
+					/>
+
+					<div className='relative flex items-center justify-between gap-4'>
+						<div className='flex flex-col'>
+							<span className='font-medium' style={{ color: 'var(--text-main)' }}>
+								Join Support server
+							</span>
+
+							<span
+								className='text-xs'
+								style={{
+									color: 'color-mix(in srgb, var(--text-main) 65%, transparent)',
+								}}>
+								Get help, information and updates about our services.
+							</span>
+						</div>
+
+						<span className='text-xs font-medium opacity-70 transition group-hover:opacity-100' style={{ color: 'var(--text-main)' }}>
+							Join →
+						</span>
+					</div>
+				</motion.button>
 			)}
 		</div>
 	);

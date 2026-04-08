@@ -313,7 +313,7 @@ export default function General({ id, name }: { id?: string; name?: string }) {
 								}}>
 								This data is derived directly from your server. To sync and populate it, the{' '}
 								<a
-									href=''
+									href='/invite/xernerx'
 									className='font-medium underline underline-offset-4 transition'
 									style={{
 										color: 'var(--text-main)',
