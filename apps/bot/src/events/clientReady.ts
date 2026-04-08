@@ -28,7 +28,9 @@ export default class ClientReadyEvent extends EventBuilder {
 					locale: guild.preferredLocale,
 					bot: true,
 				}),
-			}).then((res) => res.json());
+			})
+				.then((res) => res.json())
+				.catch(() => null);
 		});
 	}
 

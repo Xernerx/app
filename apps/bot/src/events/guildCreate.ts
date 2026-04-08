@@ -26,6 +26,8 @@ export default class GuildCreateEvent extends EventBuilder {
 
 				bot: true,
 			}),
-		}).then((res) => res.json());
+		})
+			.then((res) => res.json())
+			.catch(() => null);
 	}
 }
