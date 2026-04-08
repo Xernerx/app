@@ -7,6 +7,7 @@
 	"scripts": {
 		"dev": "pnpm i && tsc-watch --onSuccess \"node .\"",
 		"build": "pnpm i && tsc",
+		"start": "pnpm i && node .",
 		"patch": "npm version patch",
 		"minor": "npm version minor",
 		"major": "npm version major"
