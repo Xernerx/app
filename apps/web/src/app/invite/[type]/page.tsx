@@ -17,11 +17,11 @@ type Invite = {
 
 export default function Page({ params }: { params: Promise<{ type: string }> }) {
 	const invites: Record<string, Invite> = {
-		'virtue': { link: 'https://discord.com/oauth2/authorize?client_id=1484880634844287138&permissions=4503874774883392&integration_type=0&scope=bot+applications.commands' },
-		'xernerx': { link: 'https://discord.com/oauth2/authorize?client_id=1319029435655000234&permissions=0&integration_type=0&scope=bot+applications.commands' },
-		'zodiac': { link: 'https://discord.com/oauth2/authorize?client_id=950251264095162418&permissions=0&integration_type=0&scope=bot+applications.commands' },
-		'metamorphosis': { link: 'https://discord.com/oauth2/authorize?client_id=881678826906730547&permissions=0&integration_type=0&scope=bot+applications.commands', shortName: 'meta' },
-		'to-do list bot': {
+		'Virtue': { link: 'https://discord.com/oauth2/authorize?client_id=1484880634844287138&permissions=4503874774883392&integration_type=0&scope=bot+applications.commands' },
+		'Xernerx': { link: 'https://discord.com/oauth2/authorize?client_id=1319029435655000234&permissions=0&integration_type=0&scope=bot+applications.commands' },
+		'Zodiac': { link: 'https://discord.com/oauth2/authorize?client_id=950251264095162418&permissions=0&integration_type=0&scope=bot+applications.commands' },
+		'Metamorphosis': { link: 'https://discord.com/oauth2/authorize?client_id=881678826906730547&permissions=0&integration_type=0&scope=bot+applications.commands', shortName: 'meta' },
+		'To-Do List Bot': {
 			link: 'https://discord.com/oauth2/authorize?client_id=782105629572464652&permissions=3263488&response_type=code&redirect_uri=https%3A%2F%2Fportaldevelopment.net%2Fbots%2Ftodolist&scope=bot%20applications.commands',
 			shortName: 'tdl',
 		},
