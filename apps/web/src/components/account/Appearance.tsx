@@ -103,11 +103,17 @@ export default function Appearance() {
 						{colorButton('#eab308')}
 						{colorButton('#84cc16')}
 						{colorButton('#22c55e')}
+						{colorButton('#10b981')}
 						{colorButton('#14b8a6')}
 						{colorButton('#06b6d4')}
+						{colorButton('#0ea5e9')}
 						{colorButton('#3b82f6')}
 						{colorButton('#6366f1')}
+						{colorButton('#8b7cf6')}
 						{colorButton('#8b5cf6')}
+						{colorButton('#a855f7')}
+						{colorButton('#ec4899')}
+						{colorButton('#f43f5e')}
 						{user?.accent_color && colorButton('#' + user?.accent_color.toString(16).padStart(6, '0'))}
 					</div>
 					<div className='flex flex-wrap gap-3'>
@@ -116,12 +122,18 @@ export default function Appearance() {
 						{colorButton('#b45309')}
 						{colorButton('#a16207')}
 						{colorButton('#4d7c0f')}
+						{colorButton('#065f46')}
 						{colorButton('#15803d')}
 						{colorButton('#0f766e')}
 						{colorButton('#0e7490')}
+						{colorButton('#0369a1')}
 						{colorButton('#1d4ed8')}
 						{colorButton('#4338ca')}
+						{colorButton('#7a6be6')}
 						{colorButton('#6d28d9')}
+						{colorButton('#7e22ce')}
+						{colorButton('#be185d')}
+						{colorButton('#9f1239')}
 						{user?.banner_color && colorButton(user?.banner_color)}
 					</div>
 				</div>

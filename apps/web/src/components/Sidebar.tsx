@@ -120,7 +120,10 @@ export default function Sidebar() {
 								color: active ? '#fff' : 'var(--text-main)',
 							}}
 							onMouseEnter={(e) => {
-								if (!active) e.currentTarget.style.background = 'var(--accent-hover)';
+								if (!active) {
+									e.currentTarget.style.background = 'var(--accent-hover)';
+									e.currentTarget.style.cursor = 'pointer';
+								}
 							}}
 							onMouseLeave={(e) => {
 								if (!active) e.currentTarget.style.background = 'transparent';
@@ -151,7 +154,7 @@ export default function Sidebar() {
 								)}
 
 								<div className='relative flex items-center justify-between gap-2'>
-									<button ref={profileButtonRef} onClick={() => setOpenProfile(!openProfile)} className='flex items-center gap-3 group w-full text-left'>
+									<button ref={profileButtonRef} onClick={() => setOpenProfile(!openProfile)} className='flex items-center gap-3 group w-full text-left cursor-pointer'>
 										<div className='relative'>
 											<img src={`https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.png`} className='w-10 h-10 rounded-full' />
 											{avatarDecoration && <img src={avatarDecoration} className='absolute inset-0 scale-[1.15] pointer-events-none' />}
@@ -164,7 +167,7 @@ export default function Sidebar() {
 										</div>
 									</button>
 
-									<button onClick={() => router.push('/account')} className='p-2 rounded-lg hover:bg-(--accent-hover) transition'>
+									<button onClick={() => router.push('/account')} className='p-2 rounded-lg cursor-pointer hover:bg-(--accent-hover) transition'>
 										<Settings size={16} />
 									</button>
 								</div>
@@ -184,7 +187,7 @@ export default function Sidebar() {
 											setProfileMenu(false);
 											setOpenProfile(true);
 										}}
-										className='p-2 rounded-md hover:bg-(--accent-hover)'>
+										className='p-2 rounded-md cursor-pointer hover:bg-(--accent-hover)'>
 										<IdCard size={18} />
 									</button>
 
@@ -193,7 +196,7 @@ export default function Sidebar() {
 											setProfileMenu(false);
 											router.push('/account');
 										}}
-										className='p-2 rounded-md  hover:bg-(--accent-hover)'>
+										className='p-2 rounded-md cursor-pointer hover:bg-(--accent-hover)'>
 										<Settings size={18} />
 									</button>
 								</motion.div>
@@ -202,7 +205,7 @@ export default function Sidebar() {
 
 						{state !== 'open' && (
 							<div className='flex justify-center'>
-								<button ref={profileButtonRef} onClick={() => setProfileMenu(!profileMenu)} className='relative'>
+								<button ref={profileButtonRef} onClick={() => setProfileMenu(!profileMenu)} className='relative cursor-pointer'>
 									<img src={`https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.png`} className='w-10 h-10 rounded-full' />
 									{avatarDecoration && <img src={avatarDecoration} className='absolute inset-0 scale-[1.15] pointer-events-none' />}
 								</button>
@@ -246,7 +249,7 @@ export default function Sidebar() {
 
 									<button
 										onClick={() => navigator.clipboard.writeText(user.id)}
-										className='flex items-center justify-center gap-2 w-full text-xs bg-black/30 px-3 py-2 rounded-md  hover:bg-(--accent-hover) transition'>
+										className='flex items-center justify-center gap-2 w-full text-xs bg-black/30 px-3 py-2 rounded-md cursor-pointer hover:bg-(--accent-hover) transition'>
 										<IdCard size={14} />
 										Copy ID
 									</button>
@@ -279,7 +282,7 @@ export default function Sidebar() {
 												</span>
 
 												<div className='flex gap-2'>
-													<a style={{ color: 'var(--accent)' }} className='p-1 rounded  hover:bg-(--accent-hover) text-blue-400' href={status.urls?.https}>
+													<a style={{ color: 'var(--accent)' }} className='p-1 rounded cursor-pointer hover:bg-(--accent-hover) text-blue-400' href={status.urls?.https}>
 														<Globe size={14} />
 													</a>
 
@@ -421,8 +424,8 @@ function Nav({ icon, label, onClick }: { icon: React.ReactNode; label: string; o
 			whileHover={{ x: 4 }}
 			whileTap={{ scale: 0.97 }}
 			onClick={onClick}
-			className='group flex items-center gap-3 px-3 py-2 rounded-lg text-sm w-full transition bg-transparent hover:bg-(--accent-hover)'>
-			<div className='flex items-center justify-center w-8 h-8 rounded-md  transition'>
+			className='group flex items-center gap-3 px-3 py-2 rounded-lg text-sm w-full transition bg-transparent cursor-pointer hover:bg-(--accent-hover)'>
+			<div className='flex items-center justify-center w-8 h-8 rounded-md transition'>
 				<span className='text-slate-300'>{icon}</span>
 			</div>
 
@@ -437,7 +440,7 @@ function TabButton({ active, onClick, icon, position }: { active: boolean; onCli
 	return (
 		<button
 			onClick={onClick}
-			className={`flex-1 flex justify-center items-center py-2 transition relative ${active ? 'bg-transparent' : `border border-white/10 border-b-0 ${inactiveShape} bg-[rgba(0,0,0,0.2)] hover:bg-(--accent-hover)`}`}>
+			className={`flex-1 flex justify-center items-center py-2 transition relative ${active ? 'bg-transparent' : `border border-white/10 border-b-0 ${inactiveShape} bg-[rgba(0,0,0,0.2)] cursor-pointer hover:bg-(--accent-hover)`}`}>
 			<span style={{ color: active ? 'var(--accent)' : 'var(--text-muted)' }}>{icon}</span>
 		</button>
 	);

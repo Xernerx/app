@@ -50,6 +50,20 @@ const CHANNEL = 'xernerx-theme-sync';
 
 const ThemeContext = createContext<ThemeContextType | null>(null);
 
+function darkenColor(hex: string, amount: number) {
+	const num = parseInt(hex.replace('#', ''), 16);
+
+	let r = (num >> 16) & 255;
+	let g = (num >> 8) & 255;
+	let b = num & 255;
+
+	r = Math.max(0, Math.floor(r * (1 - amount)));
+	g = Math.max(0, Math.floor(g * (1 - amount)));
+	b = Math.max(0, Math.floor(b * (1 - amount)));
+
+	return `#${((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1)}`;
+}
+
 function applyTheme(state: ThemeState) {
 	const root = document.documentElement;
 
@@ -61,6 +75,10 @@ function applyTheme(state: ThemeState) {
 
 	root.dataset.theme = resolved;
 	root.style.setProperty('--accent', state.accentColor);
+
+	// generate hover color (slightly darker)
+	const accentHover = darkenColor(state.accentColor, 0.2);
+	root.style.setProperty('--accent-hover', accentHover);
 
 	const map: Record<BackgroundStyle, string> = {
 		'nebula': 'var(--bg-nebula)',
