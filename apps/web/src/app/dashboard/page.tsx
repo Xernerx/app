@@ -69,20 +69,20 @@ export default function Page() {
 				view: 'metamorphosis',
 			},
 			{
-				label: 'Zodiac',
-				onClick: () => setView('zodiac'),
-				icon: (
-					<Image className='h-6 w-auto rounded-full' src='https://cdn.discordapp.com/avatars/950251264095162418/07a9e067135a204bb0fdc796b44bda63.webp?size=4096' alt='Zodiac' width={80} height={80} />
-				),
-				view: 'zodiac',
-			},
-			{
 				label: 'Virtue',
 				onClick: () => setView('virtue'),
 				icon: (
 					<Image className='h-6 w-auto rounded-full' src='https://cdn.discordapp.com/avatars/1484880634844287138/bb9495686b0bab5efa38119c8e2f0bb3.webp?size=4096' alt='Virtue' width={80} height={80} />
 				),
 				view: 'virtue',
+			},
+			{
+				label: 'Zodiac',
+				onClick: () => setView('zodiac'),
+				icon: (
+					<Image className='h-6 w-auto rounded-full' src='https://cdn.discordapp.com/avatars/950251264095162418/07a9e067135a204bb0fdc796b44bda63.webp?size=4096' alt='Zodiac' width={80} height={80} />
+				),
+				view: 'zodiac',
 			},
 		]);
 

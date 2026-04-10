@@ -37,6 +37,7 @@ export default function Virtue({ id }: { id?: string }) {
 
 		(async () => {
 			try {
+				setProfile(null);
 				setLoading(true);
 
 				const res = await fetch(`/api/v1/virtue/guilds/${id}`);

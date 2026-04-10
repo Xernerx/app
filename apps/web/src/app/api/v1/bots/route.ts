@@ -12,6 +12,7 @@ export async function GET(request: NextRequest) {
 	const url = new URL(request.url);
 	const params = new URLSearchParams(url.search);
 	const all = !!params.get('all');
+	const privacy = params.get('privacy');
 
 	const session: any = await getServerSession(authOptions);
 
@@ -22,8 +23,9 @@ export async function GET(request: NextRequest) {
 	const filter: Record<string, string> = {};
 
 	if (!all) filter.owners = id;
+	if (privacy) filter.privacy = privacy;
 
-	const bots = await db.bot.find(filter).select('id');
+	const bots = await db.bot.find(filter).select('id description privacy');
 
 	return NextResponse.json(bots);
 }

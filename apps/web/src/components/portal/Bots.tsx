@@ -39,7 +39,7 @@ export default function Bots() {
 
 				const users = await Promise.all(
 					botsData.map((bot: any) =>
-						fetch(`/api/v1/discord/users/${bot.id}`)
+						fetch(`/api/v1/discord/users/${bot.id}/profile`)
 							.then((res) => res.json())
 							.then((data) => data.user)
 							.catch(() => null)

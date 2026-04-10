@@ -2,7 +2,7 @@
 
 'use client';
 
-import { createContext, useContext, useState } from 'react';
+import { createContext, useContext, useEffect, useState } from 'react';
 
 export type SidebarNavItem = {
 	label: string;
@@ -30,8 +30,13 @@ const SidebarContext = createContext<SidebarContextType | null>(null);
 
 export function SidebarProvider({ children }: { children: React.ReactNode }) {
 	const [state, setState] = useState<'open' | 'closed' | 'hidden'>('open');
+	const [prevState, setPrevState] = useState<'open' | 'closed'>('open');
 	const [navItems, setNavItems] = useState<SidebarNavItem[]>([]);
 	const [view, setView] = useState<string | null>(null);
+
+	useEffect(() => {
+		if (state !== 'hidden') setPrevState(state);
+	}, [state]);
 
 	return (
 		<SidebarContext.Provider
@@ -39,7 +44,7 @@ export function SidebarProvider({ children }: { children: React.ReactNode }) {
 				state,
 				toggle: () => setState((s) => (s === 'open' ? 'closed' : 'open')),
 				hide: () => setState('hidden'),
-				show: () => setState('open'),
+				show: () => setState(state === 'hidden' ? prevState : state),
 
 				navItems,
 				setNavItems,

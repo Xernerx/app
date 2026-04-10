@@ -5,6 +5,7 @@
 import { NextResponse } from 'next/server';
 import mongoose from 'mongoose';
 import os from 'os';
+import { version } from '@/../package.json' with { type: 'json' };
 
 const startTime = Date.now();
 
@@ -100,7 +101,7 @@ export async function GET() {
 		eventLoopLag,
 		time: new Date().toLocaleTimeString(),
 		timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
-		version: process.env.npm_package_version ?? '0.0.0',
+		version: process.env?.npm_package_version ?? version ?? '0.0.0',
 	};
 
 	const database = { ...mongo, status: mongo.mongodb === 'connected' ? 'ready' : 'degraded' };
