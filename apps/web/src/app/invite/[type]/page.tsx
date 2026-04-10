@@ -10,12 +10,21 @@ import { redirect } from 'next/navigation';
 import { useSidebar } from '@/providers/SidebarProvider';
 import { useToast } from '@/providers/ToastProvider';
 
+type Invite = {
+	link: string;
+	shortName?: string;
+};
+
 export default function Page({ params }: { params: Promise<{ type: string }> }) {
-	const invites: Record<string, string> = {
-		virtue: 'https://discord.com/oauth2/authorize?client_id=1484880634844287138&permissions=4503874774883392&integration_type=0&scope=bot+applications.commands',
-		xernerx: 'https://discord.com/oauth2/authorize?client_id=1319029435655000234&permissions=0&integration_type=0&scope=bot+applications.commands',
-		zodiac: 'https://discord.com/oauth2/authorize?client_id=950251264095162418&permissions=0&integration_type=0&scope=bot+applications.commands',
-		metamorphosis: 'https://discord.com/oauth2/authorize?client_id=881678826906730547&permissions=0&integration_type=0&scope=bot+applications.commands',
+	const invites: Record<string, Invite> = {
+		'virtue': { link: 'https://discord.com/oauth2/authorize?client_id=1484880634844287138&permissions=4503874774883392&integration_type=0&scope=bot+applications.commands' },
+		'xernerx': { link: 'https://discord.com/oauth2/authorize?client_id=1319029435655000234&permissions=0&integration_type=0&scope=bot+applications.commands' },
+		'zodiac': { link: 'https://discord.com/oauth2/authorize?client_id=950251264095162418&permissions=0&integration_type=0&scope=bot+applications.commands' },
+		'metamorphosis': { link: 'https://discord.com/oauth2/authorize?client_id=881678826906730547&permissions=0&integration_type=0&scope=bot+applications.commands', shortName: 'meta' },
+		'to-do list bot': {
+			link: 'https://discord.com/oauth2/authorize?client_id=782105629572464652&permissions=3263488&response_type=code&redirect_uri=https%3A%2F%2Fportaldevelopment.net%2Fbots%2Ftodolist&scope=bot%20applications.commands',
+			shortName: 'tdl',
+		},
 	};
 
 	const { hide } = useSidebar();
@@ -28,11 +37,15 @@ export default function Page({ params }: { params: Promise<{ type: string }> }) 
 		hide();
 
 		(async () => {
-			const t = (await params).type;
+			const t = (await params).type?.toLowerCase();
 			setType(t);
 
-			if (invites[t]) {
-				redirect(invites[t]);
+			const entry = Object.entries(invites).find(([key, value]) => {
+				return key.toLowerCase() === t || value.shortName?.toLowerCase() === t;
+			});
+
+			if (entry && entry[1].link) {
+				redirect(entry[1].link);
 			}
 		})();
 	}, []);
@@ -128,7 +141,7 @@ export default function Page({ params }: { params: Promise<{ type: string }> }) 
 											<motion.button
 												whileHover={!disabled ? { scale: 1.02, y: -2 } : {}}
 												whileTap={!disabled ? { scale: 0.98 } : {}}
-												onClick={() => !disabled && redirect(invite)}
+												onClick={() => !disabled && redirect(invite.link)}
 												style={{
 													flex: 1,
 													display: 'flex',
@@ -149,7 +162,7 @@ export default function Page({ params }: { params: Promise<{ type: string }> }) 
 											<motion.button
 												whileHover={!disabled ? { scale: 1.1 } : {}}
 												whileTap={!disabled ? { scale: 0.9 } : {}}
-												onClick={() => copyLink(key, invite)}
+												onClick={() => copyLink(key, invite.link)}
 												style={{
 													display: 'flex',
 													alignItems: 'center',
