@@ -21,7 +21,8 @@ export default function Page() {
 	useEffect(() => {
 		const permissions: string[] = [];
 		const items: any = [];
-		setView('overview');
+
+		setView(['overview', 'console', 'bots', 'servers', 'users', 'invite'].includes(view!) ? view : 'overview');
 
 		if (user.role === Roles.Owner) permissions.push('owner', 'admin', 'moderator');
 		if (user.role === Roles.Admin) permissions.push('admin', 'moderator');
