@@ -1,6 +1,7 @@
 /** @format */
 
 import './globals.css';
+import '@/lib/console';
 
 import { DebugProvider } from '@/providers/DebugProvider';
 import Header from '@/components/Header';
@@ -16,6 +17,8 @@ import { ToastProvider } from '@/providers/ToastProvider';
 import { UserProvider } from '@/providers/UserProvider';
 import { authOptions } from '@/lib/schema/auth';
 import { getServerSession } from 'next-auth';
+
+// somewhere server-side (layout, entry, etc)
 
 export const metadata: Metadata = {
 	title: 'Xernerx',

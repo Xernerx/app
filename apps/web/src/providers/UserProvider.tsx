@@ -4,6 +4,9 @@
 
 import { createContext, useContext, useEffect, useState } from 'react';
 
+import { authOptions } from '@/lib/schema/auth';
+import database from '@/lib/database';
+import { getServerSession } from 'next-auth';
 import { useSession } from 'next-auth/react';
 import { useToast } from './ToastProvider';
 

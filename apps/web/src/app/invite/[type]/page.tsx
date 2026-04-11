@@ -11,27 +11,29 @@ import { useSidebar } from '@/providers/SidebarProvider';
 import { useToast } from '@/providers/ToastProvider';
 
 type Invite = {
-	link: string;
+	id: string;
+	name: string;
 	shortName?: string;
+	permissions: string;
+};
+
+type Bot = {
+	id: string;
+	username: string;
+	avatar: string;
 };
 
 export default function Page({ params }: { params: Promise<{ type: string }> }) {
-	const invites: Record<string, Invite> = {
-		'Virtue': { link: 'https://discord.com/oauth2/authorize?client_id=1484880634844287138&permissions=4503874774883392&integration_type=0&scope=bot+applications.commands' },
-		'Xernerx': { link: 'https://discord.com/oauth2/authorize?client_id=1319029435655000234&permissions=0&integration_type=0&scope=bot+applications.commands' },
-		'Zodiac': { link: 'https://discord.com/oauth2/authorize?client_id=950251264095162418&permissions=0&integration_type=0&scope=bot+applications.commands' },
-		'Metamorphosis': { link: 'https://discord.com/oauth2/authorize?client_id=881678826906730547&permissions=0&integration_type=0&scope=bot+applications.commands', shortName: 'meta' },
-		'To-Do List Bot': {
-			link: 'https://discord.com/oauth2/authorize?client_id=782105629572464652&permissions=3263488&response_type=code&redirect_uri=https%3A%2F%2Fportaldevelopment.net%2Fbots%2Ftodolist&scope=bot%20applications.commands',
-			shortName: 'tdl',
-		},
-	};
-
 	const { hide } = useSidebar();
 	const { toast } = useToast();
 
 	const [type, setType] = useState<string | null>(null);
 	const [copied, setCopied] = useState<string | null>(null);
+
+	const [invites, setInvites] = useState<Invite[]>([]);
+	const [bots, setBots] = useState<Record<string, Bot | null>>({});
+
+	const [loading, setLoading] = useState(true);
 
 	useEffect(() => {
 		hide();
@@ -40,36 +42,62 @@ export default function Page({ params }: { params: Promise<{ type: string }> }) 
 			const t = (await params).type?.toLowerCase();
 			setType(t);
 
-			const entry = Object.entries(invites).find(([key, value]) => {
-				return key.toLowerCase() === t || value.shortName?.toLowerCase() === t;
+			// fetch invites
+			const res = await fetch('/api/v1/invite');
+			const data = await res.json();
+
+			setInvites(data.invites);
+
+			// fetch bot data in parallel
+			const botEntries = await Promise.all(
+				data.invites.map(async (invite: Invite) => {
+					try {
+						const res = await fetch(`/api/v1/discord/users/${invite.id}/profile`);
+						const data = await res.json();
+						return [invite.id, data.user];
+					} catch {
+						return [invite.id, null];
+					}
+				})
+			);
+
+			const botMap = Object.fromEntries(botEntries);
+			setBots(botMap);
+
+			// handle redirect
+			const entry = data.invites.find((i: Invite) => {
+				return i.name.toLowerCase() === t || i.shortName?.toLowerCase() === t || i.id === t;
 			});
 
-			if (entry && entry[1].link) {
-				redirect(entry[1].link);
+			if (entry) {
+				const link = buildLink(entry);
+				redirect(link);
 			}
+
+			setLoading(false);
 		})();
 	}, []);
 
-	function copyLink(key: string, link: string) {
-		if (!link) return;
+	function buildLink(invite: Invite) {
+		return `https://discord.com/oauth2/authorize?client_id=${invite.id}&permissions=${invite.permissions}&scope=bot+applications.commands`;
+	}
+
+	function copyLink(invite: Invite) {
+		const link = buildLink(invite);
 
 		navigator.clipboard.writeText(link);
 
-		setCopied(key);
-		toast(`Copied invite for ${key}`, 'success');
+		setCopied(invite.id);
+		toast(`Copied invite for ${invite.name}`, 'success');
 
 		setTimeout(() => setCopied(null), 1200);
 	}
 
-	if (!type) {
-		return (
-			<div style={{ padding: '2rem' }}>
-				<motion.div initial={{ opacity: 0 }} animate={{ opacity: 0.6 }}>
-					Loading...
-				</motion.div>
-			</div>
-		);
+	if (!type || loading) {
+		return <></>;
 	}
+
+	const notFound = type !== 'list' && !invites.find((i) => i.name.toLowerCase() === type || i.shortName?.toLowerCase() === type || i.id === type);
 
 	return (
 		<div
@@ -86,7 +114,7 @@ export default function Page({ params }: { params: Promise<{ type: string }> }) 
 				transition={{ duration: 0.25 }}
 				style={{
 					width: '100%',
-					maxWidth: '500px',
+					maxWidth: '520px',
 					borderRadius: '1rem',
 					border: '1px solid var(--border)',
 					background: 'var(--container)',
@@ -100,7 +128,7 @@ export default function Page({ params }: { params: Promise<{ type: string }> }) 
 				</div>
 
 				{/* ERROR */}
-				{type !== 'list' && !invites[type] && (
+				{notFound && (
 					<motion.div
 						initial={{ opacity: 0, y: 5 }}
 						animate={{ opacity: 1, y: 0 }}
@@ -129,19 +157,19 @@ export default function Page({ params }: { params: Promise<{ type: string }> }) 
 
 					<div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
 						<AnimatePresence>
-							{Object.entries(invites)
-								.sort(([a], [b]) => a.localeCompare(b))
-								.map(([key, invite]) => {
-									const disabled = !invite;
-									const isCopied = copied === key;
+							{invites
+								.sort((a, b) => a.name.localeCompare(b.name))
+								.map((invite) => {
+									const isCopied = copied === invite.id;
+									const bot = bots[invite.id];
 
 									return (
-										<motion.div key={key} initial={{ opacity: 0, y: 5 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} style={{ display: 'flex', gap: '0.5rem' }}>
-											{/* MAIN BUTTON */}
+										<motion.div key={invite.id} initial={{ opacity: 0, y: 5 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} style={{ display: 'flex', gap: '0.5rem' }}>
+											{/* MAIN */}
 											<motion.button
-												whileHover={!disabled ? { scale: 1.02, y: -2 } : {}}
-												whileTap={!disabled ? { scale: 0.98 } : {}}
-												onClick={() => !disabled && redirect(invite.link)}
+												whileHover={{ scale: 1.02, y: -2 }}
+												whileTap={{ scale: 0.98 }}
+												onClick={() => redirect(buildLink(invite))}
 												style={{
 													flex: 1,
 													display: 'flex',
@@ -150,19 +178,33 @@ export default function Page({ params }: { params: Promise<{ type: string }> }) 
 													padding: '0.75rem',
 													borderRadius: '0.5rem',
 													border: '1px solid var(--border)',
-													background: disabled ? 'rgba(255,255,255,0.05)' : 'var(--bg-main)',
-													cursor: disabled ? 'not-allowed' : 'pointer',
-													opacity: disabled ? 0.5 : 1,
+													background: 'var(--bg-main)',
 												}}>
-												<span style={{ fontWeight: 500 }}>Invite {key}</span>
+												<div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
+													{bot ? (
+														<img src={`https://cdn.discordapp.com/avatars/${bot.id}/${bot.avatar}.webp`} style={{ width: 24, height: 24, borderRadius: '50%' }} />
+													) : (
+														<div
+															style={{
+																width: 24,
+																height: 24,
+																borderRadius: '50%',
+																background: 'var(--border)',
+															}}
+														/>
+													)}
+
+													<span style={{ fontWeight: 500 }}>{bot?.username || invite.name}</span>
+												</div>
+
 												<ExternalLink size={14} style={{ opacity: 0.6 }} />
 											</motion.button>
 
-											{/* COPY BUTTON */}
+											{/* COPY */}
 											<motion.button
-												whileHover={!disabled ? { scale: 1.1 } : {}}
-												whileTap={!disabled ? { scale: 0.9 } : {}}
-												onClick={() => copyLink(key, invite.link)}
+												whileHover={{ scale: 1.1 }}
+												whileTap={{ scale: 0.9 }}
+												onClick={() => copyLink(invite)}
 												style={{
 													display: 'flex',
 													alignItems: 'center',
@@ -172,9 +214,6 @@ export default function Page({ params }: { params: Promise<{ type: string }> }) 
 													border: '1px solid var(--border)',
 													background: isCopied ? 'var(--accent)' : 'var(--bg-main)',
 													color: isCopied ? '#fff' : 'inherit',
-													cursor: disabled ? 'not-allowed' : 'pointer',
-													opacity: disabled ? 0.5 : 1,
-													transition: '0.2s',
 												}}>
 												{isCopied ? <Check size={14} /> : <Copy size={14} />}
 											</motion.button>

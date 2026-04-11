@@ -30,12 +30,12 @@ export default function Home() {
 			{ label: 'Portal', icon: <Layers />, href: '/portal' },
 		];
 
-		if (user?.role === Roles.Owner || user?.role === Roles.Admin) items.push({ label: 'Admin', icon: <ShieldCheck />, href: '/admin' });
+		if (user?.role === Roles.Owner || user?.role === Roles.Admin || user?.role === Roles.Moderator) items.push({ label: 'Admin', icon: <ShieldCheck />, href: '/admin' });
 
 		setNavItems(items);
 
 		return () => clearNavItems();
-	}, []);
+	}, [user, session]);
 
 	useEffect(() => {
 		(async () => {

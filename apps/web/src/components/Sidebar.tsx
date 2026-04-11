@@ -7,6 +7,7 @@ import { Clock, Clock10, Cpu, FlaskConical, Folder, Globe, IdCard, Layers, Link,
 import { useEffect, useRef, useState } from 'react';
 
 import QRCode from 'react-qr-code';
+import { it } from 'node:test';
 import uptime from '@/lib/uptime';
 import { usePlatform } from '@/providers/PlatformProvider';
 import { useRouter } from 'next/navigation';
@@ -92,6 +93,9 @@ export default function Sidebar() {
 
 	const nameplate = user?.collectibles?.nameplate && `https://cdn.discordapp.com/assets/collectibles/${user.collectibles.nameplate.asset}asset.webm`;
 
+	const navTop = navItems.filter((item) => item.href);
+	const navBottom = navItems.filter((item) => item.onClick && !item.href);
+
 	return (
 		<motion.aside
 			animate={{ width: state === 'open' ? 300 : 70 }}
@@ -103,7 +107,48 @@ export default function Sidebar() {
 				color: 'var(--text-main)',
 			}}>
 			<div className='flex flex-col gap-1'>
-				{navItems.map((item, i) => {
+				{/* Bottom: Navigation */}
+				{navTop.map((item, i) => {
+					return (
+						<button
+							key={`bottom-${i}`}
+							onClick={() => router.push(item.href!)}
+							className={`flex items-center rounded-md transition px-3 py-2 ${state === 'open' ? 'gap-2 justify-start' : 'justify-center'}`}
+							style={{ color: 'var(--text-main)' }}
+							onMouseEnter={(e) => {
+								e.currentTarget.style.background = 'var(--accent-hover)';
+								e.currentTarget.style.cursor = 'pointer';
+							}}
+							onMouseLeave={(e) => {
+								e.currentTarget.style.background = 'transparent';
+							}}>
+							{item.icon}
+
+							<AnimatePresence>
+								{state === 'open' && (
+									<motion.span initial={{ opacity: 0, x: -6 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -6 }} transition={{ duration: 0.15 }} className='whitespace-nowrap'>
+										{item.label}
+									</motion.span>
+								)}
+							</AnimatePresence>
+						</button>
+					);
+				})}
+
+				{/* Divider */}
+				{navBottom.length > 0 && (
+					<div className='py-2 px-2'>
+						<div
+							className='h-[1px] w-full'
+							style={{
+								background: 'linear-gradient(to right, transparent, rgba(255,255,255,0.2), transparent)',
+							}}
+						/>
+					</div>
+				)}
+
+				{/* BOTTOM: Actions */}
+				{navBottom.map((item, i) => {
 					const active = view === item.view;
 
 					return (
@@ -111,7 +156,6 @@ export default function Sidebar() {
 							key={i}
 							onClick={() => {
 								if (item.view) setView(item.view);
-								if (item.href) router.push(item.href);
 								item.onClick?.();
 							}}
 							className={`flex items-center rounded-md transition px-3 py-2 ${state === 'open' ? 'gap-2 justify-start' : 'justify-center'}`}
@@ -230,22 +274,27 @@ export default function Sidebar() {
 						{/* (keeping it exactly like you wrote it) */}
 
 						{profileView === 'card' && (
-							<div className='min-w-68'>
+							<div className='min-w-68 z-99999'>
 								<div className='relative'>
-									{user.banner && <img src={`https://cdn.discordapp.com/banners/${user.id}/${user.banner}?size=4096`} className='w-full h-24 object-cover' />}
+									<div className='h-24 w-full'>{user.banner && <img src={`https://cdn.discordapp.com/banners/${user.id}/${user.banner}?size=4096`} className='object-cover h-24 w-full' />}</div>
 									<img src={`https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}?size=4096`} className='absolute left-3 -bottom-8 w-16 h-16 rounded-full border-4 border-(--bg-panel)' />
 								</div>
 
 								<div className='pt-10 px-4 pb-4 space-y-2'>
 									<div className='font-semibold'>{user.global_name ?? user.username}</div>
 									<div className='text-xs opacity-60'>@{user.username}</div>
+									<div className='flex gap-2 flex-wrap'>
+										{user.clan?.identity_enabled && (
+											<div className='flex items-center gap-2 text-xs opacity-80 bg-(--accent) rounded p-1'>
+												<img src={`https://cdn.discordapp.com/clan-badges/${user.clan.identity_guild_id}/${user.clan.badge}.png`} className='h-4 w-4' />
+												<span className='font-semibold'>{user.clan.tag}</span>
+											</div>
+										)}
 
-									{user.clan?.identity_enabled && (
-										<div className='flex items-center gap-2 text-xs opacity-80'>
-											<img src={`https://cdn.discordapp.com/clan-badges/${user.clan.identity_guild_id}/${user.clan.badge}.png`} className='h-4 w-4' />
-											<span className='font-semibold'>{user.clan.tag}</span>
+										<div className='flex items-center gap-2 text-xs opacity-80 bg-(--accent) rounded p-1'>
+											<span className='font-semibold uppercase'>{user?.role}</span>
 										</div>
-									)}
+									</div>
 
 									<button
 										onClick={() => navigator.clipboard.writeText(user.id)}

@@ -1,16 +1,20 @@
 /** @format */
 
-'use server';
+'use client';
 
 import { Roles } from '@/lib/roles';
-import { authOptions } from '@/lib/schema/auth';
-import { getServerSession } from 'next-auth';
 import { redirect } from 'next/navigation';
+import { useEffect } from 'react';
+import { useUser } from '@/providers/UserProvider';
 
-export default async function Layout({ children }: { children: React.ReactNode }) {
-	const session = await getServerSession(authOptions);
+export default function Layout({ children }: { children: React.ReactNode }) {
+	const user = useUser();
 
-	if (session?.role !== Roles.Owner && session?.role !== Roles.Admin) return redirect('/'); // FIX THIS AT SOME POINT
+	useEffect(() => {
+		if (![Roles.Admin, Roles.Owner, Roles.Moderator].includes(user?.role)) return redirect('/');
+	}, [user]);
+
+	if (!user) return null;
 
 	return <>{children}</>;
 }

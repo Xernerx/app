@@ -8,6 +8,7 @@ import ProfileGuild from '@/schemas/xernerx/profiles/Guild';
 import ProfileOrganization from '@/schemas/xernerx/profiles/Organization';
 import ProfileUser from '@/schemas/xernerx/profiles/User';
 import TokensApi from '@/schemas/xernerx/tokens/Api';
+import TokensInvite from '@/schemas/xernerx/tokens/Invite';
 import VirtueGuild from '@/schemas/virtue/profiles/Guild';
 import VirtueMember from '@/schemas/virtue/profiles/Member';
 import VirtueUser from '@/schemas/virtue/profiles/User';
@@ -46,6 +47,7 @@ function registerXernerxModels(connection: Connection, dbName: XernerxDbName) {
 	if (!connection.models.organization) connection.model('organization', ProfileOrganization);
 	if (!connection.models.user) connection.model('user', ProfileUser);
 	if (!connection.models.api) connection.model('api', TokensApi);
+	if (!connection.models.invite) connection.model('invite', TokensInvite);
 }
 
 function registerVirtueModels(connection: Connection, dbName: VirtueDbName) {
