@@ -5,11 +5,15 @@
 	"version": "1.1.46",
 	"author": "Dummi",
 	"scripts": {
-		"dev": "pnpm i && pnpm --parallel --filter ./apps/* dev",
+		"dev": "pnpm i && concurrently -n apps,tunnel -c blue,green \"pnpm --parallel --filter ./apps/* dev\" \"pnpm tunnel\"",
 		"build": "pnpm --filter ./apps/* build",
 		"lint": "pnpm --recursive run lint",
+		"tunnel": "cloudflared tunnel run dev-local",
 		"patch": "git add . && git commit -m \"Patch submit source code of app\" && npm version patch && pnpm --filter ./apps/* run patch && git add . && git commit -m \"Patch version of app\" && git push && git push --tags",
 		"minor": "git add . && git commit -m \"Minor submit source code of app\" && npm version minor && pnpm --filter ./apps/* run minor && git add . && git commit -m \"Minor version of app\" && git push && git push --tags",
 		"major": "git add . && git commit -m \"Major submit source code of app\" && npm version major && pnpm --filter ./apps/* run major && git add . && git commit -m \"Major version of app\" && git push && git push --tags"
+	},
+	"devDependencies": {
+		"concurrently": "^9.2.1"
 	}
 }

@@ -1,0 +1,41 @@
+{
+	"name": "xernerx-web",
+	"version": "1.1.45",
+	"private": true,
+	"scripts": {
+		"dev": "next dev -p 4001",
+		"build": "next build",
+		"start": "next start",
+		"lint": "eslint",
+		"patch": "npm version patch",
+		"minor": "npm version minor",
+		"major": "npm version major"
+	},
+	"dependencies": {
+		"@svgr/webpack": "^8.1.0",
+		"discord-api-types": "^0.38.45",
+		"framer-motion": "^12.35.2",
+		"lru-cache": "^6",
+		"lucide-react": "^0.577.0",
+		"mongoose": "^9.3.0",
+		"next": "16.1.6",
+		"next-auth": "^4.24.13",
+		"react": "19.2.3",
+		"react-dom": "19.2.3",
+		"react-qr-code": "^2.0.18",
+		"systeminformation": "^5.31.5",
+		"zod": "^4.3.6"
+	},
+	"devDependencies": {
+		"@tailwindcss/postcss": "^4",
+		"@types/node": "^20",
+		"@types/react": "^19",
+		"@types/react-dom": "^19",
+		"babel-plugin-react-compiler": "1.0.0",
+		"eslint": "^9",
+		"eslint-config-next": "16.1.6",
+		"npm-run-all": "^4.1.5",
+		"tailwindcss": "^4",
+		"typescript": "^5"
+	}
+}
