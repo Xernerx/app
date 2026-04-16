@@ -2,7 +2,7 @@
 	"name": "xernerx",
 	"private": false,
 	"description": "App",
-	"version": "1.1.46",
+	"version": "1.1.47",
 	"author": "Dummi",
 	"scripts": {
 		"dev": "pnpm i && concurrently -n apps,tunnel -c blue,green \"pnpm --parallel --filter ./apps/* dev\" \"pnpm tunnel\"",
