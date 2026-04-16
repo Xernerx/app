@@ -7,8 +7,7 @@ import { ChevronDown, ChevronUp } from 'lucide-react';
 import { signIn, useSession } from 'next-auth/react';
 import { useEffect, useState } from 'react';
 
-import Image from 'next/image';
-import { useToast } from '@/providers/ToastProvider';
+import Banner from '@/../public/banner.svg';
 
 export default function SignInPage() {
 	const { data: session, status } = useSession();
@@ -36,8 +35,8 @@ export default function SignInPage() {
 					style={{
 						gap: 'calc(var(--ui-gap) * 1.5)',
 					}}>
-					<div className='flex flex-col items-center gap-4'>
-						<Image src='/banner.png' alt='Xernerx' width={740} height={240} priority className='select-none pointer-events-none' />
+					<div className='flex flex-col items-center gap-4 m-6'>
+						<Banner className='w-full h-50' style={{ color: 'var(--accent)' }} />
 					</div>
 
 					<motion.button
