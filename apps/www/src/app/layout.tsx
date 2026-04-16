@@ -15,7 +15,7 @@ export const metadata: Metadata = {
 	title: 'Xernerx Studios',
 	description: 'Xernerx Studios',
 	icons: {
-		icon: '/icon.svg',
+		icon: '/icon.png',
 	},
 };
 
