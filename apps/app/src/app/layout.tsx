@@ -18,13 +18,41 @@ import { UserProvider } from '@/providers/UserProvider';
 import { authOptions } from '@/lib/schema/auth';
 import { getServerSession } from 'next-auth';
 
-// somewhere server-side (layout, entry, etc)
-
 export const metadata: Metadata = {
-	title: 'Xernerx',
-	description: 'yes',
+	title: 'Xernerx Dashboard',
+	description: 'Manage your Xernerx applications, tokens, and settings. Access platform tools and infrastructure from a unified dashboard.',
+
+	metadataBase: new URL('https://app.xernerx.com'),
+
+	openGraph: {
+		title: 'Xernerx Dashboard',
+		description: 'Access the Xernerx dashboard to manage applications, API tokens, and platform configuration.',
+		url: 'https://app.xernerx.com',
+		siteName: 'Xernerx',
+		images: [
+			{
+				url: '/banner.png', // ✅ now local works perfectly
+				width: 1200,
+				height: 630,
+				alt: 'Xernerx Dashboard',
+			},
+		],
+		type: 'website',
+	},
+
+	twitter: {
+		card: 'summary_large_image',
+		title: 'Xernerx Dashboard',
+		description: 'Manage your Xernerx tools, tokens, and applications in one place.',
+		images: ['/banner.png'],
+	},
+
 	icons: {
 		icon: '/logo.png',
+	},
+
+	alternates: {
+		canonical: 'https://app.xernerx.com',
 	},
 };
 
