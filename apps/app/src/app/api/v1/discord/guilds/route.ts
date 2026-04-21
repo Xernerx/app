@@ -1,8 +1,11 @@
 /** @format */
 
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
+
 import { authOptions } from '@/lib/schema/auth';
+import check from '@/lib/functions/check';
 import { getServerSession } from 'next-auth';
+import getToken from '@/lib/functions/getToken';
 
 type Guild = {
 	id: string;
@@ -22,7 +25,6 @@ const MANAGE_GUILD = 32n;
 const CACHE_TTL = 1000 * 60 * 5;
 
 declare global {
-	// eslint-disable-next-line no-var
 	var discordGuildsCache: Map<string, CacheEntry> | undefined;
 }
 
@@ -41,7 +43,12 @@ function canManageGuild(permissions: string) {
 	}
 }
 
-export async function GET() {
+export async function GET(request: NextRequest) {
+	const token = await getToken(request);
+
+	const c = await check({ token, sessionOnly: true });
+	if (c) return c;
+
 	const session: any = await getServerSession(authOptions);
 	const accessToken = session?.accessToken;
 
@@ -50,107 +57,66 @@ export async function GET() {
 	}
 
 	const now = Date.now();
-	const cached = guildCache.get(session?.user?.id);
+	const cached = guildCache.get(session.user.id);
 
-	// ✅ USE CACHE FIRST
 	if (cached && cached.expiresAt > now) {
-		return NextResponse.json(
-			{
-				guilds: cached.data,
-				cached: true,
-				stale: false,
-				rateLimited: false,
-				cachedAt: cached.cachedAt,
-			},
-			{ status: 200 }
-		);
+		return NextResponse.json({
+			guilds: cached.data,
+			cached: true,
+			stale: false,
+			rateLimited: false,
+			cachedAt: cached.cachedAt,
+		});
 	}
 
 	try {
 		const response = await fetch('https://discord.com/api/v10/users/@me/guilds', {
-			headers: {
-				Authorization: `Bearer ${accessToken}`,
-			},
+			headers: { Authorization: `Bearer ${accessToken}` },
 			cache: 'no-store',
 		});
 
-		// 🧠 Rate limit fallback
-		if (response.status === 429) {
-			if (cached?.data?.length) {
-				return NextResponse.json(
-					{
-						guilds: cached.data,
-						cached: true,
-						stale: true,
-						rateLimited: true,
-						cachedAt: cached.cachedAt,
-					},
-					{ status: 200 }
-				);
-			}
-
-			const body = await response.json().catch(() => null);
-
-			return NextResponse.json(
-				{
-					message: body?.message ?? 'Discord rate limit hit and no cached guilds are available.',
-					rateLimited: true,
-				},
-				{ status: 429 }
-			);
+		if (response.status === 429 && cached?.data?.length) {
+			return NextResponse.json({
+				guilds: cached.data,
+				cached: true,
+				stale: true,
+				rateLimited: true,
+				cachedAt: cached.cachedAt,
+			});
 		}
 
 		if (!response.ok) {
 			const body = await response.json().catch(() => null);
-
-			return NextResponse.json(
-				{
-					message: body?.message ?? `Failed to fetch guilds (${response.status})`,
-				},
-				{ status: response.status }
-			);
+			return NextResponse.json({ message: body?.message ?? `Failed (${response.status})` }, { status: response.status });
 		}
 
 		const data: Guild[] = await response.json();
+		const filtered = data.filter((g) => canManageGuild(g.permissions));
 
-		const filteredGuilds = data.filter((guild) => canManageGuild(guild.permissions));
-
-		guildCache.set(session?.user?.id, {
-			data: filteredGuilds,
+		guildCache.set(session.user.id, {
+			data: filtered,
 			cachedAt: now,
 			expiresAt: now + CACHE_TTL,
 		});
 
-		return NextResponse.json(
-			{
-				guilds: filteredGuilds,
-				cached: false,
-				stale: false,
-				rateLimited: false,
-				cachedAt: now,
-			},
-			{ status: 200 }
-		);
+		return NextResponse.json({
+			guilds: filtered,
+			cached: false,
+			stale: false,
+			rateLimited: false,
+			cachedAt: now,
+		});
 	} catch {
-		// 🧠 fallback if Discord dies
-		if (cached?.data?.length) {
-			return NextResponse.json(
-				{
-					guilds: cached.data,
-					cached: true,
-					stale: true,
-					rateLimited: false,
-					cachedAt: cached.cachedAt,
-				},
-				{ status: 200 }
-			);
+		if (cached?.data) {
+			return NextResponse.json({
+				guilds: cached.data,
+				cached: true,
+				stale: true,
+				rateLimited: false,
+				cachedAt: cached.cachedAt,
+			});
 		}
 
-		return NextResponse.json(
-			{
-				message: 'Failed to fetch guilds and no cached data is available.',
-			},
-			{ status: 500 }
-		);
+		return NextResponse.json({ message: 'Failed to fetch guilds.' }, { status: 500 });
 	}
 }

@@ -2,7 +2,7 @@
 
 'use server';
 
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import mongoose from 'mongoose';
 import os from 'os';
 import { version } from '@/../package.json' with { type: 'json' };
@@ -15,9 +15,7 @@ const startTime = Date.now();
 
 async function getEventLoopLag() {
 	const start = performance.now();
-
 	await new Promise((resolve) => setTimeout(resolve, 0));
-
 	return Math.round(performance.now() - start);
 }
 
@@ -41,7 +39,6 @@ function getMemory() {
 
 function getMongo() {
 	const state = mongoose.connection.readyState;
-
 	const states = ['disconnected', 'connected', 'connecting', 'disconnecting'];
 
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -71,27 +68,15 @@ function getLANIP() {
 /* Route                                            */
 /* ------------------------------------------------ */
 
-export async function GET() {
+export async function GET(_: NextRequest) {
 	const uptime = Math.floor((Date.now() - startTime) / 1000);
-
 	const eventLoopLag = await getEventLoopLag();
-
 	const mongo = getMongo();
+
+	const isDev = process.env.ENVIRONMENT === 'DEVELOPMENT';
 
 	const env = {
 		environment: process.env.ENVIRONMENT,
-	};
-
-	const urls = {
-		https: `https://dev.dummi.me`,
-		http: `http://${getLANIP()}`,
-		host: `http://localhost`,
-	};
-
-	const ports = {
-		web: 3000,
-		app: 4000,
-		mobile: 8081,
 	};
 
 	const server = {
@@ -99,14 +84,43 @@ export async function GET() {
 		uptime,
 		memory: getMemory(),
 		eventLoopLag,
-		time: new Date().toLocaleTimeString(),
+		time: new Date().toISOString(),
 		timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
 		version: process.env?.npm_package_version ?? version ?? '0.0.0',
 	};
 
-	const database = { ...mongo, status: mongo.mongodb === 'connected' ? 'ready' : 'degraded' };
+	const database = {
+		...mongo,
+		status: mongo.mongodb === 'connected' ? 'ready' : 'degraded',
+	};
 
-	const body = process.env.ENVIRONMENT === 'DEVELOPMENT' ? { ...env, urls, ports, server, database } : { ...env, server, database };
+	// 👇 only expose sensitive/internal stuff in dev
+	const devExtras = isDev
+		? {
+				urls: {
+					https: `https://dev.dummi.me`,
+					http: `http://${getLANIP()}`,
+					host: `http://localhost`,
+				},
+				ports: {
+					web: 3000,
+					app: 4000,
+					mobile: 8081,
+				},
+			}
+		: {};
 
-	return NextResponse.json(body, { headers: { 'Access-Control-Allow-Origin': '*' }, status: 200, statusText: 'OK' });
+	const body = {
+		...env,
+		server,
+		database,
+		...devExtras,
+	};
+
+	return NextResponse.json(body, {
+		status: 200,
+		headers: {
+			'Access-Control-Allow-Origin': '*',
+		},
+	});
 }

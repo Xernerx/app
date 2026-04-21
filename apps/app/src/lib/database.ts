@@ -7,6 +7,7 @@ import ProfileBot from '@/schemas/xernerx/profiles/Bot';
 import ProfileGuild from '@/schemas/xernerx/profiles/Guild';
 import ProfileOrganization from '@/schemas/xernerx/profiles/Organization';
 import ProfileUser from '@/schemas/xernerx/profiles/User';
+import StatsBot from '@/schemas/xernerx/stats/Bot';
 import TokensApi from '@/schemas/xernerx/tokens/Api';
 import TokensInvite from '@/schemas/xernerx/tokens/Invite';
 import VirtueGuild from '@/schemas/virtue/profiles/Guild';
@@ -40,14 +41,21 @@ const cached = globalThis.__xernerxMongoCache ?? (globalThis.__xernerxMongoCache
  * Model registration helpers
  */
 function registerXernerxModels(connection: Connection, dbName: XernerxDbName) {
-	if (!['profiles', 'tokens'].includes(dbName)) return;
+	if (dbName == 'profiles') {
+		if (!connection.models.bot) connection.model('bot', ProfileBot);
+		if (!connection.models.guild) connection.model('guild', ProfileGuild);
+		if (!connection.models.organization) connection.model('organization', ProfileOrganization);
+		if (!connection.models.user) connection.model('user', ProfileUser);
+	}
 
-	if (!connection.models.bot) connection.model('bot', ProfileBot);
-	if (!connection.models.guild) connection.model('guild', ProfileGuild);
-	if (!connection.models.organization) connection.model('organization', ProfileOrganization);
-	if (!connection.models.user) connection.model('user', ProfileUser);
-	if (!connection.models.api) connection.model('api', TokensApi);
-	if (!connection.models.invite) connection.model('invite', TokensInvite);
+	if (dbName == 'stats') {
+		if (!connection.models.bot) connection.model('bot', StatsBot);
+	}
+
+	if (dbName == 'tokens') {
+		if (!connection.models.api) connection.model('api', TokensApi);
+		if (!connection.models.invite) connection.model('invite', TokensInvite);
+	}
 }
 
 function registerVirtueModels(connection: Connection, dbName: VirtueDbName) {

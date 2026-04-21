@@ -2,7 +2,10 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 
+import check from '@/lib/functions/check';
 import database from '@/lib/database';
+import getToken from '@/lib/functions/getToken';
+import validate from '@/lib/functions/validate';
 import { z } from 'zod';
 
 const hookSchema = z.object({
@@ -43,7 +46,14 @@ const botSchema = z.object({
 
 const botUpdateSchema = botSchema.partial().omit({ id: true });
 
-export async function GET(_: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+/* ---------------- GET ---------------- */
+
+export async function GET(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+	const token = await getToken(req);
+
+	const c = await check({ token });
+	if (c) return c;
+
 	try {
 		const id = (await params).id;
 
@@ -65,83 +75,73 @@ export async function GET(_: NextRequest, { params }: { params: Promise<{ id: st
 	}
 }
 
-export async function POST(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
-	try {
-		const id = (await params).id;
+/* ---------------- POST ---------------- */
 
-		const json = await request.json();
-		const parsed = botSchema.safeParse({ ...json, id });
+export async function POST(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+	const token = await getToken(req);
+	const id = (await params)?.id;
 
-		if (!parsed.success) {
-			return NextResponse.json(
-				{
-					error: 'Invalid request body',
-					fields: parsed.error.flatten(),
-				},
-				{ status: 400 }
-			);
-		}
-
-		const db = await database('xernerx', 'profiles');
-
-		const existing = await db.bot.findOne({ id }).lean();
-		if (existing) {
-			return NextResponse.json({ error: 'Bot already exists' }, { status: 409 });
-		}
-
-		const created = await db.bot.create(parsed.data);
-
-		return NextResponse.json(created, { status: 201 });
-	} catch (error) {
-		console.error('POST bot error:', error);
-		return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+	if (!id) {
+		return NextResponse.json({ error: 'Missing id' }, { status: 400 });
 	}
+
+	const c = await check({ token, write: true, botId: id });
+	if (c) return c;
+
+	const result = await validate(req, botSchema, {
+		extra: { id },
+	});
+	if ('response' in result) return result.response;
+
+	const db = await database('xernerx', 'profiles');
+
+	const existing = await db.bot.findOne({ id }).lean();
+	if (existing) {
+		return NextResponse.json({ error: 'Bot already exists' }, { status: 409 });
+	}
+
+	const created = await db.bot.create(result.data);
+
+	return NextResponse.json(created, { status: 201 });
 }
 
-export async function PATCH(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
-	try {
-		const id = (await params).id;
+/* ---------------- PATCH ---------------- */
 
-		if (!id) {
-			return NextResponse.json({ error: 'Missing id' }, { status: 400 });
-		}
+export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+	const token = await getToken(req);
+	const id = (await params).id;
 
-		const json = await request.json();
-		const parsed = botUpdateSchema.safeParse(json);
+	const c = await check({ token, write: true, botId: id });
+	if (c) return c;
 
-		if (!parsed.success) {
-			return NextResponse.json(
-				{
-					error: 'Invalid request body',
-					fields: parsed.error.flatten(),
-				},
-				{ status: 400 }
-			);
-		}
+	const result = await validate(req, botUpdateSchema);
+	if ('response' in result) return result.response;
 
-		if (Object.keys(parsed.data).length === 0) {
-			return NextResponse.json({ error: 'No valid fields provided' }, { status: 400 });
-		}
-
-		const db = await database('xernerx', 'profiles');
-
-		const updated = await db.bot.findOneAndUpdate({ id }, { $set: parsed.data }, { returnDocument: 'after', runValidators: true }).lean();
-
-		if (!updated) {
-			return NextResponse.json({ error: 'Bot not found' }, { status: 404 });
-		}
-
-		return NextResponse.json(updated, { status: 200 });
-	} catch (error) {
-		console.error('PATCH bot error:', error);
-		return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+	if (Object.keys(result.data).length === 0) {
+		return NextResponse.json({ error: 'No valid fields provided' }, { status: 400 });
 	}
+
+	const db = await database('xernerx', 'profiles');
+
+	const updated = await db.bot.findOneAndUpdate({ id }, { $set: result.data }, { returnDocument: 'after', runValidators: true }).lean();
+
+	if (!updated) {
+		return NextResponse.json({ error: 'Bot not found' }, { status: 404 });
+	}
+
+	return NextResponse.json(updated, { status: 200 });
 }
 
-export async function DELETE(_: NextRequest, { params }: { params: Promise<{ id: string }> }) {
-	try {
-		const id = (await params).id;
+/* ---------------- DELETE ---------------- */
 
+export async function DELETE(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+	const token = await getToken(req);
+	const id = (await params).id;
+
+	const c = await check({ token, write: true, botId: id });
+	if (c) return c;
+
+	try {
 		if (!id) {
 			return NextResponse.json({ error: 'Missing id' }, { status: 400 });
 		}

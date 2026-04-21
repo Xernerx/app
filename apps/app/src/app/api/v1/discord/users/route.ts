@@ -1,8 +1,11 @@
 /** @format */
 
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
+
 import { authOptions } from '@/lib/schema/auth';
+import check from '@/lib/functions/check';
 import { getServerSession } from 'next-auth';
+import getToken from '@/lib/functions/getToken';
 
 type DiscordUser = {
 	id: string;
@@ -30,7 +33,13 @@ if (!globalThis.discordUserCache) {
 	globalThis.discordUserCache = userCache;
 }
 
-export async function GET() {
+export async function GET(request: NextRequest) {
+	const token = await getToken(request);
+
+	// ✅ enforce session-only via central check
+	const c = await check({ token, sessionOnly: true });
+	if (c) return c;
+
 	const session: any = await getServerSession(authOptions);
 	const accessToken = session?.accessToken;
 
@@ -38,10 +47,11 @@ export async function GET() {
 		return NextResponse.json({ message: 'Unauthorized.' }, { status: 401 });
 	}
 
+	const userId = session.user.id;
 	const now = Date.now();
-	const cached = userCache.get(session?.user?.id);
+	const cached = userCache.get(userId);
 
-	// ✅ USE CACHE IF STILL VALID
+	// ✅ cache hit
 	if (cached && cached.expiresAt > now) {
 		return NextResponse.json(
 			{
@@ -63,7 +73,7 @@ export async function GET() {
 			cache: 'no-store',
 		});
 
-		// 🧠 Rate limit fallback
+		// 🧠 rate limit fallback
 		if (response.status === 429) {
 			if (cached?.data) {
 				return NextResponse.json(
@@ -109,7 +119,7 @@ export async function GET() {
 			avatar: raw.avatar,
 		};
 
-		userCache.set(session?.user?.id, {
+		userCache.set(userId, {
 			data: user,
 			cachedAt: now,
 			expiresAt: now + CACHE_TTL,
@@ -126,7 +136,6 @@ export async function GET() {
 			{ status: 200 }
 		);
 	} catch {
-		// 🧠 fallback if Discord dies
 		if (cached?.data) {
 			return NextResponse.json(
 				{

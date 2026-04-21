@@ -5,29 +5,64 @@
 import { NextRequest, NextResponse } from 'next/server';
 
 import { authOptions } from '@/lib/schema/auth';
+import check from '@/lib/functions/check';
 import { getServerSession } from 'next-auth';
+import getToken from '@/lib/functions/getToken';
 
-export async function PUT(_: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+export async function PUT(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+	const token = await getToken(request);
+
+	// ✅ enforce session-only
+	const c = await check({ token, sessionOnly: true });
+	if (c) return c;
+
 	const id = (await params).id;
-	const session = await getServerSession(authOptions);
 
-	if (!id) return NextResponse.json({ message: 'Missing user id.' }, { status: 400 });
+	if (!id) {
+		return NextResponse.json({ message: 'Missing user id.' }, { status: 400 });
+	}
+
+	const session: any = await getServerSession(authOptions);
+	const userId = session?.user?.id;
+	const accessToken = session?.accessToken;
+
+	if (!userId || !accessToken) {
+		return NextResponse.json({ message: 'Unauthorized.' }, { status: 401 });
+	}
 
 	const botToken = process.env.DISCORD_CLIENT_TOKEN;
 
-	if (!botToken) return NextResponse.json({ message: 'Bot token not configured.' }, { status: 500 });
+	if (!botToken) {
+		return NextResponse.json({ message: 'Bot token not configured.' }, { status: 500 });
+	}
 
-	const response = await fetch(`https://discord.com/api/v10/guilds/${id}/members/${(session?.user as any)?.id}`, {
-		method: 'PUT',
-		headers: {
-			'Authorization': `Bot ${botToken}`,
-			'Content-Type': 'application/json',
-		},
-		body: JSON.stringify({ access_token: (session as any).accessToken }),
-	});
+	try {
+		const response = await fetch(`https://discord.com/api/v10/guilds/${id}/members/${userId}`, {
+			method: 'PUT',
+			headers: {
+				'Authorization': `Bot ${botToken}`,
+				'Content-Type': 'application/json',
+			},
+			body: JSON.stringify({ access_token: accessToken }),
+		});
 
-	return NextResponse.json(response.ok ? { message: response.status == 204 ? 'Already part of this server!' : 'Added you to the server!' } : await response.json(), {
-		status: response.status == 204 ? 200 : response.status,
-		statusText: response.statusText,
-	});
+		if (response.status === 204) {
+			return NextResponse.json({ message: 'Already part of this server!' }, { status: 200 });
+		}
+
+		if (!response.ok) {
+			const body = await response.json().catch(() => null);
+
+			return NextResponse.json(
+				{
+					message: body?.message ?? `Failed to add user (${response.status})`,
+				},
+				{ status: response.status }
+			);
+		}
+
+		return NextResponse.json({ message: 'Added you to the server!' }, { status: 200 });
+	} catch {
+		return NextResponse.json({ message: 'Failed to add user due to an internal error.' }, { status: 500 });
+	}
 }

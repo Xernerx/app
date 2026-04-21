@@ -5,106 +5,155 @@
 import { NextRequest, NextResponse } from 'next/server';
 
 import { authOptions } from '@/lib/schema/auth';
+import check from '@/lib/functions/check';
 import database from '@/lib/database';
 import { generateToken } from '@/lib/generateToken';
 import { getServerSession } from 'next-auth';
+import getToken from '@/lib/functions/getToken';
+import { z } from 'zod';
 
-/**
- * GET - fetch single token
- */
-export async function GET(_: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+/* ========================= SCHEMAS ========================= */
+
+const createSchema = z.object({
+	name: z.string().min(1),
+});
+
+const updateSchema = z.object({
+	name: z.string().min(1).optional(),
+	status: z.enum(['pending', 'active', 'suspended']).optional(),
+	botId: z.string().nullable().optional(),
+	owners: z.array(z.string().min(1)).optional(),
+});
+
+/* ========================= SESSION GUARD ========================= */
+
+async function guardSession(req: NextRequest) {
+	const token = await getToken(req);
+
+	const c = await check({ token, sessionOnly: true });
+	if (c) return c;
+
 	const session: any = await getServerSession(authOptions);
-	if (!session?.user?.id) return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
 
-	const db = await database('xernerx', 'tokens');
-	const id = (await params).id;
-
-	const token = await db.api.findOne({ id, owners: session?.user?.id });
-
-	if (!token) {
-		return NextResponse.json({ message: 'Token does not exist' }, { status: 404 });
-	}
-
-	return NextResponse.json(token, { status: 200 });
-}
-
-/**
- * POST - create token
- */
-
-export async function POST(req: NextRequest) {
-	const session: any = await getServerSession(authOptions);
 	if (!session?.user?.id) {
 		return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
 	}
 
-	const db = await database('xernerx', 'tokens');
-	const body = await req.json();
+	return { session };
+}
 
-	if (!body.name) {
-		return NextResponse.json({ message: 'Missing name' }, { status: 400 });
+/* ========================= GET ========================= */
+
+export async function GET(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+	const guard = await guardSession(req);
+	if (guard instanceof NextResponse) return guard;
+
+	const session: any = guard.session;
+	const id = (await params).id;
+
+	const db = await database('xernerx', 'tokens');
+
+	const tokenDoc = await db.api.findOne({
+		id,
+		owners: session.user.id,
+	});
+
+	if (!tokenDoc) {
+		return NextResponse.json({ message: 'Token not found' }, { status: 404 });
 	}
+
+	return NextResponse.json(tokenDoc, { status: 200 });
+}
+
+/* ========================= POST ========================= */
+
+export async function POST(req: NextRequest) {
+	const guard = await guardSession(req);
+	if (guard instanceof NextResponse) return guard;
+
+	const session: any = guard.session;
+
+	let json: unknown;
+
+	try {
+		json = await req.json();
+	} catch {
+		return NextResponse.json({ message: 'Invalid JSON body' }, { status: 400 });
+	}
+
+	const parsed = createSchema.safeParse(json);
+
+	if (!parsed.success) {
+		return NextResponse.json({ message: 'Invalid body', fields: parsed.error.flatten() }, { status: 400 });
+	}
+
+	const db = await database('xernerx', 'tokens');
 
 	const id = await generateToken();
 
-	const token = {
+	const tokenDoc = {
 		id,
-		name: body.name,
-		owners: [session?.user?.id],
+		name: parsed.data.name,
+		owners: [session.user.id],
 		status: 'pending',
 		botId: null,
 		createdAt: new Date(),
 	};
 
-	await db.api.insertOne(token);
+	await db.api.insertOne(tokenDoc);
 
-	return NextResponse.json(token, { status: 201 });
+	return NextResponse.json(tokenDoc, { status: 201 });
 }
 
-/**
- * PATCH - update token
- */
+/* ========================= PATCH ========================= */
+
 export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
-	const session: any = await getServerSession(authOptions);
-	if (!session?.user?.id) {
-		return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
+	const guard = await guardSession(req);
+	if (guard instanceof NextResponse) return guard;
+
+	const session: any = guard.session;
+	const id = (await params).id;
+
+	let json: unknown;
+
+	try {
+		json = await req.json();
+	} catch {
+		return NextResponse.json({ message: 'Invalid JSON body' }, { status: 400 });
+	}
+
+	const parsed = updateSchema.safeParse(json);
+
+	if (!parsed.success) {
+		return NextResponse.json({ message: 'Invalid body', fields: parsed.error.flatten() }, { status: 400 });
+	}
+
+	if (Object.keys(parsed.data).length === 0) {
+		return NextResponse.json({ message: 'Nothing to update' }, { status: 400 });
 	}
 
 	const db = await database('xernerx', 'tokens');
-	const id = (await params).id;
-	const body = await req.json();
 
-	const existing = await db.api.findOne({ id, owners: session?.user?.id });
+	const existing = await db.api.findOne({
+		id,
+		owners: session.user.id,
+	});
+
 	if (!existing) {
 		return NextResponse.json({ message: 'Token not found' }, { status: 404 });
 	}
 
-	const update: any = {};
+	const update: any = { ...parsed.data };
 
-	// basic fields
-	if (body.name !== undefined) update.name = body.name;
-	if (body.status !== undefined) update.status = body.status;
-	if (body.botId !== undefined) update.botId = body.botId;
+	// owners logic
+	if (update.owners) {
+		const uniqueOwners = [...new Set(update.owners.filter(Boolean))];
 
-	// owners update
-	if (body.owners !== undefined) {
-		if (!Array.isArray(body.owners)) {
-			return NextResponse.json({ message: 'Invalid owners format' }, { status: 400 });
-		}
-
-		// dedupe + sanitize
-		const uniqueOwners = [...new Set(body.owners.filter(Boolean))];
-
-		// optional: prevent user from removing themselves
-		if (!uniqueOwners.includes(session?.user?.id)) {
+		if (!uniqueOwners.includes(session.user.id)) {
 			return NextResponse.json({ message: 'You cannot remove yourself as an owner' }, { status: 403 });
 		}
 
 		update.owners = uniqueOwners;
-	}
-
-	if (Object.keys(update).length === 0) {
-		return NextResponse.json({ message: 'Nothing to update' }, { status: 400 });
 	}
 
 	await db.api.updateOne({ id }, { $set: update });
@@ -114,17 +163,22 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
 	return NextResponse.json(updated, { status: 200 });
 }
 
-/**
- * DELETE - remove token
- */
-export async function DELETE(_: NextRequest, { params }: { params: Promise<{ id: string }> }) {
-	const session: any = await getServerSession(authOptions);
-	if (!session?.user?.id) return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
+/* ========================= DELETE ========================= */
 
-	const db = await database('xernerx', 'tokens');
+export async function DELETE(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+	const guard = await guardSession(req);
+	if (guard instanceof NextResponse) return guard;
+
+	const session: any = guard.session;
 	const id = (await params).id;
 
-	const existing = await db.api.findOne({ id, owners: session?.user?.id });
+	const db = await database('xernerx', 'tokens');
+
+	const existing = await db.api.findOne({
+		id,
+		owners: session.user.id,
+	});
+
 	if (!existing) {
 		return NextResponse.json({ message: 'Token not found' }, { status: 404 });
 	}

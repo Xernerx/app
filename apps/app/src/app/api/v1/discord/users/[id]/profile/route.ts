@@ -3,8 +3,11 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 
+import check from '@/lib/functions/check';
+import getToken from '@/lib/functions/getToken';
+
 type CacheEntry = {
-	data: any; // full Discord payload
+	data: any;
 	cachedAt: number;
 	expiresAt: number;
 };
@@ -12,7 +15,6 @@ type CacheEntry = {
 const CACHE_TTL = 1000 * 60 * 5;
 
 declare global {
-	// eslint-disable-next-line no-var
 	var discordUserByIdCache: Map<string, CacheEntry> | undefined;
 }
 
@@ -22,7 +24,12 @@ if (!globalThis.discordUserByIdCache) {
 	globalThis.discordUserByIdCache = userCache;
 }
 
-export async function GET(_: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+export async function GET(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+	const token = await getToken(request);
+
+	const c = await check({ token, sessionOnly: true });
+	if (c) return c;
+
 	const id = (await params).id;
 
 	if (!id) {
@@ -38,66 +45,38 @@ export async function GET(_: NextRequest, { params }: { params: Promise<{ id: st
 	const now = Date.now();
 	const cached = userCache.get(id);
 
-	// ✅ use cache
 	if (cached && cached.expiresAt > now) {
-		return NextResponse.json(
-			{
-				user: cached.data,
-				cached: true,
-				stale: false,
-				rateLimited: false,
-				cachedAt: cached.cachedAt,
-			},
-			{ status: 200 }
-		);
+		return NextResponse.json({
+			user: cached.data,
+			cached: true,
+			stale: false,
+			rateLimited: false,
+			cachedAt: cached.cachedAt,
+		});
 	}
 
 	try {
 		const response = await fetch(`https://discord.com/api/v10/users/${id}`, {
-			headers: {
-				Authorization: `Bot ${botToken}`,
-			},
+			headers: { Authorization: `Bot ${botToken}` },
 			cache: 'no-store',
 		});
 
-		// rate limit fallback
-		if (response.status === 429) {
-			if (cached?.data) {
-				return NextResponse.json(
-					{
-						user: cached.data,
-						cached: true,
-						stale: true,
-						rateLimited: true,
-						cachedAt: cached.cachedAt,
-					},
-					{ status: 200 }
-				);
-			}
-
-			const body = await response.json().catch(() => null);
-
-			return NextResponse.json(
-				{
-					message: body?.message ?? 'Discord rate limit hit and no cached user is available.',
-					rateLimited: true,
-				},
-				{ status: 429 }
-			);
+		if (response.status === 429 && cached?.data) {
+			return NextResponse.json({
+				user: cached.data,
+				cached: true,
+				stale: true,
+				rateLimited: true,
+				cachedAt: cached.cachedAt,
+			});
 		}
 
 		if (!response.ok) {
 			const body = await response.json().catch(() => null);
-
-			return NextResponse.json(
-				{
-					message: body?.message ?? `Failed to fetch user (${response.status})`,
-				},
-				{ status: response.status }
-			);
+			return NextResponse.json({ message: body?.message ?? `Failed (${response.status})` }, { status: response.status });
 		}
 
-		const raw = await response.json(); // 👈 EVERYTHING
+		const raw = await response.json();
 
 		userCache.set(id, {
 			data: raw,
@@ -105,35 +84,24 @@ export async function GET(_: NextRequest, { params }: { params: Promise<{ id: st
 			expiresAt: now + CACHE_TTL,
 		});
 
-		return NextResponse.json(
-			{
-				user: raw,
-				cached: false,
-				stale: false,
-				rateLimited: false,
-				cachedAt: now,
-			},
-			{ status: 200 }
-		);
+		return NextResponse.json({
+			user: raw,
+			cached: false,
+			stale: false,
+			rateLimited: false,
+			cachedAt: now,
+		});
 	} catch {
 		if (cached?.data) {
-			return NextResponse.json(
-				{
-					user: cached.data,
-					cached: true,
-					stale: true,
-					rateLimited: false,
-					cachedAt: cached.cachedAt,
-				},
-				{ status: 200 }
-			);
+			return NextResponse.json({
+				user: cached.data,
+				cached: true,
+				stale: true,
+				rateLimited: false,
+				cachedAt: cached.cachedAt,
+			});
 		}
 
-		return NextResponse.json(
-			{
-				message: 'Failed to fetch user and no cached data is available.',
-			},
-			{ status: 500 }
-		);
+		return NextResponse.json({ message: 'Failed to fetch user and no cache available.' }, { status: 500 });
 	}
 }
