@@ -13,6 +13,8 @@ type CheckOptions = {
 };
 
 export default async function check({ token, write, botId, sessionOnly }: CheckOptions = {}) {
+	if (!token) return null;
+
 	const session = await getServerSession(authOptions);
 	const db = await database('xernerx', 'tokens');
 

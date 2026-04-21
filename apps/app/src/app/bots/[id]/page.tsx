@@ -3,9 +3,11 @@
 'use client';
 
 import { AnimatePresence, motion } from 'framer-motion';
-import { ArrowLeft, BarChart3, IdCard, LucideHome, Terminal } from 'lucide-react';
+import { ArrowLeft, BarChart3, Globe, IdCard, Layers, LucideHome, Star, Terminal, Users } from 'lucide-react';
 import { useEffect, useState } from 'react';
 
+import About from '@/components/bots/About';
+import Statistics from '@/components/bots/Statistics';
 import { useSidebar } from '@/providers/SidebarProvider';
 
 type Bot = {
@@ -36,10 +38,12 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
 	const [bot, setBot] = useState<Bot | null>(null);
 	const [profile, setProfile] = useState<DiscordProfile | null>(null);
 	const [profileExists, setProfileExists] = useState<boolean | null>(null);
+	const [stats, setStats] = useState<any | null>(null);
+	const [owners, setOwners] = useState<any[]>([]);
+	const [organization, setOrganization] = useState<any | null>(null);
 
-	// =========================
-	// INIT
-	// =========================
+	/* ================= INIT ================= */
+
 	useEffect(() => {
 		(async () => {
 			setView('about');
@@ -57,15 +61,14 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
 		})();
 	}, []);
 
-	// =========================
-	// FETCH
-	// =========================
+	/* ================= FETCH ================= */
+
 	useEffect(() => {
 		if (!id) return;
 
 		(async () => {
 			try {
-				const [botRes, profileRes] = await Promise.all([fetch(`/api/v1/bots/${id}/profile`), fetch(`/api/v1/discord/users/${id}/profile`)]);
+				const [botRes, profileRes, statsRes] = await Promise.all([fetch(`/api/v1/bots/${id}/profile`), fetch(`/api/v1/discord/users/${id}/profile`), fetch(`/api/v1/bots/${id}/stats`)]);
 
 				if (profileRes.ok) {
 					const data = await profileRes.json();
@@ -82,6 +85,11 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
 				} else {
 					setBot(null);
 				}
+
+				if (statsRes.ok) {
+					const data = await statsRes.json();
+					setStats(data?.[0] ?? null);
+				}
 			} catch {
 				setBot(null);
 				setProfile(null);
@@ -92,107 +100,82 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
 		})();
 	}, [id]);
 
-	// =========================
-	// LOADING
-	// =========================
+	useEffect(() => {
+		if (!bot) return;
+
+		(async () => {
+			try {
+				// OWNERS → fetch Discord profiles
+				if (bot.owners?.length) {
+					const ownerProfiles = await Promise.all(
+						bot.owners.map(async (id) => {
+							try {
+								const res = await fetch(`/api/v1/discord/users/${id}/profile`);
+								if (!res.ok) return null;
+								const data = await res.json();
+								return data.user;
+							} catch {
+								return null;
+							}
+						})
+					);
+
+					setOwners(ownerProfiles.filter(Boolean));
+				}
+
+				// ORGANIZATION → fetch name
+				if (bot.organization) {
+					try {
+						const res = await fetch(`/api/v1/organizations/${bot.organization}/profile`);
+						if (res.ok) {
+							const data = await res.json();
+
+							setOrganization(data);
+						}
+					} catch {}
+				}
+			} catch {}
+		})();
+	}, [bot]);
+
+	/* ================= LOADING ================= */
+
 	if (loading || profileExists === null) {
-		return (
-			<div style={{ padding: '2rem' }}>
-				<motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
-					Loading...
-				</motion.div>
-			</div>
-		);
+		return <div style={{ padding: '2rem' }}>Loading...</div>;
 	}
 
 	const banner = profile?.banner && `https://cdn.discordapp.com/banners/${profile.id}/${profile.banner}?size=2048`;
 	const avatar = profile?.avatar && `https://cdn.discordapp.com/avatars/${profile.id}/${profile.avatar}.png`;
 
-	// =========================
-	// BOT NOT IN SYSTEM / DOESNT EXIST
-	// =========================
+	/* ================= NOT FOUND ================= */
+
 	if (!bot) {
-		const title = profile?.username || id;
-		const message = profileExists ? 'This bot exists but is not registered in our system.' : 'This bot does not exist.';
-
 		return (
-			<div style={{ maxWidth: '700px', margin: '0 auto', padding: '2rem' }}>
-				<motion.div
-					initial={{ opacity: 0, y: 10 }}
-					animate={{ opacity: 1, y: 0 }}
-					style={{
-						borderRadius: '1rem',
-						overflow: 'hidden',
-						border: '1px solid var(--border)',
-						background: 'var(--container)',
-					}}>
-					<div style={{ height: '140px', background: '#111' }}>
-						{banner && (
-							<img
-								src={banner}
-								style={{
-									width: '100%',
-									height: '100%',
-									objectFit: 'cover',
-									filter: 'brightness(0.5)',
-								}}
-							/>
-						)}
-					</div>
-
-					<div style={{ padding: '1.5rem', paddingTop: '3rem', position: 'relative' }}>
-						<div
-							style={{
-								position: 'absolute',
-								top: '-40px',
-								left: '1.5rem',
-								width: '80px',
-								height: '80px',
-								borderRadius: '50%',
-								border: '4px solid var(--container)',
-								overflow: 'hidden',
-								background: '#222',
-							}}>
-							{avatar && <img src={avatar} style={{ width: '100%', height: '100%' }} />}
-						</div>
-
-						<div style={{ fontSize: '1.4rem', fontWeight: 700 }}>{title}</div>
-						<div style={{ opacity: 0.6 }}>{id}</div>
-
-						<div
-							style={{
-								marginTop: '1rem',
-								padding: '0.75rem',
-								borderRadius: '0.5rem',
-								background: 'rgba(239,68,68,0.15)',
-								color: '#ef4444',
-								fontSize: '0.9rem',
-							}}>
-							{message}
-						</div>
-					</div>
-				</motion.div>
+			<div style={{ padding: '2rem' }}>
+				<div>{profile?.username || id}</div>
+				<div style={{ opacity: 0.6 }}>{id}</div>
+				<div style={{ marginTop: '1rem', color: '#ef4444' }}>{profileExists ? 'Bot exists but is not registered.' : 'Bot does not exist.'}</div>
 			</div>
 		);
 	}
 
-	// =========================
-	// MAIN PAGE
-	// =========================
+	/* ================= MAIN ================= */
+
 	return (
-		<div style={{ maxWidth: '900px', margin: '0 auto', padding: '2rem' }}>
+		<div style={{ width: '100%', padding: '2rem' }}>
 			{/* HEADER */}
 			<motion.div
 				initial={{ opacity: 0, y: 10 }}
 				animate={{ opacity: 1, y: 0 }}
-				transition={{ duration: 0.25 }}
 				style={{
+					position: 'relative',
 					borderRadius: '1rem',
 					overflow: 'hidden',
 					border: '1px solid var(--border)',
 					background: 'var(--container)',
 				}}>
-				<div style={{ height: '180px', background: '#111' }}>
+				{/* BANNER */}
+				<div style={{ height: '220px', position: 'relative', background: '#111' }}>
 					{banner && (
 						<img
 							src={banner}
@@ -200,71 +183,209 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
 								width: '100%',
 								height: '100%',
 								objectFit: 'cover',
-								filter: 'brightness(0.6)',
+								filter: 'brightness(0.55)',
 							}}
 						/>
 					)}
-				</div>
 
-				<div style={{ padding: '1.5rem', paddingTop: '3rem', position: 'relative' }}>
+					{/* overlay */}
 					<div
 						style={{
 							position: 'absolute',
-							top: '-40px',
-							left: '1.5rem',
-							width: '80px',
-							height: '80px',
-							borderRadius: '50%',
-							border: '4px solid var(--container)',
-							overflow: 'hidden',
-							background: '#222',
+							inset: 0,
+							background: 'linear-gradient(to bottom, rgba(0,0,0,0.2), rgba(0,0,0,0.75))',
+						}}
+					/>
+
+					{/* TOP RIGHT */}
+					<div
+						style={{
+							position: 'absolute',
+							top: '1rem',
+							right: '1rem',
+							display: 'flex',
+							gap: '0.5rem',
+							fontSize: '0.75rem',
 						}}>
-						{avatar && <img src={avatar} style={{ width: '100%', height: '100%' }} />}
+						<span style={{ opacity: 0.7 }}>{bot.privacy}</span>
 					</div>
 
-					<div style={{ fontSize: '1.5rem', fontWeight: 700 }}>{profile?.username || bot.id}</div>
-					<div style={{ opacity: 0.6 }}>{bot.id}</div>
+					{/* BOTTOM LEFT */}
+					<div
+						style={{
+							position: 'absolute',
+							bottom: '1rem',
+							left: '1rem',
+							display: 'flex',
+							alignItems: 'center',
+							gap: '0.75rem',
+						}}>
+						{/* AVATAR */}
+						<div
+							style={{
+								width: '64px',
+								height: '64px',
+								borderRadius: '50%',
+								overflow: 'hidden',
+								border: '3px solid rgba(255,255,255,0.15)',
+								background: '#222',
+							}}>
+							{avatar && <img src={avatar} style={{ width: '100%', height: '100%' }} />}
+						</div>
 
-					<div style={{ marginTop: '0.5rem', display: 'flex', gap: '0.5rem' }}>
-						{bot.verified && <span style={{ color: '#22c55e', fontSize: '0.8rem' }}>Verified</span>}
-						<span style={{ fontSize: '0.8rem', opacity: 0.7 }}>{bot.privacy}</span>
+						{/* TEXT */}
+						<div>
+							{/* NAME + VERIFIED */}
+							<div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+								<div style={{ fontSize: '1.25rem', fontWeight: 600 }}>{profile?.username || bot.id}</div>
+
+								{bot.verified && (
+									<span
+										style={{
+											fontSize: '0.65rem',
+											padding: '0.15rem 0.4rem',
+											borderRadius: '999px',
+											background: 'rgba(34,197,94,0.15)',
+											color: '#22c55e',
+											border: '1px solid rgba(34,197,94,0.3)',
+										}}>
+										Verified
+									</span>
+								)}
+							</div>
+
+							{/* ID */}
+							<div style={{ fontSize: '0.75rem', opacity: 0.6 }}>{bot.id}</div>
+
+							{/* ORG + OWNERS */}
+							<div
+								style={{
+									marginTop: '0.4rem',
+									display: 'flex',
+									flexDirection: 'column',
+									gap: '0.25rem',
+								}}>
+								{/* ORGANIZATION */}
+								{organization && (
+									<div
+										style={{
+											fontSize: '0.7rem',
+											opacity: 0.75,
+											fontWeight: 500,
+										}}>
+										{organization.name}
+									</div>
+								)}
+
+								{/* OWNERS */}
+								{owners.length > 0 && (
+									<div
+										style={{
+											display: 'flex',
+											gap: '0.35rem',
+											flexWrap: 'wrap',
+										}}>
+										{owners.slice(0, 3).map((owner) => {
+											const avatar = owner.avatar ? `https://cdn.discordapp.com/avatars/${owner.id}/${owner.avatar}.png` : null;
+
+											return (
+												<div
+													key={owner.id}
+													style={{
+														display: 'flex',
+														alignItems: 'center',
+														gap: '0.3rem',
+														padding: '0.15rem 0.35rem',
+														borderRadius: '999px',
+														background: 'rgba(255,255,255,0.06)',
+														fontSize: '0.65rem',
+														opacity: 0.85,
+													}}>
+													<div
+														style={{
+															width: '14px',
+															height: '14px',
+															borderRadius: '50%',
+															overflow: 'hidden',
+															background: '#222',
+														}}>
+														{avatar && <img src={avatar} style={{ width: '100%', height: '100%' }} />}
+													</div>
+
+													<span>{owner.username}</span>
+												</div>
+											);
+										})}
+
+										{owners.length > 3 && (
+											<div
+												style={{
+													fontSize: '0.65rem',
+													opacity: 0.6,
+													display: 'flex',
+													alignItems: 'center',
+												}}>
+												+{owners.length - 3}
+											</div>
+										)}
+									</div>
+								)}
+							</div>
+						</div>
 					</div>
+
+					{/* BOTTOM RIGHT: STATS */}
+					{stats && (
+						<div
+							style={{
+								position: 'absolute',
+								bottom: '1rem',
+								right: '1rem',
+								display: 'flex',
+								gap: '1rem',
+								fontSize: '0.75rem',
+								opacity: 0.85,
+							}}>
+							<div style={{ display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
+								<Globe size={14} style={{ opacity: 0.6 }} />
+								{stats.guildCount.toLocaleString()}
+							</div>
+
+							<div style={{ display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
+								<Users size={14} style={{ opacity: 0.6 }} />
+								{stats.userCount.toLocaleString()}
+							</div>
+
+							<div style={{ display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
+								<Layers size={14} style={{ opacity: 0.6 }} />
+								{stats.shardCount}
+							</div>
+
+							<div style={{ display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
+								<Star size={14} style={{ opacity: 0.6 }} />
+								{stats.voteCount}
+							</div>
+						</div>
+					)}
 				</div>
 			</motion.div>
 
-			{/* VIEWS */}
+			{/* CONTENT */}
 			<div style={{ marginTop: '1.5rem' }}>
 				<AnimatePresence mode='wait'>
-					<motion.div key={view} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} transition={{ duration: 0.2 }}>
-						{view === 'about' && (
-							<>
-								<h2>Description</h2>
-								<p>{bot.description || 'No description provided.'}</p>
+					<motion.div key={view} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }}>
+						{view === 'about' && <About bot={bot} />}
 
-								{bot.info && (
-									<>
-										<h2 style={{ marginTop: '1rem' }}>About</h2>
-										<p>{bot.info}</p>
-									</>
-								)}
-							</>
-						)}
-
-						{view === 'statistics' && <div style={{ opacity: 0.6 }}>Statistics coming soon.</div>}
+						{view === 'statistics' && <Statistics id={id!} />}
 
 						{view === 'commands' && (
 							<>
 								<h2>Commands</h2>
-
 								{bot.commands?.length ? (
 									<div style={{ display: 'grid', gap: '0.5rem' }}>
 										{bot.commands.map((cmd) => (
-											<motion.div
+											<div
 												key={cmd.id}
-												whileHover={{ scale: 1.02 }}
-												whileTap={{ scale: 0.98 }}
-												initial={{ opacity: 0, y: 6 }}
-												animate={{ opacity: 1, y: 0 }}
 												style={{
 													padding: '0.75rem',
 													borderRadius: '0.5rem',
@@ -273,7 +394,7 @@ export default function Page({ params }: { params: Promise<{ id: string }> }) {
 												}}>
 												<div style={{ fontWeight: 600 }}>{cmd.name}</div>
 												<div style={{ fontSize: '0.8rem', opacity: 0.7 }}>{cmd.description}</div>
-											</motion.div>
+											</div>
 										))}
 									</div>
 								) : (

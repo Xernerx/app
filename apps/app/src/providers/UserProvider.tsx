@@ -4,9 +4,6 @@
 
 import { createContext, useContext, useEffect, useState } from 'react';
 
-import { authOptions } from '@/lib/schema/auth';
-import database from '@/lib/database';
-import { getServerSession } from 'next-auth';
 import { useSession } from 'next-auth/react';
 import { useToast } from './ToastProvider';
 
@@ -21,16 +18,14 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
 	const [user, setUser] = useState<User>();
 
 	useEffect(() => {
-		if (session) toast('Fetching user info', 'info');
-	}, [session]);
+		toast('Fetching user info', 'info');
+	}, []);
 
 	useEffect(() => {
 		if (status !== 'authenticated' || !session) return;
 
 		(async () => {
-			const discord = await fetch('https://discord.com/api/users/@me', {
-				headers: { Authorization: `Bearer ${session.accessToken}` },
-			}).then((res) => res.json());
+			const discord = await fetch('/api/v1/discord/users/me/profile').then((res) => res.json());
 
 			const profile = await fetch(`/api/v1/users/${session.user.id}/profile`).then((res) => res.json());
 

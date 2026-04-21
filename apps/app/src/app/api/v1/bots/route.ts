@@ -12,6 +12,8 @@ import getToken from '@/lib/functions/getToken';
 import validate from '@/lib/functions/validate';
 import { z } from 'zod';
 
+/* ========================= SCHEMA ========================= */
+
 const querySchema = z.object({
 	all: z
 		.enum(['true', 'false'])
@@ -19,6 +21,8 @@ const querySchema = z.object({
 		.transform((v) => v === 'true'),
 	privacy: z.enum(['public', 'private', 'limited']).optional(),
 });
+
+/* ========================= GET ========================= */
 
 export async function GET(request: NextRequest) {
 	const token = await getToken(request);
@@ -34,14 +38,13 @@ export async function GET(request: NextRequest) {
 
 	const { all, privacy } = result.data;
 
-	const db = await database('xernerx', 'profiles');
+	const profilesDb = await database('xernerx', 'profiles');
 
 	const filter: Record<string, any> = {};
 
-	// --- ACCESS CONTROL ---
+	/* ================= ACCESS CONTROL ================= */
 
 	if (session) {
-		// session users can access their own or all (depending on `all`)
 		if (!all) {
 			filter.owners = id;
 		}
@@ -50,13 +53,48 @@ export async function GET(request: NextRequest) {
 			filter.privacy = privacy;
 		}
 	} else {
-		// token-based access → public only, no exceptions
+		// token → public only
 		filter.privacy = 'public';
 	}
 
-	// --- QUERY ---
+	/* ================= FETCH BOTS ================= */
 
-	const bots = await db.bot.find(filter).select('id description privacy').lean();
+	const bots = await profilesDb.bot.find(filter).select('id description privacy').lean();
 
-	return NextResponse.json(bots, { status: 200 });
+	// nothing to enrich
+	if (!bots.length) {
+		return NextResponse.json([], { status: 200 });
+	}
+
+	/* ================= FETCH STATS ================= */
+
+	const statsDb = await database('xernerx', 'stats');
+
+	const stats = await statsDb.bot.aggregate([
+		{
+			$match: {
+				id: { $in: bots.map((b: any) => b.id) },
+			},
+		},
+		{ $sort: { timestamp: -1 } },
+		{
+			$group: {
+				_id: '$id',
+				latest: { $first: '$$ROOT' },
+			},
+		},
+	]);
+
+	/* ================= MAP ================= */
+
+	const statsMap = new Map(stats.map((s: any) => [s._id, s.latest]));
+
+	const enrichedBots = bots.map((bot: any) => ({
+		...bot,
+		stats: statsMap.get(bot.id) ?? null,
+	}));
+
+	/* ================= RESPONSE ================= */
+
+	return NextResponse.json(enrichedBots, { status: 200 });
 }

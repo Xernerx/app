@@ -3,7 +3,9 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 
+import { authOptions } from '@/lib/schema/auth';
 import check from '@/lib/functions/check';
+import { getServerSession } from 'next-auth';
 import getToken from '@/lib/functions/getToken';
 
 type CacheEntry = {
@@ -34,6 +36,18 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
 
 	if (!id) {
 		return NextResponse.json({ message: 'Missing user id.' }, { status: 400 });
+	}
+
+	if (id === 'me') {
+		const session = await getServerSession(authOptions);
+
+		console.log(session);
+
+		const discord = await fetch('https://discord.com/api/users/@me', {
+			headers: { Authorization: `Bearer ${session?.accessToken}` },
+		}).then((res) => res.json());
+
+		return NextResponse.json(discord);
 	}
 
 	const botToken = process.env.DISCORD_CLIENT_TOKEN;

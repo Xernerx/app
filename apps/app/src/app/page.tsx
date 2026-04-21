@@ -4,6 +4,8 @@
 import { Compass, Layers, LayoutDashboard, Search, Shield, ShieldCheck } from 'lucide-react';
 import { useEffect, useState } from 'react';
 
+import Banner from '@/../public/banner.svg';
+import Link from 'next/link';
 import { Roles } from '@/lib/roles';
 import { motion } from 'framer-motion';
 import { usePlatform } from '@/providers/PlatformProvider';
@@ -74,18 +76,60 @@ export default function Home() {
 				/>
 
 				<div className='relative flex flex-col gap-6'>
-					<div className='flex flex-col gap-2'>
-						<h1 className='text-3xl font-semibold tracking-tight' style={{ color: 'var(--text-main)' }}>
-							Xernerx App
-						</h1>
-
-						<p
-							className='max-w-xl text-sm leading-6'
+					<div
+						className='relative overflow-hidden rounded-2xl border'
+						style={{
+							borderColor: 'var(--border)',
+							background: 'var(--bg-panel)',
+							height: 'clamp(260px, 38vh, 360px)', // ← bigger + responsive
+						}}>
+						{/* glow */}
+						<div
+							className='absolute inset-0'
 							style={{
-								color: 'color-mix(in srgb, var(--text-main) 65%, transparent)',
+								background: 'radial-gradient(circle at top right, color-mix(in srgb, var(--accent) 22%, transparent), transparent 55%)',
+							}}
+						/>
+
+						{/* banner */}
+						<div
+							className='absolute inset-0 flex items-center justify-center'
+							style={{
+								color: 'var(--accent)',
+								opacity: 0.95,
 							}}>
-							Manage bots, servers, and organizations in one place. Clean, structured, and not held together by duct tape. Mostly.
-						</p>
+							<Banner className='h-[65%] w-auto' />
+						</div>
+
+						{/* overlay */}
+						<div
+							className='absolute inset-0'
+							style={{
+								background: 'linear-gradient(to bottom, rgba(0,0,0,0.05), rgba(0,0,0,0.7))',
+							}}
+						/>
+
+						{/* text */}
+						<div className='relative flex h-full items-end px-8 pb-8'>
+							<div className='flex flex-col'>
+								<span
+									className='text-2xl font-semibold'
+									style={{
+										color: '#fff',
+										textShadow: '0 3px 18px rgba(0,0,0,0.7)',
+									}}>
+									<Link href={process.env.NEXT_PUBLIC_APP_URL || 'https://www.xernerx.com'}>Xernerx</Link>
+								</span>
+
+								<span
+									className='text-sm'
+									style={{
+										color: 'rgba(255,255,255,0.75)',
+									}}>
+									Manage bots, servers, and organizations
+								</span>
+							</div>
+						</div>
 					</div>
 
 					{/* SEARCH */}
@@ -112,19 +156,19 @@ export default function Home() {
 				{[
 					{
 						label: 'Explore',
-						desc: 'Browse public bots and servers',
+						desc: 'Discover bots and servers',
 						icon: <Compass className='h-5 w-5' />,
 						href: '/explore',
 					},
 					{
 						label: 'Dashboard',
-						desc: 'Manage your servers and our services for your servers',
+						desc: 'Manage your servers and everything connected to them',
 						icon: <LayoutDashboard className='h-5 w-5' />,
 						href: '/dashboard',
 					},
 					{
 						label: 'Portal',
-						desc: 'Developer portal for developers to manage their bots and organizations',
+						desc: 'Developer tools for managing bots and organizations',
 						icon: <Layers className='h-5 w-5' />,
 						href: '/portal',
 					},
@@ -196,7 +240,7 @@ export default function Home() {
 								style={{
 									color: 'color-mix(in srgb, var(--text-main) 65%, transparent)',
 								}}>
-								Unlock dashboard, bots, and organizations.
+								Access your servers, bots, and organizations.
 							</span>
 						</div>
 
@@ -238,7 +282,7 @@ export default function Home() {
 								style={{
 									color: 'color-mix(in srgb, var(--text-main) 65%, transparent)',
 								}}>
-								Get a faster, native experience with full features.
+								Use the app with better performance and full feature access.
 							</span>
 						</div>
 

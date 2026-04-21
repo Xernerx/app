@@ -3,7 +3,7 @@
 'use client';
 
 import { AnimatePresence, motion } from 'framer-motion';
-import { Bot as BotIcon, LucideHome, Server } from 'lucide-react';
+import { Bot as BotIcon, Globe, Layers, LucideHome, Server, Users } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 
 import Link from 'next/link';
@@ -14,6 +14,13 @@ type Bot = {
 	id: string;
 	privacy: 'public' | 'private' | 'limited';
 	description: string;
+	stats?: {
+		timestamp: number;
+		guildCount: number;
+		userCount: number;
+		shardCount: number;
+		voteCount: number;
+	};
 };
 
 type ProfileMap = Record<string, any>;
@@ -59,12 +66,13 @@ export default function Page() {
 				initial={{ opacity: 0, y: -5 }}
 				animate={{ opacity: 1, y: 0 }}
 				style={{
-					marginBottom: '1rem',
-					padding: '0.5rem 0.75rem',
+					marginBottom: '1.25rem',
+					padding: '0.6rem 0.85rem',
 					borderRadius: '0.5rem',
 					border: '1px solid var(--border)',
 					background: 'var(--container)',
 					width: '100%',
+					fontSize: '0.9rem',
 				}}
 			/>
 
@@ -73,19 +81,28 @@ export default function Page() {
 				<motion.div key={view} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} transition={{ duration: 0.2 }}>
 					{/* ================= BOTS ================= */}
 					{view === 'Bots' && (
-						<motion.div
-							layout
+						<div
 							style={{
-								display: 'grid',
-								gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))',
-								gap: '1rem',
+								width: '100%',
+								display: 'flex',
+								justifyContent: 'center',
 							}}>
-							<AnimatePresence>
-								{filtered.map((bot) => (
-									<BotCard key={bot.id} bot={bot} profiles={profiles} setProfiles={setProfiles} />
-								))}
-							</AnimatePresence>
-						</motion.div>
+							<motion.div
+								layout
+								style={{
+									display: 'grid',
+									gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))',
+									gap: '1.25rem',
+									width: '100%',
+									maxWidth: '1400px', // 👈 controls how wide it can get
+								}}>
+								<AnimatePresence>
+									{filtered.map((bot) => (
+										<BotCard key={bot.id} bot={bot} profiles={profiles} setProfiles={setProfiles} />
+									))}
+								</AnimatePresence>
+							</motion.div>
+						</div>
 					)}
 
 					{/* ================= SERVERS ================= */}
@@ -101,7 +118,14 @@ export default function Page() {
 								textAlign: 'center',
 							}}>
 							<div style={{ fontSize: '1.2rem', fontWeight: 600 }}>Servers</div>
-							<div style={{ marginTop: '0.5rem', fontSize: '0.9rem', opacity: 0.6 }}>This is a placeholder. Nothing lives here yet. Just like your backend dreams.</div>
+							<div
+								style={{
+									marginTop: '0.5rem',
+									fontSize: '0.9rem',
+									opacity: 0.6,
+								}}>
+								This is a placeholder. Nothing lives here yet. Just like your backend dreams.
+							</div>
 						</motion.div>
 					)}
 				</motion.div>
@@ -166,6 +190,9 @@ function BotCard({ bot, profiles, setProfiles }: { bot: Bot; profiles: ProfileMa
 						border: '1px solid var(--border)',
 						background: 'var(--container)',
 						cursor: 'pointer',
+						display: 'flex',
+						flexDirection: 'column',
+						height: '100%',
 					}}>
 					{/* BANNER */}
 					<div style={{ height: '80px', position: 'relative', background: '#111' }}>
@@ -193,7 +220,15 @@ function BotCard({ bot, profiles, setProfiles }: { bot: Bot; profiles: ProfileMa
 					</div>
 
 					{/* CONTENT */}
-					<div style={{ padding: '1rem', paddingTop: '2.5rem', position: 'relative' }}>
+					<div
+						style={{
+							padding: '1rem',
+							paddingTop: '2.5rem',
+							position: 'relative',
+							display: 'flex',
+							flexDirection: 'column',
+							flexGrow: 1,
+						}}>
 						{/* AVATAR */}
 						<motion.div
 							initial={{ scale: 0.9, opacity: 0 }}
@@ -212,26 +247,71 @@ function BotCard({ bot, profiles, setProfiles }: { bot: Bot; profiles: ProfileMa
 							{avatar && <img src={avatar} style={{ width: '100%', height: '100%' }} />}
 						</motion.div>
 
+						{/* TITLE */}
 						<div style={{ fontWeight: 600 }}>{profile ? profile.username : bot.id}</div>
-						<div style={{ fontSize: '0.75rem', opacity: 0.5 }}>{bot.id}</div>
+						<div style={{ fontSize: '0.75rem', opacity: 0.45 }}>{bot.id}</div>
 
+						{/* STATS */}
+						{bot.stats && (
+							<motion.div
+								initial={{ opacity: 0 }}
+								animate={{ opacity: 1 }}
+								style={{
+									marginTop: '0.6rem', // 👈 give breathing room from ID
+									paddingTop: '0.5rem',
+									display: 'flex',
+									justifyContent: 'space-between',
+									alignItems: 'center',
+									fontSize: '0.68rem',
+									opacity: 0.6,
+								}}>
+								<div style={{ display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
+									<Globe size={12} style={{ opacity: 0.45 }} />
+									{bot.stats.guildCount.toLocaleString()}
+								</div>
+
+								<div style={{ display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
+									<Users size={12} style={{ opacity: 0.45 }} />
+									{bot.stats.userCount.toLocaleString()}
+								</div>
+
+								<div style={{ display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
+									<Layers size={12} style={{ opacity: 0.45 }} />
+									{bot.stats.shardCount.toLocaleString()}
+								</div>
+							</motion.div>
+						)}
+
+						{/* PUSH DESCRIPTION DOWN */}
+						<div style={{ flexGrow: 1 }} />
+
+						{/* DESCRIPTION */}
 						<div
 							style={{
-								marginTop: '0.75rem',
-								fontSize: '0.85rem',
-								opacity: 0.8,
+								marginTop: '0.75rem', // 👈 slightly more separation from stats block
+								fontSize: '0.82rem',
+								opacity: 0.75,
 								lineHeight: 1.4,
 								display: '-webkit-box',
 								WebkitLineClamp: 2,
 								WebkitBoxOrient: 'vertical',
 								overflow: 'hidden',
 							}}>
-							{bot.description || 'No description provided.'}
+							{bot.description}
 						</div>
 
+						{/* LOADING */}
 						<AnimatePresence>
 							{!profile && visible && (
-								<motion.div initial={{ opacity: 0 }} animate={{ opacity: 0.5 }} exit={{ opacity: 0 }} style={{ marginTop: '0.5rem', fontSize: '0.75rem' }}>
+								<motion.div
+									initial={{ opacity: 0 }}
+									animate={{ opacity: 0.5 }}
+									exit={{ opacity: 0 }}
+									style={{
+										marginTop: '0.4rem',
+										fontSize: '0.7rem',
+										opacity: 0.5,
+									}}>
 									Loading profile...
 								</motion.div>
 							)}
