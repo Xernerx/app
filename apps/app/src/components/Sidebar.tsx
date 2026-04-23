@@ -7,7 +7,6 @@ import { Clock, Clock10, Cpu, FlaskConical, Folder, Globe, IdCard, Layers, Link,
 import { useEffect, useRef, useState } from 'react';
 
 import QRCode from 'react-qr-code';
-import { it } from 'node:test';
 import uptime from '@/lib/uptime';
 import { usePlatform } from '@/providers/PlatformProvider';
 import { useRouter } from 'next/navigation';
@@ -106,46 +105,49 @@ export default function Sidebar() {
 				background: 'var(--bg-main)',
 				color: 'var(--text-main)',
 			}}>
-			<div className='flex flex-col gap-1'>
-				{/* Bottom: Navigation */}
-				{navTop.map((item, i) => {
-					return (
-						<button
-							key={`bottom-${i}`}
-							onClick={() => router.push(item.href!)}
-							className={`flex items-center rounded-md transition px-3 py-2 ${state === 'open' ? 'gap-2 justify-start' : 'justify-center'}`}
-							style={{ color: 'var(--text-main)' }}
-							onMouseEnter={(e) => {
-								e.currentTarget.style.background = 'var(--accent-hover)';
-								e.currentTarget.style.cursor = 'pointer';
-							}}
-							onMouseLeave={(e) => {
-								e.currentTarget.style.background = 'transparent';
-							}}>
-							{item.icon}
+			<div className='overflow-y-auto overflow-x-hidden'>
+				<div className='flex flex-col gap-1'>
+					{/* Bottom: Navigation */}
+					{navTop.map((item, i) => {
+						return (
+							<button
+								key={`bottom-${i}`}
+								onClick={() => router.push(item.href!)}
+								className={`flex items-center rounded-md transition px-3 py-2 ${state === 'open' ? 'gap-2 justify-start' : 'justify-center'}  w-full`}
+								style={{ color: 'var(--text-main)' }}
+								onMouseEnter={(e) => {
+									e.currentTarget.style.background = 'var(--accent-hover)';
+									e.currentTarget.style.cursor = 'pointer';
+								}}
+								onMouseLeave={(e) => {
+									e.currentTarget.style.background = 'transparent';
+								}}>
+								{item.icon || <span className='uppercase'>{item.label[0]}</span>}
 
-							<AnimatePresence>
-								{state === 'open' && (
-									<motion.span initial={{ opacity: 0, x: -6 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -6 }} transition={{ duration: 0.15 }} className='whitespace-nowrap'>
-										{item.label}
-									</motion.span>
-								)}
-							</AnimatePresence>
-						</button>
-					);
-				})}
+								<AnimatePresence>
+									{state === 'open' && (
+										<motion.span initial={{ opacity: 0, x: -6 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -6 }} transition={{ duration: 0.15 }} className='whitespace-nowrap'>
+											{item.label}
+										</motion.span>
+									)}
+								</AnimatePresence>
+							</button>
+						);
+					})}
 
-				{/* Divider */}
-				{navBottom.length > 0 && (
-					<div className='py-2 px-2'>
-						<div
-							className='h-[1px] w-full'
-							style={{
-								background: 'linear-gradient(to right, transparent, rgba(255,255,255,0.2), transparent)',
-							}}
-						/>
-					</div>
-				)}
+					{/* Divider */}
+
+					{navBottom.length > 0 && (
+						<div className='py-2 px-2 '>
+							<div
+								className='h-[1px] w-full'
+								style={{
+									background: 'linear-gradient(to right, transparent, rgba(255,255,255,0.2), transparent)',
+								}}
+							/>
+						</div>
+					)}
+				</div>
 
 				{/* BOTTOM: Actions */}
 				{navBottom.map((item, i) => {
@@ -158,7 +160,7 @@ export default function Sidebar() {
 								if (item.view) setView(item.view);
 								item.onClick?.();
 							}}
-							className={`flex items-center rounded-md transition px-3 py-2 ${state === 'open' ? 'gap-2 justify-start' : 'justify-center'}`}
+							className={`flex items-center rounded-md transition px-3 py-2 ${state === 'open' ? 'gap-2 justify-start' : 'justify-center'} w-full`}
 							style={{
 								background: active ? 'var(--accent)' : 'transparent',
 								color: active ? '#fff' : 'var(--text-main)',
@@ -172,7 +174,7 @@ export default function Sidebar() {
 							onMouseLeave={(e) => {
 								if (!active) e.currentTarget.style.background = 'transparent';
 							}}>
-							{item.icon}
+							{item.icon || <span className='uppercase'>{item.label[0]}</span>}
 
 							<AnimatePresence>
 								{state === 'open' && (

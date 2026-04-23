@@ -2,7 +2,7 @@
 
 'use client';
 
-import { Bot, Building2, LucideHome } from 'lucide-react';
+import { Book, Bot, Building2, LucideHome } from 'lucide-react';
 
 import Bots from '@/components/portal/Bots';
 import Organizations from '@/components/portal/Organizations';
@@ -16,6 +16,7 @@ export default function Page() {
 		setView('bots');
 		setNavItems([
 			{ label: 'Home', icon: <LucideHome />, href: '/' },
+			{ label: 'Docs', icon: <Book />, href: 'docs' },
 			{ label: 'Bots', icon: <Bot />, onClick: () => setView('bots'), view: 'bots' },
 			{ label: 'Organizations', icon: <Building2 />, onClick: () => setView('organizations'), view: 'organizations' },
 		]);
