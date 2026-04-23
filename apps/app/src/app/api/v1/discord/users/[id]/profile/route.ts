@@ -41,8 +41,6 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
 	if (id === 'me') {
 		const session = await getServerSession(authOptions);
 
-		console.log(session);
-
 		const discord = await fetch('https://discord.com/api/users/@me', {
 			headers: { Authorization: `Bearer ${session?.accessToken}` },
 		}).then((res) => res.json());

@@ -27,6 +27,7 @@
 		"recharts": "^3.8.1",
 		"rehype-sanitize": "^6.0.0",
 		"remark-gfm": "^4.0.1",
+		"semver": "^7.7.4",
 		"systeminformation": "^5.31.5",
 		"zod": "^4.3.6"
 	},
