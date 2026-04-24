@@ -61,7 +61,7 @@ export default function Header() {
 
 						{/* TEXT */}
 						<span
-							className='ml-2 text-sm whitespace-nowrap overflow-hidden max-w-0 opacity-0 group-hover:max-w-[120px] group-hover:opacity-100 transition-all duration-200'
+							className='ml-2 text-sm whitespace-nowrap overflow-hidden max-w-0 opacity-0 group-hover:max-w-30 group-hover:opacity-100 transition-all duration-200'
 							style={{ color: 'var(--text-main)' }}>
 							Dashboard
 						</span>
