@@ -58,7 +58,10 @@ export default function Page() {
 
 		const categories = Array.from(categoriesMap.keys());
 
-		if (!view && categories.length > 0) setView(categories[0]);
+		// ✅ ensure view is valid for this doc
+		if (!view || !categories.includes(view)) {
+			setView(categories[0] ?? '');
+		}
 
 		setNavItems([
 			{ label: 'Home', icon: <LucideHome />, href: '/' },
@@ -194,18 +197,12 @@ export default function Page() {
 function DocRenderer({ item }: { item: any }) {
 	const [activeChild, setActiveChild] = useState<any>(null);
 
-	const sig = item.signatures?.[0];
+	const sigs = item.signatures ?? [];
+	const primarySig = sigs[0]; // fallback for description
 
-	const summary = sig?.comment?.summary || item.comment?.summary || [];
+	const summary = primarySig?.comment?.summary || item.comment?.summary || [];
+
 	const description = summary.map((s: any) => s.text).join('');
-
-	const returns =
-		sig?.comment?.blockTags
-			?.find((t: any) => t.tag === '@returns')
-			?.content?.map((c: any) => c.text)
-			.join('') || null;
-
-	const examples = sig?.comment?.blockTags?.filter((t: any) => t.tag === '@example') || [];
 
 	const children = item.children ?? [];
 
@@ -246,37 +243,60 @@ function DocRenderer({ item }: { item: any }) {
 			{/* DESCRIPTION */}
 			{description && <div className='text-sm opacity-80 leading-6'>{description}</div>}
 
-			{/* PARAMETERS */}
-			{sig?.parameters?.length > 0 && (
-				<div>
-					<div className='text-xs opacity-50 mb-2'>Parameters</div>
+			{/* ================= SIGNATURES (THIS IS WHAT YOU WERE MISSING) ================= */}
+			{sigs.length > 0 && (
+				<div className='flex flex-col gap-3'>
+					{sigs.map((sig: any, i: number) => {
+						const summary = sig.comment?.summary?.map((s: any) => s.text).join('') || '';
 
-					<div
-						className='grid gap-2'
-						style={{
-							gridTemplateColumns: 'repeat(2, minmax(0, 1fr))',
-						}}>
-						{sig.parameters.map((p: any) => (
-							<div
-								key={p.name}
-								className='rounded-lg px-3 py-2 border'
-								style={{
-									borderColor: 'var(--border)',
-									background: 'var(--bg-main)',
-								}}>
-								<b>{p.name}</b> <span className='opacity-60'>{renderType(p.type)}</span>
+						const returns =
+							sig.comment?.blockTags
+								?.find((t: any) => t.tag === '@returns')
+								?.content?.map((c: any) => c.text)
+								.join('') || null;
+
+						return (
+							<div className='flex flex-col gap-2'>
+								{sigs.map((sig: any, i: number) => {
+									const summary = sig.comment?.summary?.map((s: any) => s.text).join('') || '';
+
+									const returns =
+										sig.comment?.blockTags
+											?.find((t: any) => t.tag === '@returns')
+											?.content?.map((c: any) => c.text)
+											.join('') || null;
+
+									return (
+										<div key={i} className='flex flex-col gap-1 py-2'>
+											<div className='text-sm font-medium'>
+												{sig.name} <span className='opacity-50'>{sig.route}</span>
+											</div>
+
+											{summary && <div className='text-xs opacity-60'>{summary}</div>}
+
+											{sig.parameters?.length > 0 && (
+												<div className='text-xs opacity-50'>
+													{sig.parameters.map((p: any) => (
+														<div key={p.name}>
+															<b>{p.name}</b>: {renderType(p.type)}
+														</div>
+													))}
+												</div>
+											)}
+
+											{sig.type && (
+												<div className='text-xs'>
+													<span className='opacity-50'>Returns:</span> {renderType(sig.type)}
+												</div>
+											)}
+
+											{returns && <div className='text-xs opacity-50'>{returns}</div>}
+										</div>
+									);
+								})}
 							</div>
-						))}
-					</div>
-				</div>
-			)}
-
-			{/* RETURNS */}
-			{sig?.type && (
-				<div>
-					<div className='text-xs opacity-50 mb-1'>Returns</div>
-					<div className='text-sm'>{renderType(sig.type)}</div>
-					{returns && <div className='text-xs opacity-60 mt-1'>{returns}</div>}
+						);
+					})}
 				</div>
 			)}
 
@@ -289,32 +309,35 @@ function DocRenderer({ item }: { item: any }) {
 					}}>
 					{groups.map((group) => (
 						<div key={group.label} className='flex flex-col gap-2'>
-							{/* GROUP TITLE */}
 							<div className='text-xs opacity-50'>{group.label}</div>
 
-							{/* ITEMS */}
-							<div
-								className='grid gap-2'
-								style={{
-									gridTemplateColumns: 'repeat(2, minmax(0, 1fr))',
-								}}>
-								{group.items.map((child: any) => (
-									<SubItem key={child.id} item={child} active={activeChild?.id === child.id} onClick={() => setActiveChild(child)} />
-								))}
+							<div className='flex gap-6'>
+								{/* LEFT COLUMN */}
+								<div className='flex flex-col gap-2 flex-1'>
+									{group.items
+										.filter((_: any, i: number) => i % 2 === 0)
+										.map((child: any) => (
+											<SubItem key={child.id} item={child} active={activeChild?.id === child.id} onClick={() => setActiveChild(child)} />
+										))}
+								</div>
+
+								{/* RIGHT COLUMN */}
+								<div className='flex flex-col gap-2 flex-1'>
+									{group.items
+										.filter((_: any, i: number) => i % 2 === 1)
+										.map((child: any) => (
+											<SubItem key={child.id} item={child} active={activeChild?.id === child.id} onClick={() => setActiveChild(child)} />
+										))}
+								</div>
 							</div>
 						</div>
 					))}
 				</div>
 			)}
 
-			{/* ================= DETAIL PANEL ================= */}
+			{/* DETAIL */}
 			{activeChild && (
-				<div
-					className='mt-4 p-4 rounded-xl border'
-					style={{
-						borderColor: 'var(--border)',
-						background: 'var(--container)',
-					}}>
+				<div className='mt-4 pl-4 border-l' style={{ borderColor: 'var(--border)' }}>
 					<DocRenderer item={activeChild} />
 				</div>
 			)}
@@ -343,7 +366,6 @@ function SubItem({ item, onClick, active }: { item: any; onClick: () => void; ac
 			style={{
 				background: active ? 'color-mix(in srgb, var(--accent) 10%, transparent)' : 'transparent',
 			}}>
-			{/* ACTIVE INDICATOR */}
 			<div
 				className='absolute left-0 top-0 bottom-0 w-[2px] rounded'
 				style={{
@@ -351,7 +373,6 @@ function SubItem({ item, onClick, active }: { item: any; onClick: () => void; ac
 				}}
 			/>
 
-			{/* CONTENT */}
 			<div className='flex flex-col'>
 				<span className='text-sm font-medium'>{item.name}</span>
 				<span className='text-xs opacity-50'>{renderType(sig?.type || item.type)}</span>

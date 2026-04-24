@@ -19,7 +19,7 @@ export async function GET(
 	try {
 		/* ================= LOCAL ================= */
 
-		if (scope === 'local' && type === 'api') {
+		if (scope === '@xernerx' && type === 'api') {
 			const dir = path.join(process.cwd(), 'src', 'lib', 'docs', 'api');
 
 			const files = fs.readdirSync(dir);

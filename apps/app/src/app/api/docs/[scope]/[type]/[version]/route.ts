@@ -19,7 +19,7 @@ export async function GET(
 	try {
 		/* ================= LOCAL ================= */
 
-		if (scope === 'local' && type === 'api') {
+		if (scope === '@xernerx' && type === 'api') {
 			try {
 				const mod = await import(`@/lib/docs/api/${version}`);
 
