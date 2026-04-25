@@ -29,7 +29,14 @@ export default function Profile() {
 	useEffect(() => {
 		if (!user?.id) return;
 
-		setProfile(user);
+		const load = async () => {
+			const res = await fetch(`/api/v1/users/${user.id}/profile`);
+			const data = await res.json();
+			setProfile(data);
+			setLoading(false);
+		};
+
+		load();
 		setLoading(false);
 	}, [user]);
 
@@ -50,6 +57,7 @@ export default function Profile() {
 			});
 
 			const data = await res.json();
+
 			setProfile(data);
 		} catch {}
 

@@ -156,8 +156,6 @@ export async function PATCH(req: NextRequest, { params }: Params) {
 
 	const updated = await user.findOneAndUpdate({ id }, { $set: update }, { returnDocument: 'after' }).lean();
 
-	console.log(updated);
-
 	if (!updated) {
 		return NextResponse.json({ error: 'Profile not found' }, { status: 404 });
 	}
