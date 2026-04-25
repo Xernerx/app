@@ -22,6 +22,9 @@ export default function Home() {
 	const user = useUser();
 
 	const [support, setSupport] = useState(false);
+	const [results, setResults] = useState<any[]>([]);
+	const [search, setSearch] = useState('');
+	const [loadingSearch, setLoadingSearch] = useState(false);
 
 	useEffect(() => {
 		show();
@@ -146,8 +149,44 @@ export default function Home() {
 							}}
 						/>
 
-						<input type='search' placeholder='Search bots, servers, organizations...' className='w-full bg-transparent text-sm outline-none' style={{ color: 'var(--text-main)' }} />
+						<input
+							onChange={async (e) => {
+								const value = e.target.value;
+								setSearch(value);
+
+								if (!value.trim()) return setResults([]);
+
+								setLoadingSearch(true);
+
+								try {
+									const res = await fetch(`/api/search?q=${encodeURIComponent(value)}`);
+									const data = await res.json();
+
+									setResults(data.results || []);
+								} finally {
+									setLoadingSearch(false);
+								}
+							}}
+							type='search'
+							placeholder='Search bots, servers, organizations...'
+							className='w-full bg-transparent text-sm outline-none'
+							style={{ color: 'var(--text-main)' }}
+						/>
 					</div>
+					{search && (
+						<div className='mt-2 rounded-xl border overflow-hidden' style={{ borderColor: 'var(--border)', background: 'var(--bg-panel)' }}>
+							{loadingSearch && <div className='p-3 text-xs opacity-60'>Searching...</div>}
+
+							{results.map((r) => (
+								<Link key={r.id} href={r.href} className='block px-4 py-2 text-sm hover:bg-white/5'>
+									{r.label}
+									<span className='ml-2 text-xs opacity-50'>{r.type}</span>
+								</Link>
+							))}
+
+							{!loadingSearch && results.length === 0 && <div className='p-3 text-xs opacity-60'>No results</div>}
+						</div>
+					)}
 				</div>
 			</motion.div>
 

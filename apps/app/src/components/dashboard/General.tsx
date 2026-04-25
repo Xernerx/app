@@ -463,7 +463,7 @@ export default function General({ id, name }: { id?: string; name?: string }) {
 									background: 'color-mix(in srgb, #ff4d67 8%, transparent)',
 									color: 'color-mix(in srgb, var(--text-main) 78%, transparent)',
 								}}>
-								Permanently remove this guild profile from your database.
+								Delete server data for this server. Will not remove our bots.
 							</div>
 						</div>
 

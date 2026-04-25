@@ -2,8 +2,8 @@
 
 'use client';
 
-import { Globe, Link2, Terminal, Webhook } from 'lucide-react';
-import { useEffect, useState } from 'react';
+import { Globe, Link2, Loader2, Save, Terminal, Webhook } from 'lucide-react';
+import { useEffect, useMemo, useState } from 'react';
 
 import Image from 'next/image';
 import { motion } from 'framer-motion';
@@ -302,48 +302,135 @@ export default function Bots() {
 }
 
 function GeneralView({ profile, setProfile, id, orgs }: any) {
-	async function update(data: any) {
-		const res = await fetch(`/api/v1/bots/${id}/profile`, {
-			method: 'PATCH',
-			headers: { 'Content-Type': 'application/json' },
-			body: JSON.stringify(data),
-		});
+	type FormState = {
+		description: string;
+		info: string;
+		organization: string;
+		privacy: 'public' | 'private' | 'limited';
+	};
 
-		const updated = await res.json();
-		setProfile(updated);
+	function toForm(p: any): FormState {
+		return {
+			description: p.description || '',
+			info: p.info || '',
+			organization: p.organization || 'personal',
+			privacy: p.privacy || 'private',
+		};
+	}
+
+	const [baseline, setBaseline] = useState<FormState>(toForm(profile));
+	const [form, setForm] = useState<FormState>(toForm(profile));
+	const [saving, setSaving] = useState(false);
+
+	// sync when profile changes
+	useEffect(() => {
+		const next = toForm(profile);
+		setBaseline(next);
+		setForm(next);
+	}, [profile]);
+
+	const hasChanges = useMemo(() => JSON.stringify(form) !== JSON.stringify(baseline), [form, baseline]);
+
+	function updateField<K extends keyof FormState>(key: K, value: FormState[K]) {
+		setForm((prev) => ({
+			...prev,
+			[key]: value,
+		}));
+	}
+
+	function resetForm() {
+		setForm(baseline);
+	}
+
+	async function handleSave() {
+		if (!hasChanges || saving) return;
+
+		try {
+			setSaving(true);
+
+			const res = await fetch(`/api/v1/bots/${id}/profile`, {
+				method: 'PATCH',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify(form),
+			});
+
+			const updated = await res.json();
+
+			if (!res.ok) {
+				throw new Error(updated?.error || 'Failed to save');
+			}
+
+			setProfile(updated);
+
+			const next = toForm(updated);
+			setBaseline(next);
+			setForm(next);
+		} finally {
+			setSaving(false);
+		}
 	}
 
 	return (
 		<motion.div initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} className='flex flex-col gap-4'>
-			<div className='mb-4'>
+			{/* ACTIONS */}
+			<div className='flex justify-end gap-2'>
+				<motion.button
+					whileTap={{ scale: 0.98 }}
+					onClick={resetForm}
+					disabled={!hasChanges || saving}
+					className='rounded-2xl border px-4 py-2 text-sm disabled:opacity-40'
+					style={{
+						borderColor: 'var(--border)',
+						background: 'var(--bg-panel)',
+						color: 'var(--text-main)',
+					}}>
+					Reset
+				</motion.button>
+
+				<motion.button
+					whileTap={{ scale: 0.98 }}
+					onClick={handleSave}
+					disabled={!hasChanges || saving}
+					className='inline-flex items-center gap-2 rounded-2xl border px-4 py-2 text-sm disabled:opacity-40'
+					style={{
+						borderColor: hasChanges ? 'color-mix(in srgb, var(--accent) 35%, var(--border))' : 'var(--border)',
+						background: hasChanges ? 'color-mix(in srgb, var(--accent) 16%, var(--bg-panel))' : 'var(--bg-panel)',
+						color: 'var(--text-main)',
+					}}>
+					{saving ? <Loader2 className='h-4 w-4 animate-spin' /> : <Save className='h-4 w-4' />}
+					{saving ? 'Saving...' : hasChanges ? 'Save changes' : 'Saved'}
+				</motion.button>
+			</div>
+
+			{/* TITLE */}
+			<div>
 				<h4 className='text-sm font-semibold uppercase tracking-[0.18em] opacity-70'>General</h4>
 			</div>
 
+			{/* FORM */}
 			<div className='flex flex-col gap-4'>
+				<label htmlFor=''>Description</label>
 				<input
-					value={profile.description || ''}
-					onChange={(e) => update({ description: e.target.value })}
+					value={form.description}
+					onChange={(e) => updateField('description', e.target.value)}
 					placeholder='Short description'
 					className='rounded-2xl border px-4 py-3 text-sm outline-none transition'
 					style={inputStyle}
 				/>
 
+				<label htmlFor=''>Long Description</label>
 				<textarea
-					value={profile.info || ''}
-					onChange={(e) => update({ info: e.target.value })}
-					placeholder='Long description'
+					value={form.info}
+					onChange={(e) => updateField('info', e.target.value)}
+					placeholder='Long description, supports Markdown'
 					rows={6}
 					className='resize-none rounded-2xl border px-4 py-3 text-sm outline-none transition'
 					style={inputStyle}
 				/>
 
-				<select
-					value={profile.organization || 'personal'}
-					onChange={(e) => update({ organization: e.target.value })}
-					className='rounded-2xl border px-4 py-3 text-sm outline-none transition'
-					style={inputStyle}>
+				<label htmlFor=''>Organization</label>
+				<select value={form.organization} onChange={(e) => updateField('organization', e.target.value)} className='rounded-2xl border px-4 py-3 text-sm outline-none transition' style={inputStyle}>
 					<option value='personal'>Personal</option>
-
 					{orgs.map((org: any) => (
 						<option key={org._id} value={org._id}>
 							{org.name || 'Unnamed org'}
@@ -351,7 +438,12 @@ function GeneralView({ profile, setProfile, id, orgs }: any) {
 					))}
 				</select>
 
-				<select value={profile.privacy || 'private'} onChange={(e) => update({ privacy: e.target.value })} className='rounded-2xl border px-4 py-3 text-sm outline-none transition' style={inputStyle}>
+				<label htmlFor=''>Privacy</label>
+				<select
+					value={form.privacy}
+					onChange={(e) => updateField('privacy', e.target.value as FormState['privacy'])}
+					className='rounded-2xl border px-4 py-3 text-sm outline-none transition'
+					style={inputStyle}>
 					<option value='public'>Public</option>
 					<option value='private'>Private</option>
 					<option value='limited'>Limited</option>
@@ -362,38 +454,122 @@ function GeneralView({ profile, setProfile, id, orgs }: any) {
 }
 
 function LinksView({ profile, setProfile, id }: any) {
-	async function update(key: string, value: string) {
-		const res = await fetch(`/api/v1/bots/${id}/profile`, {
-			method: 'PATCH',
-			headers: { 'Content-Type': 'application/json' },
-			body: JSON.stringify({
-				links: {
-					...profile.links,
-					[key]: value,
-				},
-			}),
-		});
+	type LinksState = Record<string, string>;
 
-		const updated = await res.json();
-		setProfile(updated);
+	const KEYS = ['invite', 'support', 'community', 'github', 'website', 'privacy', 'terms'];
+
+	function toState(p: any): LinksState {
+		const base: LinksState = {};
+		for (const k of KEYS) {
+			base[k] = p.links?.[k] || '';
+		}
+		return base;
 	}
 
-	const links = profile.links || {};
+	const [baseline, setBaseline] = useState<LinksState>(toState(profile));
+	const [form, setForm] = useState<LinksState>(toState(profile));
+	const [saving, setSaving] = useState(false);
+
+	// sync when profile changes
+	useEffect(() => {
+		const next = toState(profile);
+		setBaseline(next);
+		setForm(next);
+	}, [profile]);
+
+	const hasChanges = useMemo(() => JSON.stringify(form) !== JSON.stringify(baseline), [form, baseline]);
+
+	function updateField(key: string, value: string) {
+		setForm((prev) => ({
+			...prev,
+			[key]: value,
+		}));
+	}
+
+	function resetForm() {
+		setForm(baseline);
+	}
+
+	async function handleSave() {
+		if (!hasChanges || saving) return;
+
+		try {
+			setSaving(true);
+
+			const res = await fetch(`/api/v1/bots/${id}/profile`, {
+				method: 'PATCH',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({
+					links: form,
+				}),
+			});
+
+			const updated = await res.json();
+
+			if (!res.ok) {
+				throw new Error(updated?.error || 'Failed to save links');
+			}
+
+			setProfile(updated);
+
+			const next = toState(updated);
+			setBaseline(next);
+			setForm(next);
+		} finally {
+			setSaving(false);
+		}
+	}
 
 	return (
-		<motion.div initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }}>
-			<h4 className='mb-4 text-sm font-semibold uppercase tracking-[0.18em] opacity-70'>Links</h4>
+		<motion.div initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} className='flex flex-col gap-4'>
+			{/* ACTIONS */}
+			<div className='flex justify-end gap-2'>
+				<motion.button
+					whileTap={{ scale: 0.98 }}
+					onClick={resetForm}
+					disabled={!hasChanges || saving}
+					className='rounded-2xl border px-4 py-2 text-sm disabled:opacity-40'
+					style={{
+						borderColor: 'var(--border)',
+						background: 'var(--bg-panel)',
+						color: 'var(--text-main)',
+					}}>
+					Reset
+				</motion.button>
 
+				<motion.button
+					whileTap={{ scale: 0.98 }}
+					onClick={handleSave}
+					disabled={!hasChanges || saving}
+					className='inline-flex items-center gap-2 rounded-2xl border px-4 py-2 text-sm disabled:opacity-40'
+					style={{
+						borderColor: hasChanges ? 'color-mix(in srgb, var(--accent) 35%, var(--border))' : 'var(--border)',
+						background: hasChanges ? 'color-mix(in srgb, var(--accent) 16%, var(--bg-panel))' : 'var(--bg-panel)',
+						color: 'var(--text-main)',
+					}}>
+					{saving ? <Loader2 className='h-4 w-4 animate-spin' /> : <Save className='h-4 w-4' />}
+					{saving ? 'Saving...' : hasChanges ? 'Save changes' : 'Saved'}
+				</motion.button>
+			</div>
+
+			{/* TITLE */}
+			<h4 className='text-sm font-semibold uppercase tracking-[0.18em] opacity-70'>Links</h4>
+
+			{/* FORM */}
 			<div className='grid gap-4'>
-				{['invite', 'support', 'community', 'github', 'website', 'privacy', 'terms'].map((k) => (
-					<input
-						key={k}
-						value={links[k] || ''}
-						onChange={(e) => update(k, e.target.value)}
-						placeholder={k}
-						className='rounded-2xl border px-4 py-3 text-sm outline-none transition'
-						style={inputStyle}
-					/>
+				{KEYS.map((k) => (
+					<>
+						<label htmlFor={k}>{k}</label>
+						<input
+							name={k}
+							key={k}
+							value={form[k]}
+							onChange={(e) => updateField(k, e.target.value)}
+							placeholder={k}
+							className='rounded-2xl border px-4 py-3 text-sm outline-none transition'
+							style={inputStyle}
+						/>
+					</>
 				))}
 			</div>
 		</motion.div>
@@ -401,26 +577,37 @@ function LinksView({ profile, setProfile, id }: any) {
 }
 
 function WebhooksView({ profile, setProfile, id }: any) {
-	const [hooks, setHooks] = useState<any[]>([]);
+	type Hook = {
+		name: string;
+		url: string;
+		description: string;
+		data: string;
+	};
 
-	// sync once when profile changes
-	useEffect(() => {
-		setHooks(profile.hooks || []);
-	}, [profile.hooks]);
-
-	async function save(next: any[]) {
-		const res = await fetch(`/api/v1/bots/${id}/profile`, {
-			method: 'PATCH',
-			headers: { 'Content-Type': 'application/json' },
-			body: JSON.stringify({ hooks: next }),
-		});
-
-		const updated = await res.json();
-		setProfile(updated);
+	function toState(p: any): Hook[] {
+		return (p.hooks || []).map((h: any) => ({
+			name: h.name || '',
+			url: h.url || '',
+			description: h.description || '',
+			data: h.data || '',
+		}));
 	}
 
-	function updateField(i: number, key: string, value: string) {
-		setHooks((prev) => {
+	const [baseline, setBaseline] = useState<Hook[]>(toState(profile));
+	const [form, setForm] = useState<Hook[]>(toState(profile));
+	const [saving, setSaving] = useState(false);
+
+	// sync when profile changes
+	useEffect(() => {
+		const next = toState(profile);
+		setBaseline(next);
+		setForm(next);
+	}, [profile]);
+
+	const hasChanges = useMemo(() => JSON.stringify(form) !== JSON.stringify(baseline), [form, baseline]);
+
+	function updateField(i: number, key: keyof Hook, value: string) {
+		setForm((prev) => {
 			const next = [...prev];
 			next[i] = { ...next[i], [key]: value };
 			return next;
@@ -428,17 +615,79 @@ function WebhooksView({ profile, setProfile, id }: any) {
 	}
 
 	function addHook() {
-		setHooks((prev) => [...prev, { name: '', url: '', description: '', data: '' }]);
+		setForm((prev) => [...prev, { name: '', url: '', description: '', data: '' }]);
 	}
 
 	function removeHook(i: number) {
-		setHooks((prev) => prev.filter((_, index) => index !== i));
+		setForm((prev) => prev.filter((_, index) => index !== i));
+	}
+
+	function resetForm() {
+		setForm(baseline);
+	}
+
+	async function handleSave() {
+		if (!hasChanges || saving) return;
+
+		try {
+			setSaving(true);
+
+			const res = await fetch(`/api/v1/bots/${id}/profile`, {
+				method: 'PATCH',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({ hooks: form }),
+			});
+
+			const updated = await res.json();
+
+			if (!res.ok) {
+				throw new Error(updated?.error || 'Failed to save webhooks');
+			}
+
+			setProfile(updated);
+
+			const next = toState(updated);
+			setBaseline(next);
+			setForm(next);
+		} finally {
+			setSaving(false);
+		}
 	}
 
 	return (
 		<motion.div initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} className='flex flex-col gap-4'>
+			{/* ACTIONS */}
+			<div className='flex justify-end gap-2'>
+				<motion.button
+					whileTap={{ scale: 0.98 }}
+					onClick={resetForm}
+					disabled={!hasChanges || saving}
+					className='rounded-2xl border px-4 py-2 text-sm disabled:opacity-40'
+					style={{
+						borderColor: 'var(--border)',
+						background: 'var(--bg-panel)',
+						color: 'var(--text-main)',
+					}}>
+					Reset
+				</motion.button>
+
+				<motion.button
+					whileTap={{ scale: 0.98 }}
+					onClick={handleSave}
+					disabled={!hasChanges || saving}
+					className='inline-flex items-center gap-2 rounded-2xl border px-4 py-2 text-sm disabled:opacity-40'
+					style={{
+						borderColor: hasChanges ? 'color-mix(in srgb, var(--accent) 35%, var(--border))' : 'var(--border)',
+						background: hasChanges ? 'color-mix(in srgb, var(--accent) 16%, var(--bg-panel))' : 'var(--bg-panel)',
+						color: 'var(--text-main)',
+					}}>
+					{saving ? <Loader2 className='h-4 w-4 animate-spin' /> : <Save className='h-4 w-4' />}
+					{saving ? 'Saving...' : hasChanges ? 'Save changes' : 'Saved'}
+				</motion.button>
+			</div>
+
 			{/* LIST */}
-			{hooks.map((h: any, i: number) => (
+			{form.map((h, i) => (
 				<motion.div
 					key={i}
 					initial={{ opacity: 0, y: 6 }}
@@ -449,7 +698,11 @@ function WebhooksView({ profile, setProfile, id }: any) {
 						background: 'color-mix(in srgb, var(--bg-panel) 78%, transparent)',
 					}}>
 					<div className='mb-4 flex items-center justify-between'>
-						<span className='text-sm font-semibold uppercase tracking-[0.18em]' style={{ color: 'color-mix(in srgb, var(--text-main) 64%, transparent)' }}>
+						<span
+							className='text-sm font-semibold uppercase tracking-[0.18em]'
+							style={{
+								color: 'color-mix(in srgb, var(--text-main) 64%, transparent)',
+							}}>
 							Webhook {i + 1}
 						</span>
 
@@ -490,53 +743,130 @@ function WebhooksView({ profile, setProfile, id }: any) {
 				</motion.div>
 			))}
 
-			{/* ACTIONS */}
-			<div className='flex gap-2'>
-				<button
-					onClick={addHook}
-					className='rounded-2xl border px-4 py-3 text-sm font-medium transition hover:scale-[1.02]'
-					style={{
-						borderColor: 'color-mix(in srgb, var(--accent) 30%, var(--border))',
-						background: 'color-mix(in srgb, var(--accent) 12%, transparent)',
-					}}>
-					+ Create webhook
-				</button>
-
-				<button
-					onClick={() => save(hooks)}
-					className='rounded-2xl border px-4 py-3 text-sm font-medium transition hover:scale-[1.02]'
-					style={{
-						borderColor: 'var(--border)',
-						background: 'color-mix(in srgb, var(--bg-panel) 76%, transparent)',
-					}}>
-					Save changes
-				</button>
-			</div>
+			{/* ADD BUTTON */}
+			<button
+				onClick={addHook}
+				className='rounded-2xl border px-4 py-3 text-sm font-medium transition hover:scale-[1.02]'
+				style={{
+					borderColor: 'color-mix(in srgb, var(--accent) 30%, var(--border))',
+					background: 'color-mix(in srgb, var(--accent) 12%, transparent)',
+				}}>
+				+ Create webhook
+			</button>
 		</motion.div>
 	);
 }
 
 function CommandsView({ profile, setProfile, id }: any) {
-	const commands = profile.commands || [];
+	type Command = {
+		id: string;
+		name: string;
+		description: string;
+	};
 
-	async function update(next: any[]) {
-		const res = await fetch(`/api/v1/bots/${id}/profile`, {
-			method: 'PATCH',
-			headers: { 'Content-Type': 'application/json' },
-			body: JSON.stringify({ commands: next }),
+	function toState(p: any): Command[] {
+		return (p.commands || []).map((c: any) => ({
+			id: c.id || crypto.randomUUID(),
+			name: c.name || '',
+			description: c.description || '',
+		}));
+	}
+
+	const [baseline, setBaseline] = useState<Command[]>(toState(profile));
+	const [form, setForm] = useState<Command[]>(toState(profile));
+	const [saving, setSaving] = useState(false);
+
+	// sync when profile changes
+	useEffect(() => {
+		const next = toState(profile);
+		setBaseline(next);
+		setForm(next);
+	}, [profile]);
+
+	const hasChanges = useMemo(() => JSON.stringify(form) !== JSON.stringify(baseline), [form, baseline]);
+
+	function updateField(i: number, key: keyof Command, value: string) {
+		setForm((prev) => {
+			const next = [...prev];
+			next[i] = { ...next[i], [key]: value };
+			return next;
 		});
-
-		const updated = await res.json();
-		setProfile(updated);
 	}
 
 	function addCommand() {
-		update([...commands, { id: crypto.randomUUID(), name: '', description: '' }]);
+		setForm((prev) => [...prev, { id: crypto.randomUUID(), name: '', description: '' }]);
+	}
+
+	function removeCommand(i: number) {
+		setForm((prev) => prev.filter((_, index) => index !== i));
+	}
+
+	function resetForm() {
+		setForm(baseline);
+	}
+
+	async function handleSave() {
+		if (!hasChanges || saving) return;
+
+		try {
+			setSaving(true);
+
+			const res = await fetch(`/api/v1/bots/${id}/profile`, {
+				method: 'PATCH',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({ commands: form }),
+			});
+
+			const updated = await res.json();
+
+			if (!res.ok) {
+				throw new Error(updated?.error || 'Failed to save commands');
+			}
+
+			setProfile(updated);
+
+			const next = toState(updated);
+			setBaseline(next);
+			setForm(next);
+		} finally {
+			setSaving(false);
+		}
 	}
 
 	return (
 		<motion.div initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} className='flex flex-col gap-4'>
-			{commands.map((c: any, i: number) => (
+			{/* ACTIONS */}
+			<div className='flex justify-end gap-2'>
+				<motion.button
+					whileTap={{ scale: 0.98 }}
+					onClick={resetForm}
+					disabled={!hasChanges || saving}
+					className='rounded-2xl border px-4 py-2 text-sm disabled:opacity-40'
+					style={{
+						borderColor: 'var(--border)',
+						background: 'var(--bg-panel)',
+						color: 'var(--text-main)',
+					}}>
+					Reset
+				</motion.button>
+
+				<motion.button
+					whileTap={{ scale: 0.98 }}
+					onClick={handleSave}
+					disabled={!hasChanges || saving}
+					className='inline-flex items-center gap-2 rounded-2xl border px-4 py-2 text-sm disabled:opacity-40'
+					style={{
+						borderColor: hasChanges ? 'color-mix(in srgb, var(--accent) 35%, var(--border))' : 'var(--border)',
+						background: hasChanges ? 'color-mix(in srgb, var(--accent) 16%, var(--bg-panel))' : 'var(--bg-panel)',
+						color: 'var(--text-main)',
+					}}>
+					{saving ? <Loader2 className='h-4 w-4 animate-spin' /> : <Save className='h-4 w-4' />}
+					{saving ? 'Saving...' : hasChanges ? 'Save changes' : 'Saved'}
+				</motion.button>
+			</div>
+
+			{/* LIST */}
+			{form.map((c, i) => (
 				<div
 					key={c.id}
 					className='rounded-3xl border p-4'
@@ -544,26 +874,20 @@ function CommandsView({ profile, setProfile, id }: any) {
 						borderColor: 'var(--border)',
 						background: 'color-mix(in srgb, var(--bg-panel) 78%, transparent)',
 					}}>
+					<div className='mb-3 flex justify-between items-center'>
+						<span className='text-xs opacity-60'>Command {i + 1}</span>
+
+						<button onClick={() => removeCommand(i)} className='text-xs opacity-60 hover:opacity-100 transition'>
+							Remove
+						</button>
+					</div>
+
 					<div className='grid gap-3'>
-						<input
-							value={c.name}
-							onChange={(e) => {
-								const next = [...commands];
-								next[i].name = e.target.value;
-								update(next);
-							}}
-							placeholder='Command name'
-							className='rounded-2xl border px-4 py-3 text-sm'
-							style={inputStyle}
-						/>
+						<input value={c.name} onChange={(e) => updateField(i, 'name', e.target.value)} placeholder='Command name' className='rounded-2xl border px-4 py-3 text-sm' style={inputStyle} />
 
 						<input
 							value={c.description}
-							onChange={(e) => {
-								const next = [...commands];
-								next[i].description = e.target.value;
-								update(next);
-							}}
+							onChange={(e) => updateField(i, 'description', e.target.value)}
 							placeholder='Description'
 							className='rounded-2xl border px-4 py-3 text-sm'
 							style={inputStyle}
@@ -572,6 +896,7 @@ function CommandsView({ profile, setProfile, id }: any) {
 				</div>
 			))}
 
+			{/* ADD BUTTON */}
 			<button
 				onClick={addCommand}
 				className='rounded-2xl border px-4 py-3 text-sm font-medium transition hover:scale-[1.02]'

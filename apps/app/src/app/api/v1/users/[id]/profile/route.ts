@@ -16,9 +16,54 @@ type Params = { params: Promise<{ id: string }> };
 
 const createSchema = z.object({
 	id: z.string().min(1),
-	birthday: z.string().optional(),
+
+	name: z.string().optional(),
+	icon: z.string().url().optional(),
+
 	description: z.string().optional(),
 	info: z.string().optional(),
+
+	birthday: z.coerce.date().optional(),
+
+	gender: z.enum(['male', 'female', 'other']).optional(),
+	pronouns: z.string().optional(),
+	timezone: z.string().optional(),
+	email: z.string().email().optional(),
+
+	role: z.string().optional(),
+
+	permissions: z.any().optional(),
+	notifications: z.any().optional(),
+
+	seen: z.coerce.date().optional(),
+
+	organizations: z
+		.object({
+			id: z.string(), // ObjectId → string
+			role: z.string().optional(),
+		})
+		.optional(),
+
+	verified: z.boolean().optional(),
+
+	privacy: z.enum(['public', 'private', 'limited']).default('private'),
+
+	locale: z.string().optional(),
+
+	links: z.record(z.string(), z.any()).optional(),
+
+	appearance: z.any().optional(),
+
+	hooks: z
+		.array(
+			z.object({
+				name: z.string(),
+				description: z.string().optional(),
+				url: z.string().url(),
+				data: z.string().optional(),
+			})
+		)
+		.optional(),
 });
 
 const updateSchema = createSchema.partial().omit({ id: true });
@@ -110,6 +155,8 @@ export async function PATCH(req: NextRequest, { params }: Params) {
 	const { user } = await database('xernerx', 'profiles');
 
 	const updated = await user.findOneAndUpdate({ id }, { $set: update }, { returnDocument: 'after' }).lean();
+
+	console.log(updated);
 
 	if (!updated) {
 		return NextResponse.json({ error: 'Profile not found' }, { status: 404 });

@@ -429,7 +429,9 @@ export default function Page() {
 						{view === 'links' && selectedGuild?.id && <Links id={selectedGuild.id} />}
 						{view === 'webhooks' && selectedGuild?.id && <Webhooks id={selectedGuild.id} />}
 						{view === 'statistics' && selectedGuild?.id && <Statistics />}
+						{view === 'metamorphosis' && <div>Metamorphosis will soon be integrated to this dashboard.</div>}
 						{view === 'virtue' && selectedGuild?.id && <Virtue id={selectedGuild.id} />}
+						{view === 'zodiac' && <div>Zodiac will soon be integrated to this dashboard.</div>}
 					</motion.div>
 				)}
 			</AnimatePresence>
