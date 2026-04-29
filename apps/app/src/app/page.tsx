@@ -1,12 +1,13 @@
 /** @format */
 'use client';
 
-import { Compass, Layers, LayoutDashboard, Search, Shield, ShieldCheck } from 'lucide-react';
+import { Cloud, Compass, Database, Layers, LayoutDashboard, Search, Shield, ShieldCheck } from 'lucide-react';
 import { useEffect, useState } from 'react';
 
 import Banner from '@/../public/banner.svg';
 import Link from 'next/link';
 import { Roles } from '@/lib/roles';
+import Supporters from '@/components/Supporters';
 import { motion } from 'framer-motion';
 import { usePlatform } from '@/providers/PlatformProvider';
 import { useSession } from 'next-auth/react';
@@ -35,7 +36,8 @@ export default function Home() {
 			{ label: 'Portal', icon: <Layers />, href: '/portal' },
 		];
 
-		if (user?.role === Roles.Owner || user?.role === Roles.Admin || user?.role === Roles.Moderator) items.push({ label: 'Admin', icon: <ShieldCheck />, href: '/admin' });
+		if (user?.role === Roles.Owner || user?.role === Roles.Admin || user?.role === Roles.Moderator)
+			items.push({ label: 'Admin', icon: <ShieldCheck />, href: '/admin' }, { label: 'Hosting', icon: <Cloud />, href: '/admin/hosting' });
 
 		setNavItems(items);
 
@@ -372,6 +374,8 @@ export default function Home() {
 					</div>
 				</motion.button>
 			)}
+
+			<Supporters />
 		</div>
 	);
 }
