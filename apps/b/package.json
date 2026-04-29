@@ -1,6 +1,6 @@
 {
 	"name": "b",
-	"version": "0.1.12",
+	"version": "0.1.13",
 	"private": true,
 	"scripts": {
 		"dev": "next dev -p 4002",
