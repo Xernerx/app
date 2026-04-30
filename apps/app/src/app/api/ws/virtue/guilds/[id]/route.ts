@@ -22,23 +22,23 @@ async function ensureConnected() {
 	await connecting;
 }
 
-export async function GET(req: Request, { params }: any) {
+export async function GET(req: Request, { params }: { params: Promise<{ id: string }> }) {
 	await ensureConnected();
 
 	const data = await client.get('virtue', 'guilds', {
-		id: params.id,
+		id: (await params).id,
 	});
 
 	return Response.json(data ?? null);
 }
 
-export async function PATCH(req: Request, { params }: any) {
+export async function PATCH(req: Request, { params }: { params: Promise<{ id: string }> }) {
 	await ensureConnected();
 
 	const body = await req.json();
 
 	const data = await client.update('virtue', 'guilds', {
-		id: params.id,
+		id: (await params).id,
 		...body,
 	});
 
