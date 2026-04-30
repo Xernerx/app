@@ -63,19 +63,25 @@ async function loadServices() {
 /* ================= ROUTER ================= */
 
 async function handleMessage(ws: AuthedWebSocket, msg: any) {
+	const { id } = msg;
+
+	if (typeof id !== 'number') {
+		return ws.send(JSON.stringify({ message: 'Missing request id' }));
+	}
+
 	const service = services[msg.service];
 	const method = methods[msg.method as keyof typeof methods];
 
 	if (!service) {
-		return ws.send(JSON.stringify({ message: 'Unknown service' }));
+		return ws.send(JSON.stringify({ id, message: 'Unknown service' }));
 	}
 
 	if (!method) {
-		return ws.send(JSON.stringify({ message: 'Unknown method' }));
+		return ws.send(JSON.stringify({ id, message: 'Unknown method' }));
 	}
 
 	if (!msg.body || typeof msg.body !== 'object') {
-		return ws.send(JSON.stringify({ message: 'Invalid body' }));
+		return ws.send(JSON.stringify({ id, message: 'Invalid body' }));
 	}
 
 	try {
@@ -88,9 +94,14 @@ async function handleMessage(ws: AuthedWebSocket, msg: any) {
 			ws
 		);
 
-		ws.send(JSON.stringify(data ?? {}));
+		ws.send(JSON.stringify({ id, ...(data ?? {}) }));
 	} catch (err: unknown) {
-		ws.send(JSON.stringify({ message: (err as Error)?.message || 'Server error' }));
+		ws.send(
+			JSON.stringify({
+				id,
+				message: (err as Error)?.message || 'Server error',
+			})
+		);
 	}
 }
 
@@ -101,7 +112,6 @@ async function start() {
 
 	const port = Number(process.env.PORT) || 3001;
 
-	// tiny HTTP server so hosting doesn't kill you
 	const server = http.createServer((req, res) => {
 		if (req.url === '/health') {
 			res.writeHead(200);
@@ -133,7 +143,7 @@ async function start() {
 				}
 
 				if (!ws.authed) {
-					return ws.send(JSON.stringify({ message: 'unauthorized' }));
+					return ws.send(JSON.stringify({ id: msg.id, message: 'unauthorized' }));
 				}
 
 				await handleMessage(ws, msg);
