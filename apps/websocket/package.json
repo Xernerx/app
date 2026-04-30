@@ -5,6 +5,7 @@
 	"main": "dist/main.js",
 	"type": "module",
 	"scripts": {
+		"start": "node .",
 		"build": "tsc",
 		"dev": "tsc-watch --onSuccess \"node .\"",
 		"patch": "npm version patch",
