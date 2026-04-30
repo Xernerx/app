@@ -8,8 +8,9 @@ const client = new XernerxWebsocket({
 	token: process.env.WS_TOKEN!,
 });
 
+console.log('WS_TOKEN exists:', !!process.env.WS_TOKEN, process.env.WS_TOKEN);
+
 export async function GET(req: Request, { params }: { params: Promise<{ id: string }> }) {
-	console.log('WS_TOKEN exists:', !!process.env.WS_TOKEN, process.env.WS_TOKEN);
 	await client.connect();
 	const data = await client.get('virtue', 'guilds', {
 		id: (await params).id,
