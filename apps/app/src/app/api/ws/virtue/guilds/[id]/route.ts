@@ -8,23 +8,37 @@ const client = new XernerxWebsocket({
 	token: process.env.WS_TOKEN!,
 });
 
-console.log('WS_TOKEN exists:', !!process.env.WS_TOKEN, process.env.WS_TOKEN);
+let connecting: Promise<void> | null = null;
 
-export async function GET(req: Request, { params }: { params: Promise<{ id: string }> }) {
-	await client.connect();
+async function ensureConnected() {
+	if ((client as any).ready) return;
+
+	if (!connecting) {
+		connecting = client.connect().finally(() => {
+			connecting = null;
+		});
+	}
+
+	await connecting;
+}
+
+export async function GET(req: Request, { params }: any) {
+	await ensureConnected();
+
 	const data = await client.get('virtue', 'guilds', {
-		id: (await params).id,
+		id: params.id,
 	});
 
 	return Response.json(data ?? null);
 }
 
-export async function PATCH(req: Request, { params }: { params: Promise<{ id: string }> }) {
-	await client.connect();
+export async function PATCH(req: Request, { params }: any) {
+	await ensureConnected();
+
 	const body = await req.json();
 
 	const data = await client.update('virtue', 'guilds', {
-		id: (await params).id,
+		id: params.id,
 		...body,
 	});
 
