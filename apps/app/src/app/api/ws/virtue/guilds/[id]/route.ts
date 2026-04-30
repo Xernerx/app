@@ -22,14 +22,27 @@ async function ensureConnected() {
 	await connecting;
 }
 
-export async function GET(req: Request, { params }: { params: Promise<{ id: string }> }) {
-	await ensureConnected();
+export async function GET(req: Request, ctx: any) {
+	try {
+		console.log('START');
 
-	const data = await client.get('virtue', 'guilds', {
-		id: (await params).id,
-	});
+		const params = await ctx.params;
+		console.log('PARAMS', params);
 
-	return Response.json(data ?? null);
+		await client.connect();
+		console.log('CONNECTED');
+
+		const data = await client.get('virtue', 'guilds', {
+			id: params.id,
+		});
+
+		console.log('DATA', data);
+
+		return Response.json(data ?? null);
+	} catch (err) {
+		console.error('FULL ERROR:', err);
+		return Response.json({ error: 'fail' }, { status: 500 });
+	}
 }
 
 export async function PATCH(req: Request, { params }: { params: Promise<{ id: string }> }) {
