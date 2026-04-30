@@ -8,9 +8,8 @@ const client = new XernerxWebsocket({
 	token: process.env.WS_TOKEN!,
 });
 
-await client.connect();
-
 export async function GET(req: Request, { params }: { params: Promise<{ id: string }> }) {
+	await client.connect();
 	const data = await client.get('virtue', 'guilds', {
 		id: (await params).id,
 	});
@@ -19,6 +18,7 @@ export async function GET(req: Request, { params }: { params: Promise<{ id: stri
 }
 
 export async function PATCH(req: Request, { params }: { params: Promise<{ id: string }> }) {
+	await client.connect();
 	const body = await req.json();
 
 	const data = await client.update('virtue', 'guilds', {
