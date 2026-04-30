@@ -3,7 +3,7 @@
 	"private": true,
 	"type": "module",
 	"description": "App",
-	"version": "1.1.59",
+	"version": "1.1.60",
 	"author": "Dummi",
 	"scripts": {
 		"dev": "pnpm i && concurrently -n apps,tunnel -c blue,green \"pnpm --parallel --filter ./apps/* dev\" \"pnpm tunnel\"",
