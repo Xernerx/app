@@ -1,5 +1,6 @@
 /** @format */
 
+import http from 'http';
 import { WebSocketServer, type WebSocket } from 'ws';
 import { config } from 'dotenv';
 import database from './lib/database.js';
@@ -61,7 +62,7 @@ async function loadServices() {
 
 /* ================= ROUTER ================= */
 
-async function handleMessage(ws: AuthedWebSocket, msg: Record<string, string>) {
+async function handleMessage(ws: AuthedWebSocket, msg: any) {
 	const service = services[msg.service];
 	const method = methods[msg.method as keyof typeof methods];
 
@@ -93,14 +94,26 @@ async function handleMessage(ws: AuthedWebSocket, msg: Record<string, string>) {
 	}
 }
 
-/* ================= WS SERVER ================= */
+/* ================= SERVER ================= */
 
 async function start() {
 	await loadServices();
 
-	const wss = new WebSocketServer({ port: 3001 });
+	const port = Number(process.env.PORT) || 3001;
 
-	console.log('WS running on ws://localhost:3001');
+	// tiny HTTP server so hosting doesn't kill you
+	const server = http.createServer((req, res) => {
+		if (req.url === '/health') {
+			res.writeHead(200);
+			res.end('ok');
+			return;
+		}
+
+		res.writeHead(200);
+		res.end('alive');
+	});
+
+	const wss = new WebSocketServer({ server });
 
 	wss.on('connection', (ws: AuthedWebSocket) => {
 		ws.authed = false;
@@ -115,12 +128,10 @@ async function start() {
 					return ws.send(JSON.stringify({ message: 'Invalid message format' }));
 				}
 
-				// allow auth service always
 				if (msg.service === 'auth') {
 					return handleMessage(ws, msg);
 				}
 
-				// block everything else until authenticated
 				if (!ws.authed) {
 					return ws.send(JSON.stringify({ message: 'unauthorized' }));
 				}
@@ -134,6 +145,10 @@ async function start() {
 		ws.on('close', () => {
 			console.log('Client disconnected');
 		});
+	});
+
+	server.listen(port, '0.0.0.0', () => {
+		console.log(`Server running on port ${port}`);
 	});
 }
 

@@ -22,14 +22,12 @@ async function ensureConnected() {
 	await connecting;
 }
 
-export async function GET(req: Request, ctx: any) {
+export async function GET(req: Request, { params }: { params: { id: string } }) {
 	try {
 		console.log('START');
-
-		const params = await ctx.params;
 		console.log('PARAMS', params);
 
-		await client.connect();
+		await ensureConnected();
 		console.log('CONNECTED');
 
 		const data = await client.get('virtue', 'guilds', {
