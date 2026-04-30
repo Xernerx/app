@@ -40,7 +40,7 @@ export default function Virtue({ id }: { id?: string }) {
 				setProfile(null);
 				setLoading(true);
 
-				const res = await fetch(`/api/v1/virtue/guilds/${id}`);
+				const res = await fetch(`/api/ws/virtue/guilds/${id}`);
 				const data = await res.json();
 
 				if (!cancelled && res.ok) {
@@ -153,7 +153,7 @@ export default function Virtue({ id }: { id?: string }) {
 		setState((s) => ({ ...s, saving: true }));
 
 		try {
-			await fetch(`/api/v1/virtue/guilds/${id}`, {
+			await fetch(`/api/ws/virtue/guilds/${id}`, {
 				method: 'PATCH',
 				headers: { 'Content-Type': 'application/json' },
 				body: JSON.stringify({

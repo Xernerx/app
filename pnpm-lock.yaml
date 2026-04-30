@@ -17,6 +17,9 @@ importers:
       '@svgr/webpack':
         specifier: ^8
         version: 8.1.0(typescript@5.9.3)
+      '@xernerx/websocket':
+        specifier: ^0.4.6
+        version: 0.4.6
       discord-api-types:
         specifier: ^0
         version: 0.38.45
@@ -2558,6 +2561,10 @@ packages:
     peerDependencies:
       '@discordjs/core': 2.2.2
       discord.js: 14.22.1
+
+  '@xernerx/websocket@0.4.6':
+    resolution: {integrity: sha512-mxmac2z78yfjix3qopbYUQXycIkLl+9olEqoXkVsJhRXj/tdY9milelHnQA0mkKf/8utzQDJAANVlKh0Way5IQ==}
+    engines: {node: '>=23'}
 
   '@xmldom/xmldom@0.8.11':
     resolution: {integrity: sha512-cQzWCtO6C8TQiYl1ruKNn2U6Ao4o4WBBcbL61yJl84x+j5sOWWFU9X7DpND8XZG3daDppSsigMdfAIl2upQBRw==}
@@ -9805,6 +9812,13 @@ snapshots:
       ora: 8.2.0
       sharpyy: 1.1.0
       zod: 4.1.8
+
+  '@xernerx/websocket@0.4.6':
+    dependencies:
+      ws: 8.20.0
+    transitivePeerDependencies:
+      - bufferutil
+      - utf-8-validate
 
   '@xmldom/xmldom@0.8.11': {}
 
