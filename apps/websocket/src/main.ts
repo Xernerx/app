@@ -95,12 +95,20 @@ async function handleMessage(ws: AuthedWebSocket, msg: Record<string, string>) {
 
 /* ================= WS SERVER ================= */
 
+import http from 'http';
 async function start() {
 	await loadServices();
 
-	const wss = new WebSocketServer({ port: 3001 });
+	const server = http.createServer((req, res) => {
+		res.writeHead(200);
+		res.end('OK');
+	});
 
-	console.log('WS running on ws://localhost:3001');
+	const wss = new WebSocketServer({ server });
+
+	server.listen(3001, () => {
+		console.log('WS running on port 3001');
+	});
 
 	wss.on('connection', (ws: AuthedWebSocket) => {
 		ws.authed = false;
