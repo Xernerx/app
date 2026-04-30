@@ -18,7 +18,8 @@
 	"dependencies": {
 		"dotenv": "^17",
 		"mongoose": "^9",
-		"ws": "^8"
+		"ws": "^8",
+		"crypto": "^1"
 	},
 	"devDependencies": {
 		"@types/node": "^20.19.37",
