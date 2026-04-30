@@ -1,7 +1,8 @@
 /** @format */
 'use client';
 
-import { FileText, Github, MessageCircle, Package, Shield } from 'lucide-react';
+import { BsDiscord, BsGithub } from 'react-icons/bs';
+import { FileText, Package, Shield } from 'lucide-react';
 
 import { motion } from 'framer-motion';
 
@@ -49,8 +50,8 @@ export default function Footer() {
 				{/* RIGHT */}
 				<div className='flex items-center' style={{ gap: 'calc(var(--ui-gap) * 0.6)' }}>
 					<FooterLink href='https://www.npmjs.com/package/xernerx' icon={Package} label='npm' />
-					<FooterLink href='https://github.com/xernerx' icon={Github} label='GitHub' />
-					<FooterLink href='https://discord.gg/teNWyb69dq' icon={MessageCircle} label='Discord' />
+					<FooterLink href='https://github.com/xernerx' icon={BsGithub} label='GitHub' />
+					<FooterLink href='https://discord.gg/teNWyb69dq' icon={BsDiscord} label='Discord' />
 				</div>
 			</div>
 		</motion.footer>

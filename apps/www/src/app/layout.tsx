@@ -8,6 +8,7 @@ import Footer from '@/components/Footer';
 import Header from '@/components/Header';
 import Main from '@/components/Main';
 import type { Metadata } from 'next';
+import Script from 'next/script';
 import { SessionProvider } from '@/providers/SessionProvider';
 import { ThemeProvider } from '@/providers/ThemeProvider';
 
@@ -58,7 +59,8 @@ export default function RootLayout({
 	return (
 		<html lang='en'>
 			<head>
-				<script
+				<Script
+					id={'1'}
 					dangerouslySetInnerHTML={{
 						__html: `
 try {

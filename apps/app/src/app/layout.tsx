@@ -8,6 +8,7 @@ import Header from '@/components/Header';
 import Main from '@/components/Main';
 import type { Metadata } from 'next';
 import { PlatformProvider } from '@/providers/PlatformProvider';
+import Script from 'next/script';
 import { SessionProvider } from '@/providers/SessionProvider';
 import Sidebar from '@/components/Sidebar';
 import { SidebarProvider } from '@/providers/SidebarProvider';
@@ -66,7 +67,8 @@ export default async function RootLayout({
 	return (
 		<html lang='en' className='h-full' suppressHydrationWarning>
 			<head>
-				<script
+				<Script
+					id={'1'}
 					dangerouslySetInnerHTML={{
 						__html: `
 try {

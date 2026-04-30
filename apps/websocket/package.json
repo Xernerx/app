@@ -1,0 +1,25 @@
+{
+	"name": "xernerx-ws",
+	"version": "1.0.0",
+	"description": "Xernerx Websocket",
+	"main": "dist/main.js",
+	"type": "module",
+	"scripts": {
+		"build": "npm i && tsc",
+		"dev": "tsc-watch --onSuccess \"node .\"",
+		"patch": "npm version patch",
+		"minor": "npm version minor",
+		"major": "npm version major"
+	},
+	"author": "Dummi",
+	"license": "MIT",
+	"packageManager": "pnpm@10.32.0",
+	"dependencies": {
+		"ws": "^8",
+		"mongoose": "^9",
+		"dotenv": "^17"
+	},
+	"devDependencies": {
+		"tsc-watch": "7.2.0"
+	}
+}

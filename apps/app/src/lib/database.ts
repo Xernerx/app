@@ -10,13 +10,9 @@ import ProfileUser from '@/schemas/xernerx/profiles/User';
 import StatsBot from '@/schemas/xernerx/stats/Bot';
 import TokensApi from '@/schemas/xernerx/tokens/Api';
 import TokensInvite from '@/schemas/xernerx/tokens/Invite';
-import VirtueGuild from '@/schemas/virtue/profiles/Guild';
-import VirtueMember from '@/schemas/virtue/profiles/Member';
-import VirtueUser from '@/schemas/virtue/profiles/User';
 
 type DbType = 'xernerx' | 'metamorphosis' | 'zodiac' | 'virtue';
 type XernerxDbName = 'profiles' | 'stats' | 'tokens';
-type VirtueDbName = 'profiles';
 
 type CacheEntry = {
 	conn: Connection | null;
@@ -58,18 +54,10 @@ function registerXernerxModels(connection: Connection, dbName: XernerxDbName) {
 	}
 }
 
-function registerVirtueModels(connection: Connection, dbName: VirtueDbName) {
-	if (dbName !== 'profiles') return;
-
-	if (!connection.models.guild) connection.model('guild', VirtueGuild);
-	if (!connection.models.member) connection.model('member', VirtueMember);
-	if (!connection.models.user) connection.model('user', VirtueUser);
-}
-
 /**
  * Main database connector
  */
-export default async function database(type: DbType, dbName: XernerxDbName | VirtueDbName): Promise<Connection['models']> {
+export default async function database(type: DbType, dbName: XernerxDbName): Promise<Connection['models']> {
 	const uri = URIS[type];
 
 	if (!uri) {
@@ -112,7 +100,6 @@ export default async function database(type: DbType, dbName: XernerxDbName | Vir
 
 			// Register models once
 			if (type === 'xernerx') registerXernerxModels(connection, dbName as XernerxDbName);
-			if (type === 'virtue') registerVirtueModels(connection, dbName as VirtueDbName);
 
 			return connection;
 		})();

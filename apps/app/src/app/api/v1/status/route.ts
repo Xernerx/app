@@ -5,7 +5,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import mongoose from 'mongoose';
 import os from 'os';
-import { version } from '@/../package.json' with { type: 'json' };
+import pkg from '@/../package.json' with { type: 'json' };
+
+const { version } = pkg;
 
 const startTime = Date.now();
 
