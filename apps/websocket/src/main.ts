@@ -20,10 +20,10 @@ type ServiceFn = (
 	msg: {
 		method: string;
 		action?: string;
-		body: any;
+		body: unknown;
 	},
 	ws: AuthedWebSocket
-) => Promise<any>;
+) => Promise<unknown>;
 
 /* ================= PATH ================= */
 
@@ -61,7 +61,7 @@ async function loadServices() {
 
 /* ================= ROUTER ================= */
 
-async function handleMessage(ws: AuthedWebSocket, msg: any) {
+async function handleMessage(ws: AuthedWebSocket, msg: Record<string, string>) {
 	const service = services[msg.service];
 	const method = methods[msg.method as keyof typeof methods];
 
@@ -88,8 +88,8 @@ async function handleMessage(ws: AuthedWebSocket, msg: any) {
 		);
 
 		ws.send(JSON.stringify(data ?? {}));
-	} catch (err: any) {
-		ws.send(JSON.stringify({ message: err?.message || 'Server error' }));
+	} catch (err: unknown) {
+		ws.send(JSON.stringify({ message: (err as Error)?.message || 'Server error' }));
 	}
 }
 
