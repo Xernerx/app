@@ -233,7 +233,6 @@ export default function Virtue({ id }: { id?: string }) {
 				cycles: state.cycles,
 				roles: state.roles,
 			});
-			console.log(e);
 		} catch (err) {
 			console.error('Save failed:', err);
 		} finally {
