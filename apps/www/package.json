@@ -1,6 +1,6 @@
 {
 	"name": "www",
-	"version": "0.1.36",
+	"version": "0.1.37",
 	"private": true,
 	"scripts": {
 		"dev": "pnpm i && next dev -p 4000",
