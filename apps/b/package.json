@@ -1,6 +1,6 @@
 {
 	"name": "b",
-	"version": "0.1.34",
+	"version": "0.1.35",
 	"private": true,
 	"scripts": {
 		"dev": "pnpm i && next dev -p 4002",
