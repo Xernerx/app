@@ -46,7 +46,7 @@ export default function Virtue({ id }: { id?: string }) {
 
 				if (cancelled) return;
 
-				clientRef.current = new XernerxWebsocket({ token, url: 'wss://ws.dev.dummi.me' });
+				clientRef.current = new XernerxWebsocket({ token });
 
 				await clientRef.current.connect();
 			} catch (err) {
