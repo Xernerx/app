@@ -7,7 +7,7 @@
 	"scripts": {
 		"build": "npm i && tsc",
 		"dist": "pnpm build && electron-builder",
-		"dev": "tsc && electron .",
+		"dev": "npm i && tsc && electron .",
 		"patch": "npm version patch",
 		"minor": "npm version minor",
 		"major": "npm version major"

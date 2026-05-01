@@ -65,7 +65,7 @@ async function loadServices() {
 async function handleMessage(ws: AuthedWebSocket, msg: any) {
 	const { id } = msg;
 
-	if (typeof id !== 'number') {
+	if (!id) {
 		return ws.send(JSON.stringify({ message: 'Missing request id' }));
 	}
 

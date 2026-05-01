@@ -6,6 +6,7 @@ import { XernerxWebsocket } from '@xernerx/websocket';
 
 const client = new XernerxWebsocket({
 	token: process.env.WS_TOKEN!,
+	url: process.env.ENVIRONMENT == 'DEVELOPMNENT' ? 'wss://ws.dev.dummi.me' : 'wss://ws.xernerx.com',
 });
 
 let connecting: Promise<void> | null = null;
@@ -22,16 +23,16 @@ async function ensureConnected() {
 	await connecting;
 }
 
-export async function GET(req: Request, { params }: { params: { id: string } }) {
+export async function GET(req: Request, { params }: { params: Promise<{ id: string }> }) {
 	try {
 		console.log('START');
-		console.log('PARAMS', params);
+		console.log('PARAMS', await params);
 
 		await ensureConnected();
 		console.log('CONNECTED');
 
 		const data = await client.get('virtue', 'guilds', {
-			id: params.id,
+			id: (await params).id,
 		});
 
 		console.log('DATA', data);
