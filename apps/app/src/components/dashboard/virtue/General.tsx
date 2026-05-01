@@ -90,7 +90,7 @@ export default function Virtue({ id }: { id?: string }) {
 				});
 
 				if (!cancelled) {
-					setProfile(data._doc);
+					setProfile(data?._doc);
 				}
 			} catch (err) {
 				console.error('Virtue fetch failed:', err);
@@ -138,7 +138,6 @@ export default function Virtue({ id }: { id?: string }) {
 
 		const client = new XernerxWebsocket({
 			token,
-			url: 'wss://ws.dev.dummi.me',
 		});
 
 		await client.connect();
