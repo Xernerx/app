@@ -7,10 +7,12 @@ import database from './lib/database.js';
 import { fileURLToPath, pathToFileURL } from 'url';
 import fs from 'fs/promises';
 import path from 'path';
+import { jwtVerify } from 'jose';
 
 config({ quiet: true });
 database();
 
+const secret = new TextEncoder().encode(process.env.WS_TOKEN!);
 /* ================= TYPES ================= */
 
 type AuthedWebSocket = WebSocket & {
@@ -139,7 +141,24 @@ async function start() {
 				}
 
 				if (msg.service === 'auth') {
-					return handleMessage(ws, msg);
+					const { token } = msg.body ?? {};
+
+					if (!token || typeof token !== 'string') {
+						return ws.send(JSON.stringify({ id: msg.id, message: 'Missing token' }));
+					}
+
+					try {
+						const { payload } = await jwtVerify(token, secret);
+
+						ws.authed = true;
+
+						// optional but useful
+						(ws as any).userId = payload.userId;
+
+						return ws.send(JSON.stringify({ id: msg.id, success: true }));
+					} catch {
+						return ws.send(JSON.stringify({ id: msg.id, message: 'Invalid token' }));
+					}
 				}
 
 				if (!ws.authed) {

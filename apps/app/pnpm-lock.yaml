@@ -12,14 +12,17 @@ importers:
         specifier: ^8
         version: 8.1.0(typescript@5.9.3)
       '@xernerx/websocket':
-        specifier: ^0.4.8
-        version: 0.4.8
+        specifier: ^0.4.9
+        version: 0.4.9
       discord-api-types:
         specifier: ^0
         version: 0.38.45
       framer-motion:
         specifier: ^12
         version: 12.35.2(react-dom@19.2.3(react@19.2.3))(react@19.2.3)
+      jose:
+        specifier: ^6.2.3
+        version: 6.2.3
       lru-cache:
         specifier: ^6
         version: 6.0.0
@@ -1411,8 +1414,8 @@ packages:
     cpu: [x64]
     os: [win32]
 
-  '@xernerx/websocket@0.4.8':
-    resolution: {integrity: sha512-2G6Oq8z1KANKORXio0KHMiYnicvhp3wwphlFiqjSkMqk8mAWCByh7op1WLmclFRxgg+obE4+49ErzVONIArUUA==}
+  '@xernerx/websocket@0.4.9':
+    resolution: {integrity: sha512-rPCC9nmqXDjQDJY87YitUPEJN3LpYefCYxJSCoHEZLtBhDmtIQ3czJckVyr/8ODX6WGU4LJCfTdNZE+9Pgxi7Q==}
     engines: {node: '>=23'}
 
   acorn-jsx@5.3.2:
@@ -2352,6 +2355,9 @@ packages:
 
   jose@4.15.9:
     resolution: {integrity: sha512-1vUQX+IdDMVPj4k8kOxgUqlcK518yluMuGZwqlr44FS1ppZB/5GWh4rZG89erpOBOJjU/OBsnCVFfapsRz6nEA==}
+
+  jose@6.2.3:
+    resolution: {integrity: sha512-YYVDInQKFJfR/xa3ojUTl8c2KoTwiL1R5Wg9YCydwH0x0B9grbzlg5HC7mMjCtUJjbQ/YnGEZIhI5tCgfTb4Hw==}
 
   js-tokens@4.0.0:
     resolution: {integrity: sha512-RdJUflcE3cUzKiMqQgsCu06FPu9UdIJO0beYbPhHN4k6apgJtifcoCtT9bcxOpYBtpD2kCM6Sbzg4CausW/PKQ==}
@@ -3489,18 +3495,6 @@ packages:
   word-wrap@1.2.5:
     resolution: {integrity: sha512-BN22B5eaMMI9UMtjrGd5g5eCYPpCPDUy0FJXbYsaT5zYxjFOckS53SQDE3pWkVoWpHXVb3BrYcEN4Twa55B5cA==}
     engines: {node: '>=0.10.0'}
-
-  ws@8.20.0:
-    resolution: {integrity: sha512-sAt8BhgNbzCtgGbt2OxmpuryO63ZoDk/sqaB/znQm94T4fCEsy/yV+7CdC1kJhOU9lboAEU7R3kquuycDoibVA==}
-    engines: {node: '>=10.0.0'}
-    peerDependencies:
-      bufferutil: ^4.0.1
-      utf-8-validate: '>=5.0.2'
-    peerDependenciesMeta:
-      bufferutil:
-        optional: true
-      utf-8-validate:
-        optional: true
 
   yallist@3.1.1:
     resolution: {integrity: sha512-a4UGQaWPH59mOXUYnAG2ewncQS4i4F43Tv3JoAM+s2VDAmS9NsK8GpDMLrCHPksFT7h3K6TOoUNn2pb7RoXx4g==}
@@ -4919,12 +4913,7 @@ snapshots:
   '@unrs/resolver-binding-win32-x64-msvc@1.11.1':
     optional: true
 
-  '@xernerx/websocket@0.4.8':
-    dependencies:
-      ws: 8.20.0
-    transitivePeerDependencies:
-      - bufferutil
-      - utf-8-validate
+  '@xernerx/websocket@0.4.9': {}
 
   acorn-jsx@5.3.2(acorn@8.16.0):
     dependencies:
@@ -6035,6 +6024,8 @@ snapshots:
   jiti@2.6.1: {}
 
   jose@4.15.9: {}
+
+  jose@6.2.3: {}
 
   js-tokens@4.0.0: {}
 
@@ -7556,8 +7547,6 @@ snapshots:
       isexe: 2.0.0
 
   word-wrap@1.2.5: {}
-
-  ws@8.20.0: {}
 
   yallist@3.1.1: {}
 

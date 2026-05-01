@@ -11,6 +11,9 @@ importers:
       dotenv:
         specifier: ^17
         version: 17.4.2
+      jose:
+        specifier: ^6.2.3
+        version: 6.2.3
       mongoose:
         specifier: ^9
         version: 9.6.1
@@ -71,6 +74,9 @@ packages:
 
   isexe@2.0.0:
     resolution: {integrity: sha512-RHxMLp9lnKHGHRng9QFhRCMbYAcVpn69smSGcq3f36xjgVVWThj4qqLbTLlq7Ssj8B+fIQ1EuCEGI2lKsyQeIw==}
+
+  jose@6.2.3:
+    resolution: {integrity: sha512-YYVDInQKFJfR/xa3ojUTl8c2KoTwiL1R5Wg9YCydwH0x0B9grbzlg5HC7mMjCtUJjbQ/YnGEZIhI5tCgfTb4Hw==}
 
   kareem@3.3.0:
     resolution: {integrity: sha512-kpSuLD3/7RenBnjnJdOHXCKC8dTd1JzeOiJhN0necWWci6cC+qX+VuwPnMVgb+a4+KNJSfgqahpnfWaeDXCimw==}
@@ -263,6 +269,8 @@ snapshots:
   from@0.1.7: {}
 
   isexe@2.0.0: {}
+
+  jose@6.2.3: {}
 
   kareem@3.3.0: {}
 

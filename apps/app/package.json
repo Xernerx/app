@@ -13,9 +13,10 @@
 	},
 	"dependencies": {
 		"@svgr/webpack": "^8",
-		"@xernerx/websocket": "^0.4.8",
+		"@xernerx/websocket": "^0.4.9",
 		"discord-api-types": "^0",
 		"framer-motion": "^12",
+		"jose": "^6.2.3",
 		"lru-cache": "^6",
 		"lucide-react": "^1",
 		"mongoose": "^9",
