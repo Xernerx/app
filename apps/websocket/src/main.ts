@@ -148,15 +148,17 @@ async function start() {
 					}
 
 					try {
-						const { payload } = await jwtVerify(token, secret);
+						const { payload } = await jwtVerify(token, secret).catch(() => ({ payload: null }));
+
+						if (!payload && token !== process.env.WS_TOKEN) throw new Error('Invalid Token');
 
 						ws.authed = true;
 
 						// optional but useful
-						(ws as any).userId = payload.userId;
+						(ws as any).userId = payload?.userId;
 
 						return ws.send(JSON.stringify({ id: msg.id, success: true }));
-					} catch {
+					} catch (e) {
 						return ws.send(JSON.stringify({ id: msg.id, message: 'Invalid token' }));
 					}
 				}

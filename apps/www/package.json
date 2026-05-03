@@ -2,6 +2,7 @@
 	"name": "www",
 	"version": "0.1.37",
 	"private": true,
+	"author": "Xernerx Studios",
 	"scripts": {
 		"dev": "pnpm i && next dev -p 4000",
 		"build": "next build",

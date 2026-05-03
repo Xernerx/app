@@ -4,7 +4,7 @@
 	"type": "module",
 	"description": "App",
 	"version": "1.1.83",
-	"author": "Dummi",
+	"author": "Xernerx Studios",
 	"scripts": {
 		"dev": "pnpm i && concurrently -n apps,tunnel -c blue,green \"pnpm --parallel --filter ./apps/* dev\" \"pnpm tunnel\"",
 		"build": "pnpm --filter ./apps/* build",
