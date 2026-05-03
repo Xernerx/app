@@ -8,9 +8,12 @@ import { fileURLToPath, pathToFileURL } from 'url';
 import fs from 'fs/promises';
 import path from 'path';
 import { jwtVerify } from 'jose';
+import { Terminal } from '@xernerx/terminal';
 
 config({ quiet: true });
 database();
+
+const terminal = new Terminal({ scope: 'WS', title: 'XERNERX', format: ['title', 'scope', 'datetime', 'memory'] });
 
 const secret = new TextEncoder().encode(process.env.WS_TOKEN!);
 /* ================= TYPES ================= */
@@ -127,10 +130,12 @@ async function start() {
 
 	const wss = new WebSocketServer({ server });
 
-	wss.on('connection', (ws: AuthedWebSocket) => {
+	wss.on('connection', (ws: AuthedWebSocket, req) => {
 		ws.authed = false;
 
-		console.log('Client connected');
+		const ip = req.headers['cf-connecting-ip'] || req.headers['x-forwarded-for']?.toString().split(',')[0] || req.socket.remoteAddress;
+
+		terminal.log(`Connection established from ${ip}`);
 
 		ws.on('message', async (data) => {
 			try {
@@ -174,7 +179,7 @@ async function start() {
 		});
 
 		ws.on('close', () => {
-			console.log('Client disconnected');
+			terminal.log(`Connection disconnected from ${ip}`);
 		});
 	});
 
