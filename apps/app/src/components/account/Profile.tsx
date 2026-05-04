@@ -20,7 +20,7 @@ type Profile = {
 };
 
 export default function Profile() {
-	const user = useUser();
+	const { user } = useUser();
 
 	const [profile, setProfile] = useState<Profile | null>(null);
 	const [loading, setLoading] = useState(true);

@@ -21,7 +21,7 @@ export default function Sidebar() {
 
 	const { state, navItems, view, setView } = useSidebar();
 	const { type } = usePlatform();
-	const user = useUser();
+	const { user } = useUser();
 	const router = useRouter();
 
 	const [openProfile, setOpenProfile] = useState(false);

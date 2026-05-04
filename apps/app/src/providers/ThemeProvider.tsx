@@ -121,7 +121,7 @@ function getCookie(name: string) {
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
 	const channelRef = useRef<BroadcastChannel | null>(null);
-	const user = useUser();
+	const { user } = useUser();
 	const [hydrated, setHydrated] = useState(false);
 
 	const [state, setState] = useState<ThemeState>({

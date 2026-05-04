@@ -66,7 +66,7 @@ export default function Appearance() {
 		ui: { uiSpacing, zoom },
 	} = useTheme();
 
-	const user = useUser();
+	const { user } = useUser();
 	const [zoomPreview, setZoomPreview] = useState(zoom);
 
 	const primary = mode === 'dark' ? LIGHT_COLORS : DARK_COLORS;

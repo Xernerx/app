@@ -8,7 +8,7 @@ import { signOut } from 'next-auth/react';
 import { useUser } from '@/providers/UserProvider';
 
 export default function Account() {
-	const user = useUser();
+	const { user } = useUser();
 
 	const handleDeleteData = async () => {
 		if (!user?.id) return;

@@ -5,7 +5,7 @@
 	"main": "dist/main.js",
 	"type": "module",
 	"scripts": {
-		"build": "npm i && tsc",
+		"build": "npm i && npx tsc",
 		"dist": "pnpm build && electron-builder",
 		"dev": "npm i && tsc && electron .",
 		"patch": "npm version patch",

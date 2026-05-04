@@ -8,7 +8,7 @@ import { useEffect } from 'react';
 import { useUser } from '@/providers/UserProvider';
 
 export default function Layout({ children }: { children: React.ReactNode }) {
-	const user = useUser();
+	const { user } = useUser();
 
 	useEffect(() => {
 		if (![Roles.Admin, Roles.Owner, Roles.Moderator].includes(user?.role)) return redirect('/');

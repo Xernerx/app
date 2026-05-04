@@ -6,12 +6,10 @@ import { useEffect, useState } from 'react';
 
 import { Plus } from 'lucide-react';
 import { motion } from 'framer-motion';
-import { useSession } from 'next-auth/react';
 import { useUser } from '@/providers/UserProvider';
 
 export default function Organizations() {
-	const { data: session } = useSession();
-	const user = useUser();
+	const { user } = useUser();
 
 	const [orgs, setOrgs] = useState<any[]>([]);
 	const [loading, setLoading] = useState(true);

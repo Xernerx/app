@@ -14,7 +14,7 @@ import { useUser } from '@/providers/UserProvider';
 
 export default function Page() {
 	const { setNavItems, clearNavItems, view, setView } = useSidebar();
-	const user = useUser();
+	const { user } = useUser();
 
 	useEffect(() => {
 		setView('Account');

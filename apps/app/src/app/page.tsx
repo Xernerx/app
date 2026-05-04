@@ -20,7 +20,7 @@ export default function Home() {
 	const { setNavItems, clearNavItems, show } = useSidebar();
 	const { data: session } = useSession();
 	const { toast } = useToast();
-	const user = useUser();
+	const { user } = useUser();
 
 	const [support, setSupport] = useState(false);
 	const [results, setResults] = useState<any[]>([]);
