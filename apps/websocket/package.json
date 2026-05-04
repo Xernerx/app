@@ -1,6 +1,6 @@
 {
 	"name": "xernerx-ws",
-	"version": "1.0.32",
+	"version": "1.0.33",
 	"description": "Xernerx Websocket",
 	"main": "dist/main.js",
 	"type": "module",
