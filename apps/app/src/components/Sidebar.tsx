@@ -88,7 +88,15 @@ export default function Sidebar() {
 		};
 	}, []);
 
+	const [mounted, setMounted] = useState(false);
+
+	useEffect(() => {
+		setMounted(true);
+	}, []);
+
 	if (status === 'loading') return null;
+
+	if (!mounted) return null;
 
 	if (state === 'hidden') return null;
 
