@@ -88,16 +88,6 @@ export default function Sidebar() {
 		};
 	}, []);
 
-	const [mounted, setMounted] = useState(false);
-
-	useEffect(() => {
-		setMounted(true);
-	}, []);
-
-	if (status === 'loading') return null;
-
-	if (!mounted) return null;
-
 	if (state === 'hidden') return null;
 
 	const avatarDecoration = user?.avatar_decoration_data?.asset && `https://cdn.discordapp.com/avatar-decoration-presets/${user.avatar_decoration_data.asset}.webp`;
@@ -205,11 +195,11 @@ export default function Sidebar() {
 					<>
 						{state === 'open' && (
 							<div className='relative rounded-xl overflow-hidden backdrop-blur p-2' style={{ background: 'var(--container)' }}>
-								{nameplate && (
+								{/* {nameplate && (
 									<video autoPlay loop muted playsInline className='absolute inset-0 w-full h-full object-cover opacity-70 pointer-events-none'>
 										<source src={nameplate} type='video/webm' />
 									</video>
-								)}
+								)} */}
 
 								<div className='relative flex items-center justify-between gap-2'>
 									<button ref={profileButtonRef} onClick={() => setOpenProfile(!openProfile)} className='flex items-center gap-3 group w-full text-left cursor-pointer'>
