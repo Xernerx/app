@@ -15,6 +15,7 @@ import { useSidebar } from '@/providers/SidebarProvider';
 import { useUser } from '@/providers/UserProvider';
 
 export default function Sidebar() {
+	return null;
 	const profileButtonRef = useRef<HTMLButtonElement | null>(null);
 	const profileContainerRef = useRef<HTMLDivElement | null>(null);
 	const profileMenuRef = useRef<HTMLDivElement | null>(null);
