@@ -88,6 +88,8 @@ export default function Sidebar() {
 		};
 	}, []);
 
+	if (status === 'loading') return null;
+
 	if (state === 'hidden') return null;
 
 	const avatarDecoration = user?.avatar_decoration_data?.asset && `https://cdn.discordapp.com/avatar-decoration-presets/${user.avatar_decoration_data.asset}.webp`;
