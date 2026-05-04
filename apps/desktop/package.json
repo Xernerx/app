@@ -58,7 +58,14 @@
 			"artifactName": "${productName}-${version}-setup.${ext}"
 		},
 		"mac": {
-			"target": "dmg",
+			"target": [
+				{
+					"target": "dmg",
+					"arch": [
+						"universal"
+					]
+				}
+			],
 			"artifactName": "${productName}-${version}-setup.${ext}"
 		},
 		"linux": {
