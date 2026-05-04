@@ -270,9 +270,9 @@ export default function Sidebar() {
 							</div>
 						)}
 					</>
-				) : (
+				) : status === 'loading' ? (
 					<Nav icon={<LogIn size={18} />} label='Sign In' onClick={() => router.push('/auth/login')} />
-				)}
+				) : null}
 			</div>
 
 			<AnimatePresence>
