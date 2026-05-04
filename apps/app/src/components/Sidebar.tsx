@@ -31,7 +31,6 @@ export default function Sidebar() {
 	const [status, setStatus] = useState<any>({});
 	const [qr, setQr] = useState(false);
 	const [profileMenu, setProfileMenu] = useState(false);
-	const [showVideo, setShowVideo] = useState(false);
 
 	useEffect(() => {
 		if (!(profileView === 'status' && openProfile)) return;
@@ -97,10 +96,6 @@ export default function Sidebar() {
 
 	const navTop = navItems.filter((item) => item.href);
 	const navBottom = navItems.filter((item) => item.onClick && !item.href);
-
-	useEffect(() => {
-		if (nameplate) setShowVideo(true);
-	}, [nameplate]);
 
 	return (
 		<motion.aside
@@ -200,7 +195,7 @@ export default function Sidebar() {
 					<>
 						{state === 'open' && (
 							<div className='relative rounded-xl overflow-hidden backdrop-blur p-2' style={{ background: 'var(--container)' }}>
-								{showVideo && (
+								{user && nameplate && (
 									<video autoPlay loop muted playsInline className='absolute inset-0 w-full h-full object-cover opacity-70 pointer-events-none'>
 										<source src={nameplate} type='video/webm' />
 									</video>
