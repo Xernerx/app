@@ -29,7 +29,7 @@ export const authOptions: NextAuthOptions = {
 				domain: process.env.ENVIRONMENT == 'DEVELOPMENT' ? '.dummi.me' : '.xernerx.com',
 				path: '/',
 				httpOnly: true,
-				sameSite: 'lax',
+				sameSite: 'none',
 				secure: true,
 			},
 		},
