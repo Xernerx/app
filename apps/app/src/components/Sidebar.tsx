@@ -20,7 +20,6 @@ export default function Sidebar() {
 	const profileMenuRef = useRef<HTMLDivElement | null>(null);
 	const profileCardRef = useRef<HTMLDivElement | null>(null);
 
-	return null;
 	const { state, navItems, view, setView } = useSidebar();
 	const { type } = usePlatform();
 	const { user } = useUser();
@@ -88,6 +87,7 @@ export default function Sidebar() {
 			document.removeEventListener('mousedown', handleClickOutside);
 		};
 	}, []);
+	return null;
 
 	const [mounted, setMounted] = useState(false);
 
