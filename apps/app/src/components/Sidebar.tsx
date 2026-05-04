@@ -195,7 +195,7 @@ export default function Sidebar() {
 					<>
 						{state === 'open' && (
 							<div className='relative rounded-xl overflow-hidden backdrop-blur p-2' style={{ background: 'var(--container)' }}>
-								{user && typeof nameplate === 'string' && nameplate.startsWith('http') && (
+								{type != 'application' && typeof nameplate === 'string' && nameplate.startsWith('http') && (
 									<video
 										autoPlay
 										loop
