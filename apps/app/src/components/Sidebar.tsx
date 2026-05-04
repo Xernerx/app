@@ -195,7 +195,7 @@ export default function Sidebar() {
 					<>
 						{state === 'open' && (
 							<div className='relative rounded-xl overflow-hidden backdrop-blur p-2' style={{ background: 'var(--container)' }}>
-								{/* {user && typeof nameplate === 'string' && nameplate.startsWith('http') && (
+								{user && typeof nameplate === 'string' && nameplate.startsWith('http') && (
 									<video
 										autoPlay
 										loop
@@ -207,7 +207,7 @@ export default function Sidebar() {
 										}}>
 										<source src={nameplate} type='video/webm' />
 									</video>
-								)} */}
+								)}
 
 								<div className='relative flex items-center justify-between gap-2'>
 									<button ref={profileButtonRef} onClick={() => setOpenProfile(!openProfile)} className='flex items-center gap-3 group w-full text-left cursor-pointer'>
