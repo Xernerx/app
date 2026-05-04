@@ -4,6 +4,7 @@
 
 import { AnimatePresence, motion } from 'framer-motion';
 import { ChevronDown, Download, Laptop } from 'lucide-react';
+import { FaApple, FaLinux, FaQuestion, FaWindows } from 'react-icons/fa';
 import { useEffect, useState } from 'react';
 
 import { redirect } from 'next/navigation';
@@ -65,7 +66,7 @@ export default function Page() {
 					<h1 className='text-3xl font-semibold tracking-tight'>Download Xernerx App</h1>
 
 					<p className='text-sm max-w-md' style={{ color: 'var(--text-muted)' }}>
-						Optimized for your system. One click and you’re in.
+						Optimized for your system. One click and you're in.
 					</p>
 				</div>
 
@@ -77,22 +78,17 @@ export default function Page() {
 						whileHover={{ scale: 1.02, y: -1 }}
 						whileTap={{ scale: 0.98 }}
 						onClick={() => (window.location.href = app.browser_download_url)}
-						className='flex items-center justify-center gap-3 rounded-xl px-8 py-4 text-base font-medium transition'
+						className='flex items-center justify-center gap-3 rounded-xl px-8 py-4 text-base font-medium transition hover:cursor-pointer'
 						style={{
 							background: 'var(--accent)',
 							color: '#fff',
 							boxShadow: '0 20px 50px color-mix(in srgb, var(--accent) 30%, transparent)',
 							minWidth: 260,
 						}}>
-						<Download size={18} />
-						Download for {platform}
+						Download for {platform == 'windows' ? <FaWindows /> : platform == 'macos' ? <FaApple /> : platform == 'linux' ? <FaLinux /> : <FaQuestion />}
+						<span className='capitalize'>{platform}</span>
 					</motion.button>
 				)}
-
-				{/* PLATFORM LABEL */}
-				<span className='text-xs uppercase tracking-wide' style={{ color: 'var(--text-muted)' }}>
-					Detected: {platform}
-				</span>
 
 				{/* OTHER DOWNLOADS TOGGLE */}
 				<div className='flex flex-col items-center gap-2'>
@@ -117,12 +113,12 @@ export default function Page() {
 										<button
 											key={key}
 											onClick={() => (window.location.href = value!.browser_download_url)}
-											className='flex items-center gap-2 rounded-md px-4 py-2 text-sm transition'
+											className='flex items-center gap-2 rounded-md px-4 py-2 text-sm transition hover:cursor-pointer'
 											style={{
 												background: 'var(--container)',
 												border: '1px solid var(--border)',
 											}}>
-											<Download size={14} />
+											{key == 'windows' ? <FaWindows /> : key == 'macos' ? <FaApple /> : key == 'linux' ? <FaLinux /> : <FaQuestion />}
 											<span className='capitalize'>{key}</span>
 										</button>
 									))}
