@@ -67,18 +67,6 @@ export default async function RootLayout({
 	return (
 		<html lang='en' className='h-full' suppressHydrationWarning>
 			<head>
-				<meta
-					http-equiv='Content-Security-Policy'
-					content="
-    default-src 'self' https://canary.xernerx.com https://app.xernerx.com; 
-    script-src 'self' 'unsafe-inline' 'unsafe-eval' https://static.cloudflareinsights.com; 
-    style-src 'self' 'unsafe-inline'; 
-    img-src 'self' data: https://cdn.discordapp.com; 
-    media-src 'self' blob: https://cdn.discordapp.com; 
-    connect-src 'self' https://canary.xernerx.com https://app.xernerx.com https://cdn.discordapp.com;
-  "
-				/>
-
 				<Script
 					id={'1'}
 					dangerouslySetInnerHTML={{
