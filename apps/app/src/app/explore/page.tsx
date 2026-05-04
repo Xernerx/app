@@ -31,6 +31,7 @@ export default function Page() {
 	const [search, setSearch] = useState('');
 	const [bots, setBots] = useState<Bot[]>([]);
 	const [profiles, setProfiles] = useState<ProfileMap>({});
+	const [loading, setLoading] = useState(true);
 
 	// INIT
 	useEffect(() => {
@@ -50,10 +51,14 @@ export default function Page() {
 		(async () => {
 			const b = await fetch('/api/v1/bots?all=true&privacy=public').then((res) => res.json());
 			setBots(b);
+
+			setLoading(false);
 		})();
 	}, []);
 
 	const filtered = bots.filter((b) => b.id.toLowerCase().includes(search.toLowerCase()));
+
+	if (loading) return <div>Loading...</div>;
 
 	return (
 		<>
