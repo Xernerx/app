@@ -3,7 +3,7 @@
 	"private": true,
 	"type": "module",
 	"description": "App",
-	"version": "1.1.103",
+	"version": "1.1.104",
 	"author": "Xernerx Studios",
 	"scripts": {
 		"dev": "pnpm i && concurrently -n apps,tunnel -c blue,green \"pnpm --parallel --filter ./apps/* dev\" \"pnpm tunnel\"",
