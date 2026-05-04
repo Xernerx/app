@@ -5,7 +5,7 @@
 	"main": "dist/main.js",
 	"type": "module",
 	"scripts": {
-		"build": "npm i && npx tsc",
+		"build": "npm i && tsc",
 		"dist": "pnpm build && electron-builder",
 		"dev": "npm i && tsc && electron .",
 		"patch": "npm version patch",
@@ -21,7 +21,8 @@
 	},
 	"devDependencies": {
 		"electron": "40.8.0",
-		"electron-builder": "^26.8.1"
+		"electron-builder": "^26.8.1",
+		"typescript": "^6.0.3"
 	},
 	"build": {
 		"nodeGypRebuild": false,
