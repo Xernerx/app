@@ -10,6 +10,7 @@ import QRCode from 'react-qr-code';
 import uptime from '@/lib/uptime';
 import { usePlatform } from '@/providers/PlatformProvider';
 import { useRouter } from 'next/navigation';
+import { useSession } from 'next-auth/react';
 import { useSidebar } from '@/providers/SidebarProvider';
 import { useUser } from '@/providers/UserProvider';
 
@@ -22,6 +23,7 @@ export default function Sidebar() {
 	const { state, navItems, view, setView } = useSidebar();
 	const { type } = usePlatform();
 	const { user } = useUser();
+	const { data: session } = useSession();
 	const router = useRouter();
 
 	const [openProfile, setOpenProfile] = useState(false);
@@ -189,7 +191,7 @@ export default function Sidebar() {
 			</div>
 
 			<div ref={profileContainerRef} className='mt-auto relative'>
-				{user ? (
+				{session && user ? (
 					<>
 						{state === 'open' && (
 							<div className='relative rounded-xl overflow-hidden backdrop-blur p-2' style={{ background: 'var(--container)' }}>
