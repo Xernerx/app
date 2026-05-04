@@ -67,6 +67,15 @@ export default async function RootLayout({
 	return (
 		<html lang='en' className='h-full' suppressHydrationWarning>
 			<head>
+				<meta
+					http-equiv='Content-Security-Policy'
+					content="default-src 'self' https://canary.xernerx.com https://app.xernerx.com; 
+                             img-src 'self' data: https://cdn.discordapp.com; 
+                             media-src 'self' blob: https://cdn.discordapp.com; 
+                             connect-src 'self' https://canary.xernerx.com https://cdn.discordapp.com;
+                             style-src 'self' 'unsafe-inline';"
+				/>
+
 				<Script
 					id={'1'}
 					dangerouslySetInnerHTML={{
@@ -97,6 +106,7 @@ try {
 					}}
 				/>
 			</head>
+
 			<body className='h-full'>
 				<ToastProvider>
 					<SessionProvider session={session}>

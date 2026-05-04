@@ -195,8 +195,16 @@ export default function Sidebar() {
 					<>
 						{state === 'open' && (
 							<div className='relative rounded-xl overflow-hidden backdrop-blur p-2' style={{ background: 'var(--container)' }}>
-								{user && nameplate && (
-									<video autoPlay loop muted playsInline className='absolute inset-0 w-full h-full object-cover opacity-70 pointer-events-none'>
+								{user && typeof nameplate === 'string' && nameplate.startsWith('http') && (
+									<video
+										autoPlay
+										loop
+										muted
+										playsInline
+										className='absolute inset-0 w-full h-full object-cover opacity-70 pointer-events-none'
+										onCanPlay={(e) => {
+											e.currentTarget.muted = true;
+										}}>
 										<source src={nameplate} type='video/webm' />
 									</video>
 								)}

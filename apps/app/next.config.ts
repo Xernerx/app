@@ -19,6 +19,13 @@ const nextConfig: NextConfig = {
 	reactCompiler: true,
 	images: {
 		unoptimized: true,
+		remotePatterns: [
+			{
+				protocol: 'https',
+				hostname: 'cdn.discordapp.com',
+				pathname: '/**',
+			},
+		],
 	},
 	allowedDevOrigins: ['*.dev.dummi.me'],
 	turbopack: {
