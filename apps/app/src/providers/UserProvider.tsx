@@ -15,7 +15,7 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
 	const { data: session, status }: any = useSession();
 	const { toast } = useToast();
 
-	const [user, setUser] = useState<User>({});
+	const [user, setUser] = useState<User | null>(null);
 	const [guilds, setGuilds] = useState([]);
 
 	useEffect(() => {
