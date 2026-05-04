@@ -87,7 +87,6 @@ export default function Sidebar() {
 			document.removeEventListener('mousedown', handleClickOutside);
 		};
 	}, []);
-	return null;
 
 	const [mounted, setMounted] = useState(false);
 
@@ -201,7 +200,7 @@ export default function Sidebar() {
 				})}
 			</div>
 
-			<div ref={profileContainerRef} className='mt-auto relative'>
+			{/* <div ref={profileContainerRef} className='mt-auto relative'>
 				{session && user ? (
 					<>
 						{state === 'open' && (
@@ -274,7 +273,7 @@ export default function Sidebar() {
 				) : (
 					<Nav icon={<LogIn size={18} />} label='Sign In' onClick={() => router.push('/auth/login')} />
 				)}
-			</div>
+			</div> */}
 
 			<AnimatePresence>
 				{openProfile && user && (
