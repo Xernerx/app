@@ -31,8 +31,7 @@ type GuildsResponse = {
 	cachedAt?: number;
 };
 
-export default function Page(a: any, b: any) {
-	console.log(a, b);
+export default function Page({ searchParams }: { searchParams: Promise<any> }) {
 	const { toast } = useToast();
 	const { setNavItems, clearNavItems, view, setView } = useSidebar();
 
@@ -86,6 +85,12 @@ export default function Page(a: any, b: any) {
 				view: 'zodiac',
 			},
 		]);
+
+		(async () => {
+			const { view } = await searchParams;
+
+			if (view) setView(view);
+		})();
 
 		return () => {
 			clearNavItems();
