@@ -33,7 +33,7 @@ export default function Virtue({ id }: { id?: string }) {
 		},
 
 		levelUp: true,
-		levelMessage: '[@username] went level up!',
+		levelMessage: '[@mention] reached level [@level] :tada:!',
 		levelChannel: '' as string | null,
 
 		saving: false,
@@ -136,7 +136,7 @@ export default function Virtue({ id }: { id?: string }) {
 			},
 
 			levelUp: profile.levelUp ?? true,
-			levelMessage: profile.levelMessage ?? '[@username] went level up!',
+			levelMessage: profile.levelMessage ?? '[@mention] reached level [@level] :tada:!',
 			levelChannel: profile.levelChannel ?? '',
 		}));
 	}, [profile]);

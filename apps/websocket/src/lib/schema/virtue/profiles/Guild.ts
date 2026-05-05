@@ -16,7 +16,7 @@ const schema = new Schema(
 			tracked: { type: [String], default: [] },
 		},
 		levelUp: { type: Boolean, default: true },
-		levelMessage: { type: String, default: '[@username] went level up!' },
+		levelMessage: { type: String, default: '[@mention] reached level [@level] :tada:!' },
 		levelChannel: { type: String, default: null },
 	},
 	{ timestamps: true }
