@@ -31,7 +31,8 @@ type GuildsResponse = {
 	cachedAt?: number;
 };
 
-export default function Page() {
+export default function Page(a: any, b: any) {
+	console.log(a, b);
 	const { toast } = useToast();
 	const { setNavItems, clearNavItems, view, setView } = useSidebar();
 
