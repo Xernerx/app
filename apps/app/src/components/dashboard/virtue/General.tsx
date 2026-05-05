@@ -31,6 +31,11 @@ export default function Virtue({ id }: { id?: string }) {
 			ignored: [] as string[],
 			tracked: [] as string[],
 		},
+
+		levelUp: true,
+		levelMessage: '[@username] went level up!',
+		levelChannel: '' as string | null,
+
 		saving: false,
 	});
 
@@ -118,15 +123,21 @@ export default function Virtue({ id }: { id?: string }) {
 		setState((prev) => ({
 			...prev,
 			mode: profile.mode ?? 'balanced',
+
 			cycles: {
 				daily: profile.cycles?.daily ?? false,
 				weekly: profile.cycles?.weekly ?? false,
 				monthly: profile.cycles?.monthly ?? false,
 			},
+
 			roles: {
 				ignored: profile.roles?.ignored ?? [],
 				tracked: profile.roles?.tracked ?? [],
 			},
+
+			levelUp: profile.levelUp ?? true,
+			levelMessage: profile.levelMessage ?? '[@username] went level up!',
+			levelChannel: profile.levelChannel ?? '',
 		}));
 	}, [profile]);
 
@@ -227,12 +238,19 @@ export default function Virtue({ id }: { id?: string }) {
 		await ensureFreshConnection();
 
 		try {
-			const e = await clientRef.current.update('virtue', 'guilds', {
-				id: id,
-				mode: state.mode,
-				cycles: state.cycles,
-				roles: state.roles,
-			});
+			console.log(state);
+			console.log(
+				await clientRef.current.update('virtue', 'guilds', {
+					id: id,
+					mode: state.mode,
+					cycles: state.cycles,
+					roles: state.roles,
+
+					levelUp: state.levelUp,
+					levelMessage: state.levelMessage,
+					levelChannel: state.levelChannel || null,
+				})
+			);
 		} catch (err) {
 			console.error('Save failed:', err);
 		} finally {
@@ -301,6 +319,60 @@ export default function Virtue({ id }: { id?: string }) {
 								</button>
 							);
 						})}
+					</div>
+				</div>
+
+				<div className='flex flex-col gap-4'>
+					<div className='flex items-center justify-between'>
+						<label className='text-sm font-medium'>Level Up Messages</label>
+
+						<button
+							type='button'
+							onClick={() => setState((s) => ({ ...s, levelUp: !s.levelUp }))}
+							className='relative w-9 h-5 rounded-full transition'
+							style={{
+								background: state.levelUp ? 'var(--accent)' : 'color-mix(in srgb, var(--border) 70%, transparent)',
+							}}>
+							<motion.div
+								layout
+								transition={{ type: 'spring', stiffness: 500, damping: 30 }}
+								className='absolute top-0.5 w-4 h-4 rounded-full bg-white'
+								style={{
+									left: state.levelUp ? 'calc(100% - 18px)' : '2px',
+								}}
+							/>
+						</button>
+					</div>
+
+					<div className='flex flex-col gap-2'>
+						<textarea
+							value={state.levelMessage}
+							onChange={(e) =>
+								setState((s) => ({
+									...s,
+									levelMessage: e.target.value,
+								}))
+							}
+							disabled={!state.levelUp}
+							rows={3}
+							placeholder='Level-up message (use [@username])'
+							className='rounded-2xl border px-4 py-3 text-sm outline-none resize-none disabled:opacity-50 disabled:cursor-not-allowed'
+							style={inputStyle}
+						/>
+
+						<input
+							value={state.levelChannel ?? ''}
+							onChange={(e) =>
+								setState((s) => ({
+									...s,
+									levelChannel: e.target.value,
+								}))
+							}
+							disabled={!state.levelUp}
+							placeholder='Channel ID (optional)'
+							className='rounded-2xl border px-4 py-3 text-sm outline-none disabled:opacity-50 disabled:cursor-not-allowed'
+							style={inputStyle}
+						/>
 					</div>
 				</div>
 

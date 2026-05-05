@@ -12,9 +12,12 @@ const schema = new Schema(
 			daily: { type: Boolean, default: false },
 		},
 		roles: {
-			ignored: [String],
-			tracked: [String],
+			ignored: { type: [String], default: [] },
+			tracked: { type: [String], default: [] },
 		},
+		levelUp: { type: Boolean, default: true },
+		levelMessage: { type: String, default: '[@username] went level up!' },
+		levelChannel: { type: String, default: null },
 	},
 	{ timestamps: true }
 );

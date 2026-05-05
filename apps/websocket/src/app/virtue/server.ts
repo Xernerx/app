@@ -11,7 +11,7 @@ const models = {
 const methods = {
 	get: (model: any, body: any) => model.findOne(body),
 	create: (model: any, body: any) => model.create(body),
-	update: (model: any, body: any) => model.findOneAndUpdate({ id: body.id }, body, { after: true }),
+	update: (model: any, body: any) => model.findOneAndUpdate({ id: body.id }, { $set: body }, { after: true, runValidators: true }),
 	delete: (model: any, body: any) => model.findOneAndDelete(body),
 };
 
