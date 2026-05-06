@@ -291,7 +291,7 @@ export default function Virtue({ id }: { id?: string }) {
 					</select>
 				</div>
 
-				<div className='flex flex-col gap-3'>
+				{/* <div className='flex flex-col gap-3'>
 					<label className='text-sm font-medium'>Reset Cycles</label>
 
 					<div className='grid grid-cols-3 gap-2'>
@@ -320,7 +320,7 @@ export default function Virtue({ id }: { id?: string }) {
 							);
 						})}
 					</div>
-				</div>
+				</div> */}
 
 				<div className='flex flex-col gap-4'>
 					<div className='flex items-center justify-between'>

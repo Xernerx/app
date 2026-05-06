@@ -115,7 +115,13 @@ export default function Page({ searchParams }: { searchParams: Promise<any> }) {
 				if (!cancelled) {
 					const fetchedGuilds = data.guilds ?? [];
 
+					const { guild } = await searchParams;
+
 					setGuilds(fetchedGuilds);
+
+					if (guild) {
+						if (fetchedGuilds.map((g) => g.id).includes(guild)) setSelectedGuildId(guild);
+					}
 
 					if (fetchedGuilds.length > 0) {
 						setSelectedGuildId((current) => current ?? fetchedGuilds[0].id);
