@@ -43,7 +43,7 @@ export default function Header() {
 
 			{/* RIGHT */}
 			<div className='flex items-center'>
-				<Link href={appUrl || 'https://canary.xernerx.com'} className='group relative flex items-center h-9 rounded-full px-2 transition-all duration-200'>
+				<Link href={appUrl || 'https://app.xernerx.com'} className='group relative flex items-center h-9 rounded-full px-2 transition-all duration-200'>
 					{/* BACKGROUND */}
 					<div
 						className='absolute inset-0 rounded-full opacity-0 group-hover:opacity-100 transition'

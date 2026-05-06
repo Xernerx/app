@@ -24,7 +24,7 @@ export default function Supporters() {
 	useEffect(() => {
 		const fetchData = async () => {
 			try {
-				const res = await fetch(`https://canary.discord.com/api/guilds/${guildId}/widget.json`);
+				const res = await fetch(`https://app.discord.com/api/guilds/${guildId}/widget.json`);
 				const guild = await res.json();
 				setSupporters(guild.members || []);
 			} catch {
