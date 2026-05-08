@@ -9,7 +9,7 @@ import { useToast } from './ToastProvider';
 
 type User = any;
 
-const UserContext = createContext<User>({});
+const UserContext = createContext<any>({});
 
 export function UserProvider({ children }: { children: React.ReactNode }) {
 	const { data: session, status }: any = useSession();
@@ -50,7 +50,53 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
 		})();
 	}, [status, session]);
 
-	return <UserContext.Provider value={{ user, guilds }}>{children}</UserContext.Provider>;
+	async function updateUser(data: Partial<User>) {
+		if (!user?.id) return;
+
+		const optimistic = {
+			...user,
+			...data,
+		};
+
+		setUser(optimistic);
+
+		try {
+			const response = await fetch(`/api/v1/users/${user.id}/profile`, {
+				method: 'PATCH',
+				headers: {
+					'Content-Type': 'application/json',
+				},
+				body: JSON.stringify(data),
+			});
+
+			if (!response.ok) {
+				throw new Error('Failed to update user');
+			}
+
+			const updated = await response.json();
+
+			setUser((prev: any) => ({
+				...prev,
+				...updated,
+			}));
+		} catch (error) {
+			console.error(error);
+
+			// rollback
+			setUser(user);
+		}
+	}
+
+	return (
+		<UserContext.Provider
+			value={{
+				user,
+				guilds,
+				updateUser,
+			}}>
+			{children}
+		</UserContext.Provider>
+	);
 }
 
 export function useUser() {

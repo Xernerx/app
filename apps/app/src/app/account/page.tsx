@@ -2,19 +2,18 @@
 'use client';
 
 import { AnimatePresence, motion } from 'framer-motion';
-import { Home, KeyRound, Palette, User } from 'lucide-react';
+import { Bell, Home, Info, KeyRound, Palette, User } from 'lucide-react';
 
 import Account from '@/components/account/Account';
 import Appearance from '@/components/account/Appearance';
+import Notifications from '@/components/account/Notifications';
 import Profile from '@/components/account/Profile';
 import Tokens from '@/components/account/Tokens';
 import { useEffect } from 'react';
 import { useSidebar } from '@/providers/SidebarProvider';
-import { useUser } from '@/providers/UserProvider';
 
 export default function Page() {
 	const { setNavItems, clearNavItems, view, setView } = useSidebar();
-	const { user } = useUser();
 
 	useEffect(() => {
 		setView('Account');
@@ -22,8 +21,9 @@ export default function Page() {
 		setNavItems([
 			{ icon: <Home />, label: 'Home', href: '/' },
 			{ icon: <User />, label: 'Account', onClick: () => setView('Account'), view: 'Account' },
-			{ icon: <User />, label: 'Profile', onClick: () => setView('Profile'), view: 'Profile' },
+			{ icon: <Info />, label: 'Profile', onClick: () => setView('Profile'), view: 'Profile' },
 			{ icon: <Palette />, label: 'Appearance', onClick: () => setView('Appearance'), view: 'Appearance' },
+			{ icon: <Bell />, label: 'Notifications', onClick: () => setView('Notifications'), view: 'Notifications' },
 			{ icon: <KeyRound />, label: 'Tokens', onClick: () => setView('Tokens'), view: 'Tokens' },
 		]);
 
@@ -59,6 +59,7 @@ export default function Page() {
 					{view === 'Profile' && <Profile />}
 					{view === 'Appearance' && <Appearance />}
 					{view === 'Tokens' && <Tokens />}
+					{view === 'Notifications' && <Notifications />}
 				</motion.div>
 			</AnimatePresence>
 		</div>
