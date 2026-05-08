@@ -2,7 +2,7 @@
 
 'use client';
 
-import { Loader2, Sparkles } from 'lucide-react';
+import { Info, Loader2, Sparkles } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 
 import { XernerxWebsocket } from '@xernerx/websocket';
@@ -37,6 +37,7 @@ export default function Virtue({ id }: { id?: string }) {
 		levelChannel: '' as string | null,
 
 		saving: false,
+		autoDelete: 0,
 	});
 
 	/* ================= INIT WS CLIENT ================= */
@@ -138,6 +139,8 @@ export default function Virtue({ id }: { id?: string }) {
 			levelUp: profile.levelUp ?? true,
 			levelMessage: profile.levelMessage ?? '[@mention] reached level [@level] :tada:!',
 			levelChannel: profile.levelChannel ?? '',
+
+			autoDelete: profile.autoDelete ?? 0,
 		}));
 	}, [profile]);
 
@@ -238,19 +241,18 @@ export default function Virtue({ id }: { id?: string }) {
 		await ensureFreshConnection();
 
 		try {
-			console.log(state);
-			console.log(
-				await clientRef.current.update('virtue', 'guilds', {
-					id: id,
-					mode: state.mode,
-					cycles: state.cycles,
-					roles: state.roles,
+			await clientRef.current.update('virtue', 'guilds', {
+				id: id,
+				mode: state.mode,
+				cycles: state.cycles,
+				roles: state.roles,
 
-					levelUp: state.levelUp,
-					levelMessage: state.levelMessage,
-					levelChannel: state.levelChannel || null,
-				})
-			);
+				levelUp: state.levelUp,
+				levelMessage: state.levelMessage,
+				levelChannel: state.levelChannel || null,
+
+				autoDelete: state.autoDelete,
+			});
 		} catch (err) {
 			console.error('Save failed:', err);
 		} finally {
@@ -345,6 +347,47 @@ export default function Virtue({ id }: { id?: string }) {
 					</div>
 
 					<div className='flex flex-col gap-2'>
+						<div className='flex items-center justify-between gap-3 pt-1'>
+							<div className='flex items-center gap-1.5 text-sm'>
+								<span
+									style={{
+										color: `color-mix(in srgb, var(${state.levelChannel ? '--text-muted' : '--text-main'}) 80%, transparent)`,
+									}}>
+									Auto delete after
+								</span>
+
+								<div title='0 disables auto delete • max 60 seconds' className='opacity-60 hover:opacity-100 transition cursor-help'>
+									<Info size={14} />
+								</div>
+							</div>
+
+							<div className='flex items-center gap-2'>
+								<input
+									type='number'
+									min={0}
+									max={60}
+									disabled={!!state.levelChannel}
+									value={!state.levelChannel ? state.autoDelete || 0 : 0}
+									onChange={(e) =>
+										setState((s) => ({
+											...s,
+											autoDelete: Number(e.target.value),
+										}))
+									}
+									style={inputStyle}
+									className='w-16 rounded-xl border px-2 py-1 text-sm outline-none disabled:opacity-50 disabled:cursor-not-allowed'
+								/>
+
+								<span
+									style={{
+										color: `color-mix(in srgb, var(${state.levelChannel ? '--text-muted' : '--text-main'}) 80%, transparent)`,
+									}}>
+									sec
+								</span>
+							</div>
+						</div>
+
+						<label htmlFor=''>Message</label>
 						<textarea
 							value={state.levelMessage}
 							onChange={(e) =>
@@ -359,6 +402,8 @@ export default function Virtue({ id }: { id?: string }) {
 							className='rounded-2xl border px-4 py-3 text-sm outline-none resize-none disabled:opacity-50 disabled:cursor-not-allowed'
 							style={inputStyle}
 						/>
+
+						<label htmlFor=''>Channel</label>
 
 						<input
 							value={state.levelChannel ?? ''}

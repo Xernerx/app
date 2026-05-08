@@ -18,6 +18,7 @@ const schema = new Schema(
 		levelUp: { type: Boolean, default: true },
 		levelMessage: { type: String, default: '[@mention] reached level [@level] :tada:!' },
 		levelChannel: { type: String, default: null },
+		autoDelete: { type: Number, default: 0 },
 	},
 	{ timestamps: true }
 );
