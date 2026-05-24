@@ -1,6 +1,7 @@
 /** @format */
+'use server';
 
-// /** @format */
+export async function GET() {}
 
 // import { NextRequest, NextResponse } from 'next/server';
 // import { db } from '@/lib/database'; // Your database or ORM client
