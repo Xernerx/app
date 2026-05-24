@@ -4,6 +4,7 @@
 
 import React, { createContext, useContext, useEffect, useRef, useState } from 'react';
 
+import { useToast } from './ToastProvider';
 import { useUser } from '@/providers/UserProvider';
 
 type ThemeMode = 'light' | 'dark' | 'system';
@@ -34,7 +35,6 @@ type ThemeState = {
 	accentColor: string;
 	syncAcrossClients: boolean;
 	background: BackgroundStyle;
-
 	ui: UISettings;
 };
 
@@ -121,7 +121,10 @@ function getCookie(name: string) {
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
 	const channelRef = useRef<BroadcastChannel | null>(null);
+
+	const { toast } = useToast();
 	const { user } = useUser();
+
 	const [hydrated, setHydrated] = useState(false);
 
 	const [state, setState] = useState<ThemeState>({
@@ -129,7 +132,6 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
 		accentColor: '#8b7cf6',
 		syncAcrossClients: true,
 		background: 'nebula',
-
 		ui: {
 			uiSpacing: 'default',
 			zoom: 100,
@@ -204,27 +206,45 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
 			try {
 				const a = user.appearance;
 
-				setState({
-					mode: a.mode ?? 'system',
-					accentColor: a.accentColor ?? '#8b7cf6',
-					syncAcrossClients: a.syncAcrossClients ?? true,
-					background: a.background ?? 'nebula',
-					ui: {
-						uiSpacing: a.ui?.uiSpacing ?? 'default',
-						zoom: a.ui?.zoom ?? 100,
-					},
+				setState((currentLocalState) => {
+					if (!currentLocalState.syncAcrossClients || !a.syncAcrossClients) {
+						return currentLocalState;
+					}
+
+					return {
+						mode: a.mode ?? 'system',
+						accentColor: a.accentColor ?? '#8b7cf6',
+						syncAcrossClients: a.syncAcrossClients ?? true,
+						background: a.background ?? 'nebula',
+						ui: {
+							uiSpacing: a.ui?.uiSpacing ?? 'default',
+							zoom: a.ui?.zoom ?? 100,
+						},
+					};
 				});
 			} catch {}
 		}
 
-		// ✅ ALWAYS hydrate, even if no appearance exists
 		setHydrated(true);
 	}, [user]);
 
 	const timeoutRef = useRef<NodeJS.Timeout | null>(null);
 
+	const lastSyncStateRef = useRef<boolean>(state.syncAcrossClients);
+
 	useEffect(() => {
-		if (!hydrated || !state.syncAcrossClients || !user?.id) return;
+		if (!hydrated || !user?.id) return;
+
+		// Check if the user just toggled sync from TRUE to FALSE
+		const turnedOffSync = lastSyncStateRef.current && !state.syncAcrossClients;
+		lastSyncStateRef.current = state.syncAcrossClients;
+
+		// If sync is off, AND they didn't just turn it off right now, exit early.
+		// This ensures "false" gets saved to the cloud once, but stops all future updates.
+		if (!state.syncAcrossClients && !turnedOffSync) {
+			if (timeoutRef.current) clearTimeout(timeoutRef.current);
+			return;
+		}
 
 		if (timeoutRef.current) clearTimeout(timeoutRef.current);
 
@@ -235,8 +255,10 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
 				body: JSON.stringify({
 					appearance: state,
 				}),
-			}).catch(() => {});
-		}, 300);
+			})
+				.then(() => toast('Updated theme preference', 'success'))
+				.catch(() => toast('Failed to update theme preference', 'error'));
+		}, 1000);
 
 		return () => {
 			if (timeoutRef.current) clearTimeout(timeoutRef.current);

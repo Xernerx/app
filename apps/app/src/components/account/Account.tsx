@@ -5,18 +5,26 @@ import { LogOut, Trash2, User } from 'lucide-react';
 
 import { motion } from 'framer-motion';
 import { signOut } from 'next-auth/react';
+import { useToast } from '@/providers/ToastProvider';
 import { useUser } from '@/providers/UserProvider';
 
 export default function Account() {
 	const { user } = useUser();
+	const { toast } = useToast();
 
-	const handleDeleteData = async () => {
+	const handleDeleteData = () => {
 		if (!user?.id) return;
 
-		try {
-			await fetch(`/api/v1/users/${user.id}/profile`, { method: 'DELETE' });
-		} catch {}
+		fetch(`/api/v1/users/${user.id}/profile`, { method: 'DELETE' })
+			.then(() => {
+				toast('Successfully deleted user data', 'success');
+				signOut();
+			})
+			.catch(() => toast('Unable to delete user data at this time.', 'error'));
+	};
 
+	const handleSignOut = () => {
+		toast('Signed out!', 'success');
 		signOut();
 	};
 
@@ -93,7 +101,7 @@ export default function Account() {
 				</div>
 
 				<button
-					onClick={() => signOut()}
+					onClick={handleSignOut}
 					className='flex items-center justify-center gap-2 text-sm rounded-md transition'
 					style={{
 						padding: '8px 12px',

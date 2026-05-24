@@ -103,13 +103,12 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ id: 
 async function guardWrite(req: NextRequest, guildId: string) {
 	const token = await getToken(req);
 
-	// 🚫 session-only enforcement
-	const c = await check({ token, sessionOnly: true });
+	const c = await check({ token });
 	if (c) return c;
 
 	const session: any = await getServerSession(authOptions);
 
-	if (!canModifyGuild(session, guildId)) {
+	if (token !== process.env.OPEN_TOKEN && !canModifyGuild(session, guildId)) {
 		return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
 	}
 

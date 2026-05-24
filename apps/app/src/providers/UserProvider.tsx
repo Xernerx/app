@@ -30,13 +30,13 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
 				.then((res) => res.json())
 				.catch(() => {});
 
-			const profile = await fetch(`/api/v1/users/${session.user.id}/profile`)
-				.then((res) => res.json())
-				.catch(() => {});
-
 			const { guilds } = await fetch(`/api/v1/discord/guilds`)
 				.then((res) => res.json())
 				.catch(() => ({ guilds: [] }));
+
+			const profile = await fetch(`/api/v1/users/${session.user.id}/profile`)
+				.then((res) => res.json())
+				.catch(() => {});
 
 			const u = {
 				...session,

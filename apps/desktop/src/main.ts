@@ -85,18 +85,17 @@ function log(message: string) {
 function sendError(message: string) {
 	log(`ERROR: ${message}`);
 
-	if (DEBUG && win && !win.isDestroyed()) {
-		win.webContents.executeJavaScript(`
-			document.body.innerHTML = "<pre style='color:red;padding:20px;'>${message}</pre>";
-		`);
+	if (splash && !splash.isDestroyed()) {
+		splash.webContents.send('startup:error', message);
 	}
 }
 
 function sendStatus(message: string) {
 	log(`STATUS: ${message}`);
 
-	if (win && !win.isDestroyed()) {
-		win.webContents.send('startup:status', message);
+	// Startup messages belong to splash
+	if (splash && !splash.isDestroyed()) {
+		splash.webContents.send('startup:status', message);
 	}
 }
 
@@ -148,7 +147,6 @@ function getDisplayFromBounds(bounds: Electron.Rectangle) {
 
 function createSplash(bounds: Electron.Rectangle) {
 	const display = getDisplayFromBounds(bounds);
-	const { workArea } = display;
 
 	const width = 500;
 	const height = 350;
@@ -164,6 +162,13 @@ function createSplash(bounds: Electron.Rectangle) {
 		alwaysOnTop: true,
 		skipTaskbar: true,
 		backgroundColor: '#00000000',
+
+		webPreferences: {
+			preload: path.join(__dirname, 'preload.cjs'),
+			contextIsolation: true,
+			nodeIntegration: false,
+			sandbox: false,
+		},
 	});
 
 	splash.loadFile(path.join(__dirname, '../pages/loading.html'));
@@ -189,7 +194,7 @@ async function waitForServer() {
 				return;
 			}
 
-			const delay = Math.min(attempt * attempt, 10);
+			const delay = Math.min(attempt * attempt, 180);
 
 			for (let s = delay; s > 0; s--) {
 				sendStatus(`Retrying in ${s}s`);
@@ -239,12 +244,7 @@ async function runUpdater() {
 /* Window                                        */
 /* --------------------------------------------- */
 
-async function createWindow() {
-	let bounds = store.get('windowBounds') as Electron.Rectangle | undefined;
-	bounds = getSafeBounds(bounds);
-
-	createSplash(bounds);
-
+function createMainWindow(bounds: Electron.Rectangle) {
 	win = new BrowserWindow({
 		width: bounds.width,
 		height: bounds.height,
@@ -272,8 +272,6 @@ async function createWindow() {
 		win.maximize();
 	}
 
-	/* Save bounds */
-
 	function saveBounds() {
 		if (!win || win.isDestroyed()) return;
 
@@ -292,21 +290,6 @@ async function createWindow() {
 	win.on('move', saveBounds);
 	win.on('close', saveBounds);
 
-	/* Window controls */
-
-	ipcMain.on('window:minimize', () => win.minimize());
-
-	ipcMain.on('window:maximize', () => {
-		if (win.isMaximized()) win.unmaximize();
-		else win.maximize();
-	});
-
-	ipcMain.on('window:close', () => win.close());
-
-	ipcMain.handle('window:isMaximized', () => win.isMaximized());
-
-	/* Crash recovery */
-
 	let crashCount = 0;
 
 	win.webContents.on('render-process-gone', (_, details) => {
@@ -315,11 +298,9 @@ async function createWindow() {
 		if (++crashCount > 3) return;
 
 		setTimeout(() => {
-			win.reload(); // that's it
+			win.reload();
 		}, 1000);
 	});
-
-	/* Debug */
 
 	if (DEBUG) {
 		win.webContents.on('did-finish-load', () => {
@@ -331,11 +312,10 @@ async function createWindow() {
 		});
 	}
 
-	/* Devtools lock */
-
 	if (app.isPackaged && !DEBUG) {
 		win.webContents.on('before-input-event', (event, input) => {
 			if (input.key === 'F12') event.preventDefault();
+
 			if (input.control && input.shift && input.key.toLowerCase() === 'i') {
 				event.preventDefault();
 			}
@@ -344,29 +324,62 @@ async function createWindow() {
 		win.webContents.on('context-menu', (e) => e.preventDefault());
 	}
 
-	/* Boot flow */
+	ipcMain.on('window:minimize', () => win.minimize());
 
-	await runUpdater();
-	await waitForServer();
+	ipcMain.on('window:maximize', () => {
+		if (win.isMaximized()) win.unmaximize();
+		else win.maximize();
+	});
 
-	sendStatus('Launching...');
+	ipcMain.on('window:close', () => win.close());
 
-	await win.loadURL(WEB_URL);
+	ipcMain.handle('window:isMaximized', () => win.isMaximized());
+}
 
-	if (!meta.startMinimized) {
-		win.show();
-		win.focus();
-	}
+async function createWindow() {
+	let bounds = store.get('windowBounds') as Electron.Rectangle | undefined;
 
-	if (splash && !splash.isDestroyed()) {
-		splash.destroy();
-		splash = null;
-	}
+	bounds = getSafeBounds(bounds);
 
-	if (DEBUG) {
-		setTimeout(() => {
-			win.webContents.openDevTools({ mode: 'detach' });
-		}, 1000);
+	// Only splash exists initially
+	createSplash(bounds);
+
+	await new Promise<void>((resolve) => {
+		if (!splash) return resolve();
+
+		splash.webContents.once('did-finish-load', () => resolve());
+	});
+
+	try {
+		await runUpdater();
+		await waitForServer();
+
+		sendStatus('Launching...');
+
+		// Create actual app only now
+		createMainWindow(bounds);
+
+		await win.loadURL(WEB_URL);
+
+		if (!meta.startMinimized) {
+			win.show();
+			win.focus();
+		}
+
+		if (DEBUG) {
+			setTimeout(() => {
+				win.webContents.openDevTools({
+					mode: 'detach',
+				});
+			}, 1000);
+		}
+	} catch (error) {
+		sendError((error as Error).message);
+	} finally {
+		if (splash && !splash.isDestroyed()) {
+			splash.destroy();
+			splash = null;
+		}
 	}
 }
 

@@ -17,6 +17,7 @@ const schema = new Schema(
 		id: { type: String, unique: true, required: true }, // Guild ID
 		name: { type: String, required: true }, // Guild name
 		icon: { type: String }, // Guild icon URL (optional)
+		banner: { type: String },
 		description: { type: String }, // Short description of the guild
 		info: { type: String }, // Long description about the guild
 		organization: { type: String }, // Organization or developer of the guild

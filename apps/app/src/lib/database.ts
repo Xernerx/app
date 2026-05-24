@@ -8,6 +8,7 @@ import ProfileGuild from '@/schemas/xernerx/profiles/Guild';
 import ProfileOrganization from '@/schemas/xernerx/profiles/Organization';
 import ProfileUser from '@/schemas/xernerx/profiles/User';
 import StatsBot from '@/schemas/xernerx/stats/Bot';
+import StatsGuild from '@/schemas/xernerx/stats/Guild';
 import TokensApi from '@/schemas/xernerx/tokens/Api';
 import TokensInvite from '@/schemas/xernerx/tokens/Invite';
 
@@ -46,6 +47,7 @@ function registerXernerxModels(connection: Connection, dbName: XernerxDbName) {
 
 	if (dbName == 'stats') {
 		if (!connection.models.bot) connection.model('bot', StatsBot);
+		if (!connection.models.guild) connection.model('guild', StatsGuild);
 	}
 
 	if (dbName == 'tokens') {

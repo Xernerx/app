@@ -2,10 +2,11 @@
 'use client';
 
 import { AnimatePresence, motion } from 'framer-motion';
-import { Bell, Home, Info, KeyRound, Palette, User } from 'lucide-react';
+import { Bell, Home, Info, KeyRound, Palette, Smartphone, User } from 'lucide-react';
 
 import Account from '@/components/account/Account';
 import Appearance from '@/components/account/Appearance';
+import Devices from '@/components/account/Devices';
 import Notifications from '@/components/account/Notifications';
 import Profile from '@/components/account/Profile';
 import Tokens from '@/components/account/Tokens';
@@ -22,6 +23,7 @@ export default function Page() {
 			{ icon: <Home />, label: 'Home', href: '/' },
 			{ icon: <User />, label: 'Account', onClick: () => setView('Account'), view: 'Account' },
 			{ icon: <Info />, label: 'Profile', onClick: () => setView('Profile'), view: 'Profile' },
+			{ icon: <Smartphone />, label: 'Devices', onClick: () => setView('Devices'), view: 'Devices' },
 			{ icon: <Palette />, label: 'Appearance', onClick: () => setView('Appearance'), view: 'Appearance' },
 			{ icon: <Bell />, label: 'Notifications', onClick: () => setView('Notifications'), view: 'Notifications' },
 			{ icon: <KeyRound />, label: 'Tokens', onClick: () => setView('Tokens'), view: 'Tokens' },
@@ -57,6 +59,7 @@ export default function Page() {
 					style={{ gap: 'calc(var(--ui-gap) * 2)' }}>
 					{view === 'Account' && <Account />}
 					{view === 'Profile' && <Profile />}
+					{view === 'Devices' && <Devices />}
 					{view === 'Appearance' && <Appearance />}
 					{view === 'Tokens' && <Tokens />}
 					{view === 'Notifications' && <Notifications />}

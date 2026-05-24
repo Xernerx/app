@@ -4,6 +4,7 @@
 
 import { LayoutGrid, Monitor, Palette, RefreshCw, Sparkles, ZoomIn } from 'lucide-react';
 
+import { Switch } from '@/components/modules/Switch';
 import { motion } from 'framer-motion';
 import { useState } from 'react';
 import { useTheme } from '@/providers/ThemeProvider';
@@ -66,7 +67,6 @@ export default function Appearance() {
 		ui: { uiSpacing, zoom },
 	} = useTheme();
 
-	const { user } = useUser();
 	const [zoomPreview, setZoomPreview] = useState(zoom);
 
 	const primary = mode === 'dark' ? LIGHT_COLORS : DARK_COLORS;
@@ -149,7 +149,7 @@ export default function Appearance() {
 					onChange={(e) => {
 						const val = Number(e.target.value);
 						setZoomPreview(val);
-						setZoom(val); // 🔥 live update, no weird delay
+						setZoom(val);
 					}}
 					className='slider w-full'
 				/>
@@ -162,14 +162,13 @@ export default function Appearance() {
 			</SettingsCard>
 
 			{/* SYNC */}
-			<SettingsCard icon={<RefreshCw size={18} />} title='Sync' desc='Share theme across clients.'>
-				<label className='relative inline-flex items-center cursor-pointer'>
-					<input type='checkbox' checked={syncAcrossClients} onChange={() => setSyncAcrossClients(!syncAcrossClients)} className='sr-only peer' />
-
-					<div className='w-11 h-6 rounded-full bg-gray-600 peer-checked:bg-[rgb(var(--accent))] transition'>
-						<div className='absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full transition peer-checked:translate-x-5' />
-					</div>
-				</label>
+			<SettingsCard
+				icon={<RefreshCw size={18} />}
+				title='Sync'
+				desc='Share theme across clients.'
+				isRow={true} // Render side-by-side layout for switches
+			>
+				<Switch checked={syncAcrossClients} onChange={setSyncAcrossClients} />
 			</SettingsCard>
 		</div>
 	);
@@ -181,7 +180,7 @@ function ColorDot({ color, active, onClick }: any) {
 	return <button onClick={onClick} className={`w-8 h-8 rounded-full border-2 transition ${active ? 'border-white scale-110' : 'border-white/20'}`} style={{ background: color }} />;
 }
 
-function SettingsCard({ icon, title, desc, children }: any) {
+function SettingsCard({ icon, title, desc, children, isRow = false }: any) {
 	return (
 		<motion.div
 			initial={{ opacity: 0, y: 6 }}
@@ -192,7 +191,9 @@ function SettingsCard({ icon, title, desc, children }: any) {
 				borderColor: 'var(--border)',
 				padding: 'calc(var(--ui-gap) * 1.5)',
 				display: 'flex',
-				flexDirection: 'column',
+				flexDirection: isRow ? 'row' : 'column',
+				justifyContent: isRow ? 'space-between' : 'flex-start',
+				alignItems: isRow ? 'center' : 'stretch',
 				gap: 'calc(var(--ui-gap) * 1)',
 			}}>
 			<div className='flex items-center gap-3'>

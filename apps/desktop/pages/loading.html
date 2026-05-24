@@ -93,7 +93,7 @@
 		const error = document.getElementById('error');
 
 		const collector = setTimeout(() => {
-			status.classList.toggle('hidden');
+			status.classList.remove('hidden');
 		}, 30000);
 
 		window.electron.onStatus((message) => {
@@ -101,12 +101,12 @@
 		});
 
 		window.electron.onError((message) => {
+			clearTimeout(collector);
+
 			error.textContent = message;
 
 			status.classList.add('hidden');
-			error.classList.toggle('hidden');
-
-			clearTimeout(collector);
+			error.classList.remove('hidden');
 		});
 	</script>
 </html>
