@@ -14,4 +14,14 @@ const schema = new Schema(
 	{ timestamps: true }
 );
 
+schema.index(
+	{
+		id: 1,
+		guild: 1,
+	},
+	{
+		unique: true,
+	}
+);
+
 export default schema;
