@@ -1,8 +1,8 @@
 /** @format */
 'use client';
 
+import { motion, useScroll, useSpring } from 'framer-motion';
 import { useEffect, useState } from 'react';
-import { useScroll, useSpring, motion } from 'framer-motion';
 
 type Section = {
 	id: string;
@@ -17,8 +17,8 @@ export default function Page() {
 			title: '1. Introduction',
 			content: (
 				<p>
-					These Terms of Service ("Terms") govern your access to and use of services provided by Xernerx Studios ("we", "our", or "us"). By accessing or using our services, you agree to be legally
-					bound by these Terms.
+					These Terms of Service ({'"'}Terms{'"'}) govern your access to and use of services provided by Xernerx Studios ({'"'}we{'"'}, {'"'}our{'"'}, or {'"'}us{'"'}). By accessing or using our
+					services, you agree to be legally bound by these Terms.
 				</p>
 			),
 		},
@@ -31,7 +31,7 @@ export default function Page() {
 			id: 'acceptable-use',
 			title: '3. Acceptable Use',
 			content: (
-				<ul className="list-disc pl-6 space-y-2">
+				<ul className='list-disc pl-6 space-y-2'>
 					<li>Engage in unlawful activities.</li>
 					<li>Access data without explicit authorization.</li>
 					<li>Attempt to disrupt service infrastructure.</li>
@@ -103,7 +103,7 @@ export default function Page() {
 			title: '14. Contact',
 			content: (
 				<p>
-					For legal inquiries contact <span className="text-[rgb(var(--accent))] font-medium">legal@xernerx.com</span>.
+					For legal inquiries contact <span className='text-[rgb(var(--accent))] font-medium'>legal@xernerx.com</span>.
 				</p>
 			),
 		},
@@ -138,14 +138,14 @@ export default function Page() {
 	}, []);
 
 	return (
-		<div className="relative">
-			<motion.div style={{ scaleX }} className="fixed top-0 left-0 right-0 h-[3px] origin-left bg-[rgb(var(--accent))] z-50" />
+		<div className='relative'>
+			<motion.div style={{ scaleX }} className='fixed top-0 left-0 right-0 h-0.75 origin-left bg-[rgb(var(--accent))] z-50' />
 
-			<div className="min-h-screen px-6 py-32">
-				<div className="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-[250px_1fr] gap-16">
-					<aside className="hidden lg:block sticky top-32 self-start">
-						<h3 className="text-sm uppercase tracking-wide text-muted-foreground mb-6">Contents</h3>
-						<nav className="space-y-4 text-sm">
+			<div className='min-h-screen px-6 py-32'>
+				<div className='max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-[250px_1fr] gap-16'>
+					<aside className='hidden lg:block sticky top-32 self-start'>
+						<h3 className='text-sm uppercase tracking-wide text-muted-foreground mb-6'>Contents</h3>
+						<nav className='space-y-4 text-sm'>
 							{sections.map((section) => (
 								<a
 									key={section.id}
@@ -157,16 +157,16 @@ export default function Page() {
 						</nav>
 					</aside>
 
-					<main className="space-y-20">
-						<header className="text-center mb-16">
-							<h1 className="text-4xl font-semibold mb-4">Terms of Service</h1>
-							<p className="text-sm text-muted-foreground">Effective Date: {new Date().toDateString()}</p>
+					<main className='space-y-20'>
+						<header className='text-center mb-16'>
+							<h1 className='text-4xl font-semibold mb-4'>Terms of Service</h1>
+							<p className='text-sm text-muted-foreground'>Effective Date: {new Date().toDateString()}</p>
 						</header>
 
 						{sections.map((section) => (
-							<section key={section.id} id={section.id} className="scroll-mt-32 pl-6 border-l-2 border-[rgb(var(--accent))]/20">
-								<h2 className="text-2xl font-semibold mb-4">{section.title}</h2>
-								<div className="text-muted-foreground leading-relaxed">{section.content}</div>
+							<section key={section.id} id={section.id} className='scroll-mt-32 pl-6 border-l-2 border-[rgb(var(--accent))]/20'>
+								<h2 className='text-2xl font-semibold mb-4'>{section.title}</h2>
+								<div className='text-muted-foreground leading-relaxed'>{section.content}</div>
 							</section>
 						))}
 					</main>

@@ -6,11 +6,8 @@ import { Boxes, ExternalLink, LayoutDashboard, Package } from 'lucide-react';
 
 import Banner from '@/../public/banner.svg';
 import Timeline from '@/components/Timeline';
-import { useSession } from 'next-auth/react';
 
 export default function Home() {
-	const { data: session } = useSession();
-
 	return (
 		<div className='flex flex-col'>
 			{/* HERO */}
