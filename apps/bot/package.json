@@ -12,6 +12,9 @@
 		"minor": "npm version minor",
 		"major": "npm version major"
 	},
+	"engines": {
+		"node": ">=20"
+	},
 	"keywords": [],
 	"author": "Xernerx Studios",
 	"license": "MIT",
