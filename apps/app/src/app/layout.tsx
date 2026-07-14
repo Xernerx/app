@@ -3,6 +3,7 @@
 import './globals.css';
 import '@/lib/console';
 
+import { CookieProvider } from '@/providers/CookieProvider';
 import { DebugProvider } from '@/providers/DebugProvider';
 import Header from '@/components/Header';
 import Main from '@/components/Main';
@@ -99,35 +100,37 @@ try {
 			</head>
 
 			<body className='h-full'>
-				<ToastProvider>
-					<SessionProvider session={session}>
+				<SessionProvider session={session}>
+					<ToastProvider>
 						<UserProvider>
 							<ThemeProvider>
-								<DebugProvider>
-									<SupportProvider>
-										<PlatformProvider>
-											<div id='app-root' className='h-full w-full overflow-hidden bg-(--bg-main)'>
-												<SidebarProvider>
-													<div className='flex flex-col h-full'>
-														{/* Header */}
-														<Header />
+								<CookieProvider>
+									<DebugProvider>
+										<SupportProvider>
+											<PlatformProvider>
+												<div id='app-root' className='h-full w-full overflow-hidden bg-(--bg-main)'>
+													<SidebarProvider>
+														<div className='flex flex-col h-full'>
+															{/* Header */}
+															<Header />
 
-														{/* Sidebar + Main */}
-														<div className='flex flex-1 overflow-hidden'>
-															<Sidebar />
+															{/* Sidebar + Main */}
+															<div className='flex flex-1 overflow-hidden'>
+																<Sidebar />
 
-															<Main>{children}</Main>
+																<Main>{children}</Main>
+															</div>
 														</div>
-													</div>
-												</SidebarProvider>
-											</div>
-										</PlatformProvider>
-									</SupportProvider>
-								</DebugProvider>
+													</SidebarProvider>
+												</div>
+											</PlatformProvider>
+										</SupportProvider>
+									</DebugProvider>
+								</CookieProvider>
 							</ThemeProvider>
 						</UserProvider>
-					</SessionProvider>
-				</ToastProvider>
+					</ToastProvider>
+				</SessionProvider>
 			</body>
 		</html>
 	);
