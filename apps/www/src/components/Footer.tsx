@@ -1,9 +1,10 @@
 /** @format */
 'use client';
 
-import { BsDiscord, BsGithub } from 'react-icons/bs';
-import { FileText, Package, Shield } from 'lucide-react';
+import { BookOpen, FileText, Mail, MessageCircle, Package, Shield } from 'lucide-react';
 
+import { BsGithub } from 'react-icons/bs';
+import Link from 'next/link';
 import { motion } from 'framer-motion';
 
 export default function Footer() {
@@ -11,77 +12,151 @@ export default function Footer() {
 		<motion.footer
 			initial={{ opacity: 0, y: 10 }}
 			animate={{ opacity: 1, y: 0 }}
-			className='mt-auto w-full relative'
+			className='relative mt-auto w-full overflow-hidden'
 			style={{
 				background: 'var(--container)',
 				borderTop: '1px solid var(--border)',
 				backdropFilter: 'blur(14px)',
 			}}>
-			{/* subtle separator glow */}
+			{/* Accent line */}
 			<div
-				className='pointer-events-none absolute top-0 left-1/2 -translate-x-1/2 h-px w-[85%]'
+				className='pointer-events-none absolute left-1/2 top-0 h-px w-[90%] -translate-x-1/2'
 				style={{
-					background: 'linear-gradient(to right, transparent, color-mix(in srgb, var(--accent) 25%, transparent), transparent)',
+					background: 'linear-gradient(to right, transparent, color-mix(in srgb, var(--accent) 30%, transparent), transparent)',
 				}}
 			/>
 
 			<div
-				className='mx-auto flex flex-col md:flex-row items-center justify-between'
+				className='mx-auto grid w-full grid-cols-1 gap-10 md:grid-cols-[1.6fr_1fr_1fr]'
 				style={{
-					maxWidth: '1200px',
-					padding: 'calc(var(--ui-gap) * 1.2) calc(var(--ui-gap) * 2)',
-					gap: 'calc(var(--ui-gap) * 1)',
+					maxWidth: '1400px',
+					padding: 'calc(var(--ui-gap) * 2.5)',
 				}}>
-				{/* LEFT */}
-				<div className='flex flex-col text-center md:text-left'>
-					<span className='text-sm font-medium'>© 2024 - {new Date().getFullYear()} Xernerx Studios</span>
+				{/* ---------------------------------------------------------------- */}
+				{/* Brand */}
+				{/* ---------------------------------------------------------------- */}
+
+				<div className='flex flex-col justify-between text-center md:text-left'>
+					<div>
+						<h2
+							className='font-semibold'
+							style={{
+								fontSize: '1.1rem',
+							}}>
+							Xernerx Studios
+						</h2>
+
+						<p
+							className='mt-3 max-w-md leading-7'
+							style={{
+								color: 'var(--text-muted)',
+							}}>
+							Building modern software, infrastructure and developer tools with a focus on performance, simplicity and long-term maintainability.
+						</p>
+					</div>
 
 					<div
-						className='flex items-center justify-center md:justify-start'
+						className='mt-8 text-sm'
 						style={{
-							gap: 'calc(var(--ui-gap) * 0.8)',
-							marginTop: '4px',
+							color: 'var(--text-muted)',
 						}}>
-						<FooterLink href='/terms' icon={FileText} label='Terms' external={false} />
-						<FooterLink href='/privacy' icon={Shield} label='Privacy' external={false} />
+						© 2024 - {new Date().getFullYear()} Xernerx Studios
 					</div>
 				</div>
 
-				{/* RIGHT */}
-				<div className='flex items-center' style={{ gap: 'calc(var(--ui-gap) * 0.6)' }}>
-					<FooterLink href='https://www.npmjs.com/package/xernerx' icon={Package} label='npm' />
+				{/* ---------------------------------------------------------------- */}
+				{/* Resources */}
+				{/* ---------------------------------------------------------------- */}
+
+				<FooterSection title='Resources'>
+					<FooterLink href='/privacy' icon={Shield} label='Privacy' external={false} />
+
+					<FooterLink href='/terms' icon={FileText} label='Terms' external={false} />
+
+					<FooterLink href='/contact' icon={Mail} label='Contact' external={false} />
+				</FooterSection>
+
+				{/* ---------------------------------------------------------------- */}
+				{/* Developer */}
+				{/* ---------------------------------------------------------------- */}
+
+				<FooterSection title='Developer'>
 					<FooterLink href='https://github.com/xernerx' icon={BsGithub} label='GitHub' />
-					<FooterLink href='https://discord.gg/teNWyb69dq' icon={BsDiscord} label='Discord' />
-				</div>
+
+					<FooterLink href='https://www.npmjs.com/package/xernerx' icon={Package} label='npm' />
+
+					<FooterLink href='https://app.xernerx.com/docs' icon={BookOpen} label='Documentation' />
+
+					<FooterLink href='https://discord.gg/teNWyb69dq' icon={MessageCircle} label='Discord' />
+				</FooterSection>
 			</div>
 		</motion.footer>
 	);
 }
 
-/* ================= COMPONENT ================= */
+/* -------------------------------------------------------------------------- */
+/* Sections */
+/* -------------------------------------------------------------------------- */
+
+function FooterSection({ title, children }: { title: string; children: React.ReactNode }) {
+	return (
+		<div className='flex flex-col items-center md:items-start'>
+			<h3
+				className='mb-5 text-sm font-semibold uppercase tracking-[0.2em]'
+				style={{
+					color: 'var(--text-main)',
+				}}>
+				{title}
+			</h3>
+
+			<div className='flex flex-col gap-1.5'>{children}</div>
+		</div>
+	);
+}
+
+/* -------------------------------------------------------------------------- */
+/* Link */
+/* -------------------------------------------------------------------------- */
 
 function FooterLink({ href, icon: Icon, label, external = true }: { href: string; icon: React.ElementType; label: string; external?: boolean }) {
-	return (
-		<a
-			href={href}
-			target={external ? '_blank' : undefined}
-			rel={external ? 'noopener noreferrer' : undefined}
-			className='group inline-flex items-center gap-2 px-2 py-1 rounded-md transition'
-			style={{
-				color: 'var(--text-muted)',
-			}}
-			onMouseEnter={(e) => {
-				e.currentTarget.style.background = 'color-mix(in srgb, var(--accent) 12%, transparent)';
-				e.currentTarget.style.color = 'var(--text-main)';
-			}}
-			onMouseLeave={(e) => {
-				e.currentTarget.style.background = 'transparent';
-				e.currentTarget.style.color = 'var(--text-muted)';
-			}}
-			title={label}>
+	const className = 'inline-flex items-center gap-3 rounded-lg px-3 py-2 transition-all duration-200';
+
+	const style = {
+		color: 'var(--text-muted)',
+	};
+
+	const content = (
+		<>
 			<Icon size={16} />
 
-			<span className='hidden sm:inline text-xs'>{label}</span>
-		</a>
+			<span className='text-sm'>{label}</span>
+		</>
+	);
+
+	const handlers = {
+		onMouseEnter: (e: React.MouseEvent<HTMLElement>) => {
+			e.currentTarget.style.background = 'color-mix(in srgb, var(--accent) 15%, transparent)';
+			e.currentTarget.style.color = 'var(--text-main)';
+			e.currentTarget.style.transform = 'translateX(2px)';
+		},
+		onMouseLeave: (e: React.MouseEvent<HTMLElement>) => {
+			e.currentTarget.style.background = 'transparent';
+			e.currentTarget.style.color = 'var(--text-muted)';
+			e.currentTarget.style.transform = 'translateX(0px)';
+		},
+	};
+
+	if (external) {
+		return (
+			<a href={href} target='_blank' rel='noopener noreferrer' className={className} style={style} {...handlers}>
+				{content}
+			</a>
+		);
+	}
+
+	return (
+		<Link href={href} className={className} style={style} {...handlers}>
+			{content}
+		</Link>
 	);
 }
